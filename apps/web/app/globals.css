@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  /* High-Authority "Deep Parchment" Palette */
+  --color-parchment: #e2dac7; /* A darker, aged vellum - NOT bright */
+  --color-ink-black: #0a0a0a;
+  --color-infinite-blue: #0827dc;
+  --color-infinite-magenta: #fe009c;
+
+  /* Drafting Line Colors */
+  --line-subtle: rgba(139, 125, 107, 0.15); /* Minor grid lines */
+  --line-strong: rgba(139, 125, 107, 0.4);  /* Major structural lines */
+
+  --font-display: "HK Modular", sans-serif;
+  --font-body: "Helvetica Now Display", sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    scroll-behavior: initial;
+  }
+
+  body {
+    background-color: var(--color-parchment);
+    color: var(--color-ink-black);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+}
+
+/* MASTER TECHNICAL GRID 
+   Uses layered gradients to create evident, 
+   professional drafting lines.
+*/
+.technical-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    /* Major Grid (Every 50px) - Bold enough to see */
+    linear-gradient(to right, var(--line-strong) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, var(--line-strong) 1.5px, transparent 1.5px),
+    /* Minor Grid (Every 10px) - Gives that "paper" texture */
+    linear-gradient(to right, var(--line-subtle) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-subtle) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+}
+
+::selection {
+  background-color: var(--color-infinite-magenta);
+  color: white;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
