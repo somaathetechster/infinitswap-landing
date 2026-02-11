@@ -67,9 +67,10 @@ export default function Home() {
       <section className="py-24 bg-transparent border-t border-black/10 flex flex-col items-center justify-center text-center px-10">
          <div className="mb-12 flex gap-8 opacity-20 grayscale">
             {/* Placeholder for Partner Logos: BOT, SARB, BOG */}
-            <span className="font-display text-sm uppercase italic tracking-widest">Bank of Tanzania</span>
-            <span className="font-display text-sm uppercase italic tracking-widest">SARB</span>
-            <span className="font-display text-sm uppercase italic tracking-widest">Bank of Ghana</span>
+            <span className="font-display text-sm uppercase italic tracking-widest">Tz</span>
+            <span className="font-display text-sm uppercase italic tracking-widest">SA</span>
+            <span className="font-display text-sm uppercase italic tracking-widest">Gh</span>
+            <span className="font-display text-sm uppercase italic tracking-widest">Ng</span>
          </div>
          
          <div className="max-w-3xl space-y-6">

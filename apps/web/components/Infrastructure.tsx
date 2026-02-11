@@ -77,9 +77,8 @@ export default function Infrastructure() {
           </h2>
           
           <p className="reveal font-body text-xl md:text-2xl text-ink-black/60 leading-tight max-w-xl">
-            We’ve rebuilt the foundation of African finance. By connecting modern 
-            digital assets to local bank systems, we move your value instantly, 
-            without the traditional borders or delays.
+          We architect the digital pathways. Our engine routes settlement instructions 
+          to authorized partners, enabling instant execution without friction.
           </p>
         </div>
 
