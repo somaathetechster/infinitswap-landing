@@ -21,7 +21,7 @@ export default function AccessBotButton() {
       className="inline-flex items-center gap-3 px-8 py-4 bg-ink-black text-parchment font-display text-sm uppercase tracking-widest hover:bg-infinite-blue transition-all duration-300 group"
     >
       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-      Launch Interface
+      |Launch Interface|
       <svg 
         className="w-4 h-4 group-hover:translate-x-1 transition-transform" 
         fill="none" viewBox="0 0 24 24" stroke="currentColor"
