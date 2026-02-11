@@ -3,6 +3,7 @@ import "./globals.css";
 import { SmoothScroll } from "../components/SmoothScroll";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import LegalFooter from "../components/LegalFooter"; // 1. Import the LegalFooter
 
 export const metadata: Metadata = {
   title: "Infinitswap | Institutional Liquidity Orchestration",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#e2dac7", // Matches your 'Antique Vellum' exactly for mobile status bars
+  themeColor: "#e2dac7",
   width: "device-width",
   initialScale: 1,
 };
@@ -30,10 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="selection:bg-infinite-magenta selection:text-white scroll-smooth">
       <body className="antialiased bg-parchment text-ink-black min-h-screen">
-        {/* THE DRAFTING FOUNDATION
-            This div is fixed so the grid stays static while content glides over it,
-            mimicking a physical blueprint on a drafting table.
-        */}
+        {/* THE DRAFTING FOUNDATION */}
         <div className="technical-grid fixed inset-0 pointer-events-none z-0" />
 
         <SmoothScroll>
@@ -45,6 +43,8 @@ export default function RootLayout({
             </main>
 
             <Footer />
+            {/* 2. Place LegalFooter here to ensure it's part of the scroll flow */}
+            <LegalFooter /> 
           </div>
         </SmoothScroll>
       </body>

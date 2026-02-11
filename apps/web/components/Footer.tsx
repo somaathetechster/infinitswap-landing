@@ -4,10 +4,12 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
         {/* Left Column */}
         <div className="space-y-4">
-          <h3 className="font-display text-xl uppercase tracking-tighter text-ink-black">Infinitswap</h3>
+          <h3 className="font-display text-xl uppercase tracking-tighter text-ink-black underline decoration-infinite-blue/20 underline-offset-8">
+            Infinitswap
+          </h3>
           <p className="font-body text-sm text-ink-black/60 max-w-sm leading-relaxed">
-            The intelligent interface for modern settlement. We provide the technology layer 
-            that connects authorized liquidity partners with local payment networks.
+            The intelligent interface for modern settlement. We architect the technology layer 
+            connecting global liquidity with local payment architecture.
           </p>
         </div>
         
@@ -15,32 +17,31 @@ export default function Footer() {
         <div className="font-body text-xs text-ink-black/40 space-y-4 md:text-right">
           <div className="p-4 bg-black/[0.02] border border-black/5 rounded-sm text-left md:text-right">
             <p className="font-bold text-ink-black/60 mb-2 uppercase tracking-wider text-[10px]">
-              Regulatory Disclosure
+              Platform Status
             </p>
             <p className="leading-relaxed mb-2">
               Infinitswap is a <strong>technology platform only</strong>. We do not hold, custody, 
-              transmit, or settle funds. 
+              transmit, or settle funds directly. 
             </p>
             <p className="leading-relaxed">
-              All monetary value is processed and settled directly by licensed 
-              Third-Party Payment Service Providers (PSPs) regulated within their 
-              respective jurisdictions.
+              Services are executed by licensed Third-Party Payment Service Providers (PSPs) 
+              operating within their respective regulated jurisdictions.
             </p>
           </div>
           
           <p className="leading-relaxed pt-2">
-            © 2026 Infinite 69Trading Services Limited. All rights reserved. <br />
+            © 2026 Infinite 69Trading Services Limited. <br />
             17, ONYENEKE CHUKWU STREET ACHARA LAYOUT ENUGU NIGERIA.
           </p>
         </div>
       </div>
 
-      {/* Domani Credit */}
+      {/* Domani Credit - Subtle link to the LegalFooter below */}
       <div className="max-w-7xl mx-auto pt-8 border-t border-black/5 flex flex-col items-center justify-center text-center opacity-40 hover:opacity-100 transition-opacity duration-300">
-        <p className="font-mono text-[10px] uppercase tracking-widest text-ink-black">
-          Powered by <span className="font-bold text-infinite-blue">Domani</span>
+        <p className="font-mono text-[9px] uppercase tracking-widest text-ink-black">
+          Engineered by <span className="font-bold text-infinite-blue">Domani</span>
         </p>
-        <p className="font-display text-xs italic text-ink-black/60 mt-1">
+        <p className="font-display text-[10px] italic text-ink-black/60 mt-1">
           Building Tomorrow, Today.
         </p>
       </div>
