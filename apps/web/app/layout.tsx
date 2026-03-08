@@ -3,18 +3,24 @@ import "./globals.css";
 import { SmoothScroll } from "../components/SmoothScroll";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import LegalFooter from "../components/LegalFooter"; // 1. Import the LegalFooter
+import LegalFooter from "../components/LegalFooter";
 
 export const metadata: Metadata = {
-  title: "Infinitswap | Institutional Liquidity Orchestration",
-  description: "The world-standard conversational engine for Pan-African crypto-to-fiat settlement. Regulated rails. Institutional spreads.",
-  keywords: ["Fintech", "Liquidity", "Crypto-to-fiat", "WhatsApp Bot", "Pan-African Finance"],
-  authors: [{ name: "Infinitswap Technology Group" }],
+  title: "Infinitswap | Crypto to Cash. In Your Chats.",
+  description: "Turn your USDT into local currency instantly. No apps, no complex exchanges—just send a WhatsApp message and get paid directly to your bank account.",
+  keywords: ["Sell USDT", "Crypto to Naira", "WhatsApp Bot", "Infinitswap", "Crypto to Fiat", "Africa Crypto"],
+  authors: [{ name: "Infinitswap" }],
   openGraph: {
-    title: "Infinitswap | Financial Intelligence",
-    description: "Architecting the last mile of Pan-African commerce.",
+    title: "Infinitswap | Seamless Crypto-to-Cash",
+    description: "Send crypto, get cash. The fastest way to turn your digital assets into local fiat across Africa.",
     type: "website",
+    siteName: "Infinitswap",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Infinitswap | Crypto to Cash",
+    description: "Turn your USDT into local currency instantly via WhatsApp.",
+  }
 };
 
 export const viewport: Viewport = {
@@ -43,7 +49,6 @@ export default function RootLayout({
             </main>
 
             <Footer />
-            {/* 2. Place LegalFooter here to ensure it's part of the scroll flow */}
             <LegalFooter /> 
           </div>
         </SmoothScroll>

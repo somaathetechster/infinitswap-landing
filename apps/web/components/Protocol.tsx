@@ -3,30 +3,31 @@ import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
+// 🟢 NEW: Updated with user-centric, everyday language
 const LAYERS = [
   { 
     id: "01", 
-    title: "Intelligent Routing", 
-    tag: "INPUT LAYER",
-    detail: "Simply tell the bot what you need. Our system instantly maps your request to the most efficient payout corridor." 
+    title: "Start a Chat", 
+    tag: "STEP 1",
+    detail: "Message our WhatsApp number and tell us how much USDT you want to sell. No accounts to create, no passwords to remember." 
   },
   { 
     id: "02", 
-    title: "Rate Optimization", 
-    tag: "PRICING ENGINE",
-    detail: "We scan multiple liquidity providers in real-time to guarantee you the best possible exchange rate, every single time." 
+    title: "Lock in the Rate", 
+    tag: "STEP 2",
+    detail: "We instantly give you the best exchange rate. What you see is exactly what you get—no hidden fees or surprises." 
   },
   { 
     id: "03", 
-    title: "Automated Security", 
-    tag: "COMPLIANCE",
-    detail: "Safety without the slowdown. Identity and fraud checks happen automatically in the background, ensuring every trade is secure." 
+    title: "Send Your Crypto", 
+    tag: "STEP 3",
+    detail: "We generate a secure, one-time wallet address just for you. Send your USDT safely from TrustWallet, Binance, or any exchange." 
   },
   { 
     id: "04", 
-    title: "Instant Settlement", 
-    tag: "OUTPUT LAYER",
-    detail: "The moment the trade is confirmed, funds are released directly to the local bank account. No waiting periods." 
+    title: "Get Paid Instantly", 
+    tag: "STEP 4",
+    detail: "The moment your USDT arrives, the cash is sent directly to your local bank account. No waiting periods, no withdrawal requests." 
   }
 ];
 
@@ -56,7 +57,7 @@ export default function Protocol() {
 
     // 2. Item Activation Animation
     const items = gsap.utils.toArray('.protocol-item');
-    items.forEach((item: any, index) => {
+    items.forEach((item: any) => {
       // Fade in and slide up
       gsap.fromTo(item, 
         { opacity: 0.3, y: 30 },
@@ -84,27 +85,27 @@ export default function Protocol() {
         <div className="lg:sticky lg:top-32 h-fit">
            <div className="mb-12">
              <span className="font-mono text-[10px] text-infinite-blue font-bold uppercase tracking-[0.6em] block mb-4 border-l-2 border-infinite-blue pl-4">
-               The Protocol // Workflow
+               The Process // How To Use
              </span>
              <h2 className="font-display text-5xl md:text-[6rem] uppercase leading-[0.9] text-ink-black tracking-tighter mb-8">
-               Seamless <br /> <span className="text-infinite-magenta italic">Execution.</span>
+               From Crypto <br /> <span className="text-infinite-magenta italic">To Cash.</span>
              </h2>
              <p className="font-body text-lg md:text-xl text-ink-black/60 max-w-md leading-relaxed">
-               We’ve stripped away the complexity of cross-border finance. 
-               Infinitswap handles the heavy lifting—compliance, pricing, and routing—so you just focus on the trade.
+               We’ve stripped away the complexity of crypto. 
+               Infinitswap does all the heavy lifting in the background so you can get your money fast.
              </p>
            </div>
            
-           {/* Decorative 'System Status' Box */}
+           {/* Decorative 'System Status' Box - Left this alone for aesthetic trust signals */}
            <div className="hidden lg:block p-6 bg-white/50 backdrop-blur-md border border-black/5 rounded-sm max-w-xs">
               <div className="flex items-center gap-3 mb-2">
                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                  <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">System Active</span>
               </div>
               <p className="font-mono text-[10px] text-ink-black/40">
-                  Listening for liquidity requests... <br/>
-                  Latency: 12ms <br/>
-                  Security: TLS 1.3 Enforced
+                 Listening for liquidity requests... <br/>
+                 Latency: 12ms <br/>
+                 Security: TLS 1.3 Enforced
               </p>
            </div>
         </div>

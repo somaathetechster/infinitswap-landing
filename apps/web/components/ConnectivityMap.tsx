@@ -18,7 +18,7 @@ const NODES = [
   { id: "TZ", label: "Tanzania", x: 2.5, y: 0.5, z: 0, region: "East Africa" },
   { id: "SA", label: "South Africa", x: 1.5, y: -3, z: 0, region: "South Africa" },
   { id: "GH", label: "Ghana", x: -2.8, y: 1.5, z: 0, region: "West Africa" },
-  { id: "LHR", label: "London (Bridge)", x: -0.5, y: 5.5, z: -1, region: "Liquidity Provider" }, // Contextual anchor
+  { id: "LHR", label: "Global", x: -0.5, y: 5.5, z: -1, region: "Routing Hub" }, // Simplified from "London Bridge Liquidity"
 ];
 
 // Connections definitions (Index of NODES)
@@ -26,8 +26,8 @@ const CONNECTIONS = [
   [0, 4], // Lagos -> London
   [0, 3], // Lagos -> Accra
   [0, 2], // Lagos -> Joburg
-  [2, 1], // Joburg -> Nairobi
-  [1, 4], // Nairobi -> London
+  [2, 1], // Joburg -> Nairobi/TZ
+  [1, 4], // TZ -> London
 ];
 
 // --- COMPONENTS ---
@@ -158,7 +158,6 @@ const CameraController = ({ targetPosition }: { targetPosition: THREE.Vector3 | 
     );
     
     // Smooth LookAt
-    const currentLookAt = new THREE.Vector3(0,0,0); // Need to store current lookAt if we want smooth rotation, simplified here
     camera.lookAt(lookAtTarget);
   });
 
@@ -184,7 +183,7 @@ export default function ConnectivityMap() {
     <section className="h-[120vh] relative bg-[#020410] overflow-hidden border-t border-white/5">
       
       {/* 3D SCENE */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 cursor-crosshair">
         <Canvas>
           <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
           <ambientLight intensity={0.2} />
@@ -208,13 +207,11 @@ export default function ConnectivityMap() {
 
             {/* Render Connections */}
             {CONNECTIONS.map(([startIdx, endIdx], i) => {
-              // FIX: Safety check. If for some reason data is missing, don't render this line.
               if (startIdx === undefined || endIdx === undefined) return null;
 
               const startNode = NODES[startIdx];
               const endNode = NODES[endIdx];
 
-              // Double check nodes exist
               if (!startNode || !endNode) return null;
 
               return (
@@ -233,18 +230,20 @@ export default function ConnectivityMap() {
       </div>
 
       {/* OVERLAY CONTENT */}
-      <div className="relative z-10 pointer-events-none h-full flex flex-col justify-center items-center text-center px-4">
+      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-center items-center text-center px-4">
         <h2 className="font-display text-5xl md:text-8xl uppercase leading-[0.85] text-white mix-blend-screen opacity-90">
-          Neural <br /> 
+          Borderless <br /> 
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-infinite-blue to-infinite-magenta italic">
-            Architecture.
+            Payments.
           </span>
         </h2>
-        <p className="font-mono text-xs md:text-sm text-white/50 mt-8 max-w-md uppercase tracking-widest bg-black/50 backdrop-blur-md p-4 border border-white/10">
-          [Interactive Mode] <br/>
-          Click on nodes to inspect local liquidity pools. <br/>
-          Move cursor to initiate parallax drift.
-        </p>
+        <div className="mt-8 max-w-md pointer-events-auto">
+          <p className="font-mono text-xs md:text-sm text-white/70 uppercase tracking-widest bg-black/40 backdrop-blur-md p-4 border border-white/10 rounded-sm">
+            <span className="text-infinite-cyan font-bold block mb-2">[Live Network]</span>
+            Click a country node to explore.<br/>
+            Converting crypto to NGN, GHS, ZAR, and TZS instantly.
+          </p>
+        </div>
       </div>
       
     </section>

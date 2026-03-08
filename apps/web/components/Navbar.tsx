@@ -39,7 +39,7 @@ export default function Navbar() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
             </span>
             <span className="font-mono text-[9px] uppercase tracking-[0.3em] font-bold text-ink-black/40">
-              Infinitswap Node_04 // Active
+              System Online // Africa
             </span>
           </div>
           
@@ -76,28 +76,29 @@ export default function Navbar() {
       {/* LAYER 02: PRIMARY NAVIGATION */}
       <div className="w-full px-10 py-6 flex justify-between items-center pointer-events-auto">
         <Link href="/" className="block -mt-20 group">
-          {/* INTERACTION LOGIC:
-              1. hover:hue-rotate-[60deg] -> Shifts Blue pixels to Magenta pixels
-              2. hover:drop-shadow -> Adds a glowing Magenta aura
-              3. active:scale-95 -> Creates the "Click Pulse" tactile feel
-          */}
           <img 
             src="/logob.png" 
             alt="Infinitswap" 
-            className="h-50 w-auto object-contain 
+            className="h-40 w-auto object-contain 
                        transition-all duration-300 ease-out
-                       hover:drop-shadow-[0_0_15px_rgba(254,0,156,0.6)]
-                       hover:brightness-110
+                       hover:drop-shadow-[0_0_8px_rgba(8,39,220,0.3)]
                        hover:scale-105
-                       active:scale-95 active:duration-100 active:brightness-125" 
+                       active:scale-95 active:duration-100" 
           />
         </Link>
         
         <div className="flex items-center gap-12">
+          {/* MAPPING: UI Name -> Physical Page Path */}
           <div className="hidden md:flex gap-10 font-body text-[10px] uppercase tracking-[0.3em] font-bold text-ink-black/60">
-            <Link href="/protocol" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">Protocol</Link>
-            <Link href="/compliance" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">Compliance</Link>
-            <Link href="/network" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">Network</Link>
+            <Link href="/protocol" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">
+              How It Works
+            </Link>
+            <Link href="/network" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">
+              Rates & Regions
+            </Link>
+            <Link href="/compliance" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">
+              Trust & Safety
+            </Link>
           </div>
           
           <AccessBotButton />

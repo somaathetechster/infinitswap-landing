@@ -7,24 +7,24 @@ import { MotionPathPlugin } from 'gsap/dist/MotionPathPlugin';
 
 const STEPS = [
   { 
-    label: "Request", 
-    tag: "STEP_01", 
-    desc: "You message the bot. Our system instantly recognizes the currency and amount you want to swap." 
+    label: "Live Pricing", 
+    tag: "01_RATES", 
+    desc: "Our bot scans the market by the millisecond, ensuring you are quoted the absolute highest exchange rate available." 
   },
   { 
-    label: "Valuation", 
-    tag: "STEP_02", 
-    desc: "We scan the market in milliseconds to lock in the lowest possible exchange rate for your trade." 
+    label: "Unique Wallets", 
+    tag: "02_SECURITY", 
+    desc: "Every time you trade, we generate a brand new, one-time TRC20 address. Your funds are never mixed or delayed." 
   },
   { 
-    label: "Verification", 
-    tag: "STEP_03", 
-    desc: "Automatic security and compliance checks run in the background to ensure the transaction is safe." 
+    label: "Zero Gas Fees", 
+    tag: "03_NETWORK", 
+    desc: "We absorb the complex blockchain network fees in the background. The rate you see is exactly what hits your bank." 
   },
   { 
-    label: "Delivery", 
-    tag: "STEP_04", 
-    desc: "Funds are released directly to the recipient's local bank account. Instant. Confirmed." 
+    label: "Local Payouts", 
+    tag: "04_DELIVERY", 
+    desc: "We connect directly to local payment providers (like Paystack and Flutterwave) to release your cash instantly." 
   }
 ];
 
@@ -76,15 +76,14 @@ export default function TechnicalFlow() {
         {/* Header Section */}
         <div className="mb-24 md:mb-32 max-w-2xl">
           <span className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.6em] font-bold mb-6 block border-l-2 border-infinite-blue pl-4">
-            How It Works // The Flow
+            Behind The Scenes // The Engine
           </span>
           <h3 className="font-display text-5xl md:text-7xl uppercase tracking-tighter text-ink-black leading-[0.9]">
-            From Chat <br/>
-            <span className="text-infinite-magenta italic">To Bank.</span>
+            Built For <br/>
+            <span className="text-infinite-magenta italic">Speed.</span>
           </h3>
           <p className="font-body text-lg text-ink-black/60 mt-6 leading-relaxed">
-             No complex dashboards. No waiting. Just a seamless flow of value 
-             from your crypto wallet to a local bank account.
+            Here is exactly what happens in the background during the 60 seconds it takes to turn your crypto into cash.
           </p>
         </div>
         
@@ -97,7 +96,7 @@ export default function TechnicalFlow() {
               {/* The Line Path */}
               <path 
                 ref={pathRef}
-                d="M 50 10 L 1200 10" // Adjust '1200' based on your max-width logic or use simple straight line
+                d="M 50 10 L 1200 10" 
                 stroke="url(#gradient)"
                 strokeWidth="2"
                 fill="none"

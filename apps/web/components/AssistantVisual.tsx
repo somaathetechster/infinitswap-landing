@@ -1,176 +1,128 @@
 'use client';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Icosahedron, Torus, Sparkles, ContactShadows } from '@react-three/drei';
-import * as THREE from 'three';
-import { useRef, useState, useEffect } from 'react';
+import { motion, useAnimation, useInView } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 
-// ==================== CONFIGURATION ====================
-const INFINITE_BLUE = '#0827dc';
-const INFINITE_MAGENTA = '#fe009c';
-const ACCENT_CYAN = '#00d9ff';
+// ==================== CHAT SEQUENCE DATA ====================
+const chatSequence = [
+  { id: 1, type: 'user', text: "Hey! I need to swap 50 USDT.", delay: 0.5 },
+  { id: 2, type: 'bot', text: "Welcome back! The current rate is 1,520 NGN. You will receive 76,000 NGN.", delay: 1.5 },
+  { id: 3, type: 'bot', text: "Please send exactly 50 USDT (TRC20) to this address:", delay: 2.5 },
+  { id: 4, type: 'bot-address', text: "TXYZ1234567890abcdef", delay: 3.0 },
+  { id: 5, type: 'user', text: "Done. Just sent it.", delay: 5.0 },
+  { id: 6, type: 'bot-success', text: "✅ Payment Received! 76,000 NGN has been instantly credited to your Access Bank account.", delay: 6.5 }
+];
 
-// ==================== THE NEURAL CORE (The Brain) ====================
-function NeuralCore({ scrollY }: { scrollY: number }) {
-  const meshRef = useRef<THREE.Group>(null);
-  const coreRef = useRef<THREE.Mesh>(null);
-  const outerRef = useRef<THREE.Mesh>(null);
-  
-  const [hovered, setHovered] = useState(false);
-  const [clicked, setClicked] = useState(false);
-
-  // Animation Loop
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    const mouse = state.mouse;
-
-    if (meshRef.current && coreRef.current && outerRef.current) {
-      // 1. MOUSE PARALLAX (The AI "Watches" You)
-      // Interpolate current rotation to target rotation (mouse pos)
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, mouse.y * 0.5, 0.1);
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, mouse.x * 0.5, 0.1);
-
-      // 2. SCROLL INTERACTION (The Journey)
-      // Add scroll position to rotation logic
-      const scrollRotation = scrollY * 0.002;
-      meshRef.current.rotation.z = scrollRotation;
-
-      // 3. HOVER STATE (Activation)
-      // Spin faster when hovered
-      const spinSpeed = hovered ? 2.5 : 1;
-      coreRef.current.rotation.y += 0.01 * spinSpeed;
-      coreRef.current.rotation.z += 0.005 * spinSpeed;
-      outerRef.current.rotation.x -= 0.01 * spinSpeed;
-
-      // 4. CLICK PULSE (Acknowledgment)
-      const targetScale = clicked ? 1.2 : hovered ? 1.1 : 1;
-      meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-    }
-  });
-
-  // Click Handler for "Pulse" effect
-  const handleClick = () => {
-    setClicked(true);
-    setTimeout(() => setClicked(false), 200);
-  };
-
-  return (
-    <group 
-      ref={meshRef}
-      onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
-      onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
-      onClick={handleClick}
-    >
-      {/* INNER CORE: The Dense Logic Center */}
-      <mesh ref={coreRef}>
-        <icosahedronGeometry args={[0.8, 4]} /> {/* High poly for smooth look */}
-        <meshStandardMaterial
-          color={clicked ? INFINITE_MAGENTA : INFINITE_BLUE} // Flashes Magenta on click
-          emissive={clicked ? INFINITE_MAGENTA : INFINITE_BLUE}
-          emissiveIntensity={hovered ? 2 : 1.2}
-          roughness={0.1}
-          metalness={1}
-        />
-      </mesh>
-
-      {/* OUTER SHELL: The Data Shield */}
-      <mesh ref={outerRef}>
-        <icosahedronGeometry args={[1.3, 2]} />
-        <meshStandardMaterial
-          color={hovered ? ACCENT_CYAN : INFINITE_BLUE}
-          emissive={hovered ? ACCENT_CYAN : INFINITE_BLUE}
-          emissiveIntensity={0.5}
-          wireframe={true}
-          transparent
-          opacity={0.3}
-        />
-      </mesh>
-
-      {/* ORBITAL RING 1: Vertical Axis */}
-      <group rotation={[0, 0, Math.PI / 4]}>
-        <OrbitalRing radius={1.8} speed={1} color={INFINITE_MAGENTA} hovered={hovered} />
-      </group>
-
-      {/* ORBITAL RING 2: Horizontal Axis */}
-      <group rotation={[Math.PI / 2, Math.PI / 6, 0]}>
-        <OrbitalRing radius={2.2} speed={-0.8} color={ACCENT_CYAN} hovered={hovered} />
-      </group>
-    </group>
-  );
-}
-
-// ==================== HELPER: ORBITAL RINGS ====================
-function OrbitalRing({ radius, speed, color, hovered }: { radius: number, speed: number, color: string, hovered: boolean }) {
-  const ringRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (ringRef.current) {
-        // Spin logic
-        ringRef.current.rotation.z += 0.01 * speed * (hovered ? 3 : 1);
-    }
-  });
-
-  return (
-    <Torus ref={ringRef} args={[radius, 0.02, 16, 100]}>
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={2}
-        toneMapped={false}
-      />
-    </Torus>
-  );
-}
-
-// ==================== MAIN COMPONENT ====================
 export default function AssistantVisual() {
-  const [scrollY, setScrollY] = useState(0);
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: false, amount: 0.5 });
+  const controls = useAnimation();
 
-  // Track scroll position for rotation
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (isInView) {
+      controls.start("visible");
+    } else {
+      controls.start("hidden");
+    }
+  }, [isInView, controls]);
 
   return (
-    <div className="w-full h-[600px] cursor-pointer outline-none relative">
-      <Canvas 
-        camera={{ position: [0, 0, 6], fov: 45 }} 
-        dpr={[1, 2]} // Crisp rendering
-        gl={{ antialias: true, alpha: true }}
+    <div className="w-full flex justify-center items-center py-10 perspective-[1000px]">
+      
+      {/* PHONE CONTAINER / MOCKUP */}
+      <motion.div 
+        ref={containerRef}
+        initial={{ rotateX: 10, y: 50, opacity: 0, boxShadow: "0px 0px 0px rgba(0,0,0,0)" }}
+        animate={{ rotateX: 0, y: 0, opacity: 1, boxShadow: "0px 25px 50px -12px rgba(8, 39, 220, 0.15)" }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="w-full max-w-[380px] bg-[#f0f2f5] rounded-[2.5rem] overflow-hidden border-[6px] border-white shadow-2xl relative"
       >
-        <ambientLight intensity={0.5} />
         
-        {/* Cinematic Lighting */}
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={2} color={INFINITE_BLUE} />
-        <pointLight position={[-10, -10, -10]} color={INFINITE_MAGENTA} intensity={2} />
-        <pointLight position={[0, 5, 0]} color={ACCENT_CYAN} intensity={1} distance={5} />
+        {/* WHATSAPP HEADER */}
+        <div className="bg-[#075e54] text-white px-6 py-4 flex items-center gap-4 z-10 relative shadow-sm">
+          <div className="relative">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-[#075e54]">
+              IS
+            </div>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#25d366] border-2 border-[#075e54] rounded-full animate-pulse"></span>
+          </div>
+          <div>
+            <h3 className="font-display font-semibold text-lg leading-tight">Infinitswap Bot</h3>
+            <p className="font-body text-xs text-white/80">Always online</p>
+          </div>
+        </div>
 
-        {/* Floating Animation for the entire group */}
-        <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
-          <NeuralCore scrollY={scrollY} />
-        </Float>
+        {/* CHAT BACKGROUND PATTERN */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none mix-blend-multiply" 
+             style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px', top: '70px' }} />
 
-        {/* Background Sparkles (Data Dust) */}
-        <Sparkles 
-            count={100} 
-            scale={8} 
-            size={2} 
-            speed={0.4} 
-            opacity={0.5} 
-            color={ACCENT_CYAN} 
-        />
+        {/* CHAT AREA */}
+        <div className="p-5 flex flex-col gap-3 h-[450px] overflow-hidden relative z-10">
+          {chatSequence.map((msg, index) => {
+            
+            // Bubble Styles based on sender type
+            const isUser = msg.type === 'user';
+            const isAddress = msg.type === 'bot-address';
+            const isSuccess = msg.type === 'bot-success';
+            
+            return (
+              <motion.div
+                key={msg.id}
+                custom={msg.delay}
+                initial="hidden"
+                animate={controls}
+                variants={{
+                  hidden: { opacity: 0, y: 20, scale: 0.95, originX: isUser ? 1 : 0 },
+                  visible: (delay) => ({
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    transition: { delay, duration: 0.4, type: "spring", stiffness: 200, damping: 20 }
+                  })
+                }}
+                className={`max-w-[85%] rounded-2xl px-4 py-2 shadow-sm text-sm font-body ${
+                  isUser 
+                    ? 'self-end bg-[#dcf8c6] text-black rounded-tr-sm' 
+                    : isAddress
+                    ? 'self-start bg-white text-black font-mono text-[11px] rounded-tl-sm border-l-4 border-infinite-blue select-all'
+                    : isSuccess
+                    ? 'self-start bg-white text-black rounded-tl-sm border-l-4 border-[#25d366]'
+                    : 'self-start bg-white text-black rounded-tl-sm'
+                }`}
+              >
+                {/* Optional sender name for bot */}
+                {!isUser && !isAddress && !isSuccess && index !== 2 && (
+                  <span className="block text-xs font-bold text-[#075e54] mb-1">Infinitswap</span>
+                )}
+                
+                <p className="leading-relaxed">
+                  {msg.text}
+                </p>
+                
+                {/* Fake timestamp */}
+                <span className={`block text-[9px] mt-1 text-right ${isUser ? 'text-black/40' : 'text-black/30'}`}>
+                  Just now
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
 
-        {/* Shadow to ground it */}
-        <ContactShadows 
-            position={[0, -2.5, 0]} 
-            opacity={0.4} 
-            scale={10} 
-            blur={2.5} 
-            far={4} 
-            color={INFINITE_BLUE} 
-        />
-      </Canvas>
+        {/* FAKE INPUT AREA */}
+        <div className="bg-white p-3 flex items-center gap-3 z-10 relative border-t border-black/5">
+          <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center">
+             <span className="text-lg">＋</span>
+          </div>
+          <div className="flex-1 bg-[#f0f2f5] rounded-full h-10 px-4 flex items-center">
+            <span className="text-black/30 font-body text-sm animate-pulse">Type a message...</span>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-[#075e54] flex items-center justify-center text-white">
+             <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+             </svg>
+          </div>
+        </div>
+
+      </motion.div>
     </div>
   );
 }

@@ -1,3 +1,5 @@
+// apps/web/app/page.tsx
+
 import Hero from "../components/Hero";
 import Infrastructure from "../components/Infrastructure";
 import Protocol from "../components/Protocol";
@@ -8,8 +10,8 @@ import AssistantVisual from "../components/AssistantVisual";
 /**
  * Infinitswap Digital Flagship // v4.0
  * * Strategic Sequence:
- * 01. Hero: Immediate "World-Standard" authority.
- * 02. Infrastructure: Demonstrating the "Last Mile" engineering.
+ * 01. Hero: Immediate clear value proposition.
+ * 02. Infrastructure: Demonstrating speed and reliability.
  * 03. Protocol: Layer-by-layer technical audit.
  * 04. AI Intelligence: The Smart Companion (Bot interface).
  * 05. Technical Flow: Visualizing the Crypto-to-Fiat pipeline.
@@ -22,70 +24,51 @@ export default function Home() {
       {/* SCENE 01: THE STATEMENT */}
       <Hero />
 
-      {/* SCENE 02: THE NARRATIVE 
-          Establishing the "Engineering" baseline.
-      */}
+      {/* SCENE 02: THE NARRATIVE */}
       <Infrastructure />
 
-      {/* SCENE 03: THE PROTOCOL 
-          Deep technical breakdown for institutional trust.
-      */}
+      {/* SCENE 03: THE PROTOCOL */}
       <Protocol />
 
-      {/* SCENE 04: THE SMART COMPANION 
-          Depicting the AI Decision Engine.
-      */}
-      <section className="min-h-screen py-32 flex flex-col items-center justify-center bg-transparent relative border-t border-black/5">
-        <AssistantVisual />
-        <div className="max-w-3xl text-center px-6 mt-16 z-10">
-          <span className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.5em] mb-6 block font-bold">
-            Interface // Conversational NLP
+      {/* SCENE 04: THE SMART COMPANION */}
+      <section className="min-h-screen pt-32 pb-20 flex flex-col justify-center bg-transparent relative border-t border-black/5">
+        
+        {/* Massive Full-Page Typography */}
+        <div className="w-full px-6 md:px-10 z-10 flex flex-col mb-12">
+          <span className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.5em] mb-6 block font-bold border-l-2 border-infinite-blue pl-4">
+            WhatsApp // AI Assistant
           </span>
-          <h2 className="font-display text-5xl md:text-8xl uppercase mb-8 text-ink-black leading-[0.85]">
-            Intelligence <br /> <span className="text-infinite-magenta italic">By Design.</span>
+          <h2 className="font-display text-[15vw] md:text-[11vw] uppercase text-ink-black leading-[0.8] tracking-tighter w-full flex flex-col">
+            <span>Crypto to Fiat.</span>
+            <span className="text-infinite-magenta italic md:self-end">In your Chats.</span>
           </h2>
-          <p className="font-body text-ink-black/60 text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed">
-            Infinitswap bridges the gap between digital assets and legacy bank rails 
-            through an intent-based AI layer. Speak to your assets; we handle the orchestration.
-          </p>
+        </div>
+
+        {/* Editorial Grid: Text on the left, Visual on the right for desktop */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-10 px-6 md:px-10 items-center z-10 relative">
+          
+          <div className="md:col-span-5 md:col-start-1">
+            <p className="font-body text-ink-black/60 text-2xl md:text-3xl leading-snug md:leading-relaxed max-w-lg">
+              Send USDT and get paid directly into your local bank account instantly. 
+              No new apps to download, no complex trading charts—if you know how to send a text, you know how to use Infinitswap.
+            </p>
+          </div>
+
+          <div className="md:col-span-7 relative h-[50vh] md:h-[80vh] w-full -mt-10 md:mt-0 z-0">
+            {/* The 3D scene will now fill this large right-side container */}
+            <AssistantVisual />
+          </div>
+
         </div>
       </section>
 
-      {/* SCENE 05: THE SETTLEMENT PIPELINE
-          Step-by-step visual of the internal bot logic.
-      */}
+      {/* SCENE 05: THE SETTLEMENT PIPELINE */}
       <TechnicalFlow />
 
-      {/* SCENE 06: THE SCALE 
-          Global reach, local precision.
-      */}
+      {/* SCENE 06: THE SCALE */}
       <ConnectivityMap />
 
-      {/* SCENE 07: INSTITUTIONAL FOOTER / COMPLIANCE
-          Satisfying Section 7.1-7.4 of the Regulatory Framework.
-      */}
-      <section className="py-24 bg-transparent border-t border-black/10 flex flex-col items-center justify-center text-center px-10">
-         <div className="mb-12 flex gap-8 opacity-20 grayscale">
-            {/* Placeholder for Partner Logos: BOT, SARB, BOG */}
-            <span className="font-display text-sm uppercase italic tracking-widest">Tz</span>
-            <span className="font-display text-sm uppercase italic tracking-widest">SA</span>
-            <span className="font-display text-sm uppercase italic tracking-widest">Gh</span>
-            <span className="font-display text-sm uppercase italic tracking-widest">Ng</span>
-         </div>
-         
-         <div className="max-w-3xl space-y-6">
-            <p className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.6em] font-bold">
-              Infinitswap Technology Group // Architecture v4.0.2
-            </p>
-            <p className="font-body text-[11px] text-ink-black/40 uppercase tracking-tight leading-loose">
-              Infinitswap is a financial technology platform and does not provide banking, 
-              lending, or investment advisory services. All monetary value is held by 
-              licensed third-party payment service providers (PSPs) regulated within their 
-              respective jurisdictions. Use of this platform constitutes acceptance of 
-              our institutional protocol standards.
-            </p>
-         </div>
-      </section>
+      {/* FOOTER IS NOW HANDLED IN layout.tsx */}
     </div>
   );
 }
