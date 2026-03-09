@@ -16,5 +16,10 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@studio-freight/react-lenis": "^0.0.47",
+    "framer-motion": "^12.35.1",
+    "gsap": "^3.14.2"
   }
 }

@@ -1,33 +1,14 @@
-import type { Metadata, Viewport } from "next";
+'use client'; // Required because Lenis is a client-side interaction provider
+
+import { ReactLenis } from '@studio-freight/react-lenis';
 import "./globals.css";
-import { SmoothScroll } from "../components/SmoothScroll";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import LegalFooter from "../components/LegalFooter";
 
-export const metadata: Metadata = {
-  title: "Infinitswap | Crypto to Cash. In Your Chats.",
-  description: "Turn your USDT into local currency instantly. No apps, no complex exchanges—just send a WhatsApp message and get paid directly to your bank account.",
-  keywords: ["Sell USDT", "Crypto to Naira", "WhatsApp Bot", "Infinitswap", "Crypto to Fiat", "Africa Crypto"],
-  authors: [{ name: "Infinitswap" }],
-  openGraph: {
-    title: "Infinitswap | Seamless Crypto-to-Cash",
-    description: "Send crypto, get cash. The fastest way to turn your digital assets into local fiat across Africa.",
-    type: "website",
-    siteName: "Infinitswap",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Infinitswap | Crypto to Cash",
-    description: "Turn your USDT into local currency instantly via WhatsApp.",
-  }
-};
-
-export const viewport: Viewport = {
-  themeColor: "#e2dac7",
-  width: "device-width",
-  initialScale: 1,
-};
+// Note: Metadata and Viewport exports must remain in a separate 
+// 'layout.tsx' if you want them to be server-rendered, OR 
+// you can move them to a 'metadata.ts' file. 
+// For this layout to be 'use client', we focus on the structure.
 
 export default function RootLayout({
   children,
@@ -35,12 +16,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="selection:bg-infinite-magenta selection:text-white scroll-smooth">
+    <html lang="en" className="selection:bg-infinite-magenta selection:text-white">
       <body className="antialiased bg-parchment text-ink-black min-h-screen">
-        {/* THE DRAFTING FOUNDATION */}
-        <div className="technical-grid fixed inset-0 pointer-events-none z-0" />
+        
+        {/* 1. THE LENIS ROOT: This is the magic "Xara" scroll engine */}
+        <ReactLenis root options={{ 
+          lerp: 0.1,         // Speed of the "inertia" (lower is smoother/heavier)
+          duration: 1.5,     // How long the scroll animation lasts
+          smoothWheel: true, 
+          wheelMultiplier: 1, 
+          infinite: false 
+        }}>
+          
+          {/* THE DRAFTING FOUNDATION */}
+          <div className="technical-grid fixed inset-0 pointer-events-none z-0" />
 
-        <SmoothScroll>
           <div className="relative z-10 flex flex-col min-h-screen">
             <Navbar />
             
@@ -49,9 +39,8 @@ export default function RootLayout({
             </main>
 
             <Footer />
-            <LegalFooter /> 
           </div>
-        </SmoothScroll>
+        </ReactLenis>
       </body>
     </html>
   );

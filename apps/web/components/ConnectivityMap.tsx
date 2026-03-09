@@ -1,251 +1,361 @@
 'use client';
 
-import React, { useRef, useMemo, useState, useEffect } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Html, Text, CatmullRomLine, PerspectiveCamera, useCursor, Float } from '@react-three/drei';
-import * as THREE from 'three';
-import { gsap } from 'gsap';
+import { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// --- CONFIGURATION ---
-const BRAND_BLUE = "#0827dc";
-const BRAND_MAGENTA = "#fe009c";
-const BRAND_CYAN = "#00f0ff";
+const BRAND_BLUE = '#0827dc';
+const BRAND_MAGENTA = '#fe009c';
+const BRAND_CYAN = '#00d9ff';
 
-// Spatial Coordinates (Abstract Map of Africa/Global connections)
-// X = East/West, Y = North/South (on flat plane)
-const NODES = [
-  { id: "NG", label: "Nigeria", x: -1.5, y: 1, z: 0, region: "West Africa" },
-  { id: "TZ", label: "Tanzania", x: 2.5, y: 0.5, z: 0, region: "East Africa" },
-  { id: "SA", label: "South Africa", x: 1.5, y: -3, z: 0, region: "South Africa" },
-  { id: "GH", label: "Ghana", x: -2.8, y: 1.5, z: 0, region: "West Africa" },
-  { id: "LHR", label: "Global", x: -0.5, y: 5.5, z: -1, region: "Routing Hub" }, // Simplified from "London Bridge Liquidity"
-];
-
-// Connections definitions (Index of NODES)
-const CONNECTIONS = [
-  [0, 4], // Lagos -> London
-  [0, 3], // Lagos -> Accra
-  [0, 2], // Lagos -> Joburg
-  [2, 1], // Joburg -> Nairobi/TZ
-  [1, 4], // TZ -> London
-];
-
-// --- COMPONENTS ---
-
-const MapPlane = () => {
-  return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
-      <planeGeometry args={[30, 30, 40, 40]} />
-      <meshStandardMaterial 
-        color="#020410" 
-        wireframe 
-        transparent 
-        opacity={0.08} 
-        roughness={0.1}
-        metalness={0.8}
-      />
-    </mesh>
-  );
+type NodeItem = {
+  id: string;
+  label: string;
+  region: string;
+  status: string;
+  rate: string;
+  x: number;
+  y: number;
+  accent: string;
 };
 
-const NodePoint = ({ node, isSelected, onClick }: { node: any, isSelected: boolean, onClick: (vec: THREE.Vector3) => void }) => {
-  const [hovered, setHovered] = useState(false);
-  useCursor(hovered); // Changes cursor on hover
+const NODES: NodeItem[] = [
+  {
+    id: 'NG',
+    label: 'Nigeria',
+    region: 'West Africa',
+    status: 'Operational',
+    rate: '1,520 NGN',
+    x: 33,
+    y: 44,
+    accent: BRAND_CYAN,
+  },
+  {
+    id: 'GH',
+    label: 'Ghana',
+    region: 'West Africa',
+    status: 'Active',
+    rate: '14.2 GHS',
+    x: 24,
+    y: 34,
+    accent: BRAND_MAGENTA,
+  },
+  {
+    id: 'TZ',
+    label: 'Tanzania',
+    region: 'East Africa',
+    status: 'Active',
+    rate: '2,600 TZS',
+    x: 67,
+    y: 42,
+    accent: BRAND_CYAN,
+  },
+  {
+    id: 'SA',
+    label: 'South Africa',
+    region: 'Southern Africa',
+    status: 'High Liquidity',
+    rate: '18.9 ZAR',
+    x: 57,
+    y: 72,
+    accent: BRAND_MAGENTA,
+  },
+  {
+    id: 'HUB',
+    label: 'Global Hub',
+    region: 'Liquidity Hub',
+    status: 'Master Node',
+    rate: 'N/A',
+    x: 49,
+    y: 16,
+    accent: '#ffffff',
+  },
+];
 
-  const scale = hovered || isSelected ? 1.5 : 1;
-  const color = hovered ? BRAND_MAGENTA : isSelected ? BRAND_CYAN : BRAND_BLUE;
+const CONNECTIONS: Array<[string, string]> = [
+  ['NG', 'HUB'],
+  ['GH', 'NG'],
+  ['NG', 'SA'],
+  ['SA', 'TZ'],
+  ['TZ', 'HUB'],
+];
+
+function getNode(id: string) {
+  return NODES.find((n) => n.id === id)!;
+}
+
+function curvedPath(a: NodeItem, b: NodeItem) {
+  const mx = (a.x + b.x) / 2;
+  const my = (a.y + b.y) / 2;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const curve = Math.max(6, Math.min(16, Math.hypot(dx, dy) * 0.18));
+  const cx = mx;
+  const cy = my - curve;
+  return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
+}
+
+function NodeCard({
+  node,
+  active,
+  hovered,
+  onEnter,
+  onLeave,
+  onClick,
+}: {
+  node: NodeItem;
+  active: boolean;
+  hovered: boolean;
+  onEnter: () => void;
+  onLeave: () => void;
+  onClick: () => void;
+}) {
+  const visible = active || hovered;
 
   return (
-    <group position={[node.x, node.y, node.z]}>
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.2}>
-        <mesh 
-          onClick={(e) => { e.stopPropagation(); onClick(new THREE.Vector3(node.x, node.y, node.z)); }}
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
-        >
-          <sphereGeometry args={[0.15, 32, 32]} />
-          <meshStandardMaterial 
-            color={color} 
-            emissive={color} 
-            emissiveIntensity={hovered ? 4 : 2} 
-            toneMapped={false} 
+    <>
+      <motion.button
+        type="button"
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+        onClick={onClick}
+        className="absolute -translate-x-1/2 -translate-y-1/2"
+        style={{ left: `${node.x}%`, top: `${node.y}%` }}
+        animate={{
+          scale: active ? 1.08 : hovered ? 1.04 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+      >
+        <div className="relative flex items-center justify-center">
+          <motion.span
+            className="absolute rounded-full"
+            style={{ backgroundColor: node.accent }}
+            animate={{
+              width: visible ? 56 : 38,
+              height: visible ? 56 : 38,
+              opacity: visible ? 0.18 : 0.1,
+            }}
+            transition={{ duration: 0.25 }}
           />
-        </mesh>
-        
-        {/* Glow Halo */}
-        <mesh scale={[2, 2, 2]}>
-          <ringGeometry args={[0.12, 0.15, 32]} />
-          <meshBasicMaterial color={color} transparent opacity={0.3} side={THREE.DoubleSide} />
-        </mesh>
-      </Float>
 
-      {/* Futuristic Label */}
-      <Html distanceFactor={10} position={[0.3, 0.3, 0]} style={{ pointerEvents: 'none' }}>
-        <div className={`transition-all duration-300 ${hovered || isSelected ? 'opacity-100 translate-x-0' : 'opacity-40 -translate-x-2'}`}>
-          <div className="flex flex-col items-start">
-            <span className="font-display font-bold text-lg text-white uppercase leading-none" style={{ textShadow: `0 0 10px ${color}` }}>
-              {node.id}
-            </span>
-            <span className="font-mono text-[8px] bg-black/80 px-1 py-0.5 border border-white/20 text-white/70 uppercase">
-              {node.label}
+          <motion.span
+            className="absolute rounded-full border"
+            style={{
+              borderColor: node.accent,
+              boxShadow: `0 0 26px ${node.accent}55`,
+            }}
+            animate={{
+              width: [34, 46, 34],
+              height: [34, 46, 34],
+              opacity: [0.28, 0.08, 0.28],
+            }}
+            transition={{
+              duration: 2.2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+
+          <span
+            className="relative block h-4 w-4 rounded-full border border-white/20"
+            style={{
+              backgroundColor: node.accent,
+              boxShadow: `0 0 18px ${node.accent}`,
+            }}
+          />
+        </div>
+      </motion.button>
+
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            initial={{ opacity: 0, y: 8, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: 8, filter: 'blur(8px)' }}
+            transition={{ duration: 0.2 }}
+            className="pointer-events-none absolute z-20 -translate-x-1/2"
+            style={{
+              left: `${node.x + 7}%`,
+              top: `${node.y - 2}%`,
+            }}
+          >
+            <div className="min-w-[176px] rounded-2xl border border-white/12 bg-black/72 px-4 py-4 shadow-[0_0_30px_rgba(0,217,255,0.10)] backdrop-blur-xl">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[15px] font-semibold tracking-[-0.03em] text-white">
+                  {node.label}
+                </span>
+                <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-emerald-400">
+                  Online
+                </span>
+              </div>
+
+              <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.22em] text-white/38">
+                {node.region}
+              </p>
+
+              <p className="mt-3 text-lg font-semibold tracking-[-0.04em] text-white">
+                {node.rate}
+              </p>
+
+              <div className="mt-3 border-t border-white/8 pt-3">
+                <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-white/30">
+                  {node.status}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+export default function ConnectivityMap() {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const activeIds = useMemo(() => {
+    if (!selectedId) return new Set<string>(NODES.map((n) => n.id));
+    const ids = new Set<string>([selectedId]);
+    CONNECTIONS.forEach(([a, b]) => {
+      if (a === selectedId || b === selectedId) {
+        ids.add(a);
+        ids.add(b);
+      }
+    });
+    return ids;
+  }, [selectedId]);
+
+  return (
+    <section className="relative min-h-[88svh] overflow-hidden bg-[#02030a]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(8,39,220,0.18),transparent_24%),radial-gradient(circle_at_80%_35%,rgba(254,0,156,0.14),transparent_22%),linear-gradient(180deg,#03040a_0%,#05070f_55%,#02030a_100%)]" />
+      <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:72px_72px]" />
+
+      {/* HUD */}
+      <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between p-6 md:p-8">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.42em] text-white/34">
+              Orchestration network / live map
+            </p>
+            <div className="mt-4 h-px w-40 overflow-hidden bg-white/8">
+              <motion.div
+                animate={{ x: ['-100%', '220%'] }}
+                transition={{ duration: 3.8, repeat: Infinity, ease: 'linear' }}
+                className="h-full w-1/3 bg-[#00d9ff]"
+              />
+            </div>
+          </div>
+
+          <div className="text-right">
+            <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/24">
+              Integrity / 99.98%
+            </p>
+            <p className="mt-2 font-mono text-[8px] uppercase tracking-[0.24em] text-white/24">
+              Mode / network view
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-center">
+          <div className="rounded-full border border-white/10 bg-white/6 px-5 py-3 backdrop-blur-md">
+            <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/46">
+              {selectedId
+                ? 'Node focused / click node again to reset'
+                : 'Hover nodes to inspect / click to focus'}
             </span>
           </div>
         </div>
-      </Html>
-    </group>
-  );
-};
-
-const DataStream = ({ start, end }: { start: number[], end: number[] }) => {
-  const points = useMemo(() => {
-    const startVec = new THREE.Vector3(...start);
-    const endVec = new THREE.Vector3(...end);
-    
-    // Create a curved path (Arc)
-    const mid = startVec.clone().lerp(endVec, 0.5);
-    mid.z += 1.5; // Lift the curve up in Z space (3D arc)
-    
-    return [startVec, mid, endVec];
-  }, [start, end]);
-
-  // Animate the dash offset
-  const materialRef = useRef<any>(null);
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.dashOffset -= 0.01; // Moving data effect
-    }
-  });
-
-  return (
-    <CatmullRomLine
-      points={points}
-      color={BRAND_BLUE}
-      lineWidth={1}
-      dashed
-      dashScale={2}
-      dashSize={2} // Short dashes
-      gapSize={1} 
-      onUpdate={(line: any) => {
-         // @ts-ignore
-         materialRef.current = line.material;
-      }}
-    />
-  );
-};
-
-const CameraController = ({ targetPosition }: { targetPosition: THREE.Vector3 | null }) => {
-  const { camera, mouse } = useThree();
-  const initialPos = new THREE.Vector3(0, 0, 8); // Top-down-ish view
-  
-  useFrame(() => {
-    // 1. Mouse Parallax (Subtle movement based on mouse position)
-    const parallaxX = mouse.x * 0.5;
-    const parallaxY = mouse.y * 0.5;
-
-    let targetCamPos = initialPos.clone();
-    let lookAtTarget = new THREE.Vector3(0, 0, 0);
-
-    if (targetPosition) {
-        // Zoomed in state
-        targetCamPos = new THREE.Vector3(targetPosition.x, targetPosition.y - 1, targetPosition.z + 4);
-        lookAtTarget = targetPosition;
-    }
-
-    // Apply smooth interpolation (Lerp)
-    camera.position.lerp(
-      new THREE.Vector3(targetCamPos.x + parallaxX, targetCamPos.y + parallaxY, targetCamPos.z),
-      0.05
-    );
-    
-    // Smooth LookAt
-    camera.lookAt(lookAtTarget);
-  });
-
-  return null;
-};
-
-// --- MAIN EXPORT ---
-
-export default function ConnectivityMap() {
-  const [selectedNodePos, setSelectedNodePos] = useState<THREE.Vector3 | null>(null);
-
-  // Scroll Interaction
-  useEffect(() => {
-    const handleScroll = () => {
-       // Reset selection on scroll to "zoom out"
-       if(window.scrollY > 100) setSelectedNodePos(null);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <section className="h-[120vh] relative bg-[#020410] overflow-hidden border-t border-white/5">
-      
-      {/* 3D SCENE */}
-      <div className="absolute inset-0 z-0 cursor-crosshair">
-        <Canvas>
-          <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
-          <ambientLight intensity={0.2} />
-          <pointLight position={[10, 10, 10]} intensity={2} color={BRAND_BLUE} />
-          <pointLight position={[-10, -5, 5]} intensity={2} color={BRAND_MAGENTA} />
-          
-          <CameraController targetPosition={selectedNodePos} />
-
-          <group rotation={[0.2, 0, 0]}> {/* Tilt the whole map for better 3D view */}
-            <MapPlane />
-
-            {/* Render Nodes */}
-            {NODES.map((node, i) => (
-              <NodePoint 
-                key={node.id} 
-                node={node} 
-                isSelected={selectedNodePos?.x === node.x && selectedNodePos?.y === node.y}
-                onClick={(vec) => setSelectedNodePos(vec)} 
-              />
-            ))}
-
-            {/* Render Connections */}
-            {CONNECTIONS.map(([startIdx, endIdx], i) => {
-              if (startIdx === undefined || endIdx === undefined) return null;
-
-              const startNode = NODES[startIdx];
-              const endNode = NODES[endIdx];
-
-              if (!startNode || !endNode) return null;
-
-              return (
-                <DataStream 
-                  key={i} 
-                  start={[startNode.x, startNode.y, startNode.z]} 
-                  end={[endNode.x, endNode.y, endNode.z]} 
-                />
-              );
-            })}
-          </group>
-
-          {/* Fog for depth fading */}
-          <fog attach="fog" args={['#020410', 5, 20]} />
-        </Canvas>
       </div>
 
-      {/* OVERLAY CONTENT */}
-      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-center items-center text-center px-4">
-        <h2 className="font-display text-5xl md:text-8xl uppercase leading-[0.85] text-white mix-blend-screen opacity-90">
-          Borderless <br /> 
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-infinite-blue to-infinite-magenta italic">
+      {/* Main map stage */}
+      <div className="absolute inset-0 z-0">
+        <svg
+          viewBox="0 0 100 100"
+          className="absolute inset-0 h-full w-full"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <defs>
+            <linearGradient id="lineGradientA" x1="0%" x2="100%">
+              <stop offset="0%" stopColor={BRAND_CYAN} stopOpacity="0.95" />
+              <stop offset="100%" stopColor={BRAND_MAGENTA} stopOpacity="0.9" />
+            </linearGradient>
+          </defs>
+
+          {CONNECTIONS.map(([startId, endId], i) => {
+            const a = getNode(startId);
+            const b = getNode(endId);
+            const isActive =
+              !selectedId || startId === selectedId || endId === selectedId;
+
+            return (
+              <g key={`${startId}-${endId}-${i}`}>
+                <motion.path
+                  d={curvedPath(a, b)}
+                  fill="none"
+                  stroke="url(#lineGradientA)"
+                  strokeWidth="0.22"
+                  strokeOpacity={isActive ? 0.8 : 0.16}
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.2, delay: i * 0.08 }}
+                />
+                {isActive && (
+                  <motion.circle
+                    r="0.55"
+                    fill={BRAND_CYAN}
+                    filter="url(#blur)"
+                    animate={{
+                      offsetDistance: ['0%', '100%'],
+                    }}
+                    transition={{
+                      duration: 2.6,
+                      repeat: Infinity,
+                      ease: 'linear',
+                      delay: i * 0.18,
+                    }}
+                    style={{
+                      offsetPath: `path('${curvedPath(a, b)}')`,
+                    }}
+                  />
+                )}
+              </g>
+            );
+          })}
+        </svg>
+
+        <div className="absolute inset-0">
+          {NODES.map((node) => {
+            const active = activeIds.has(node.id);
+            const hovered = hoveredId === node.id;
+
+            return (
+              <NodeCard
+                key={node.id}
+                node={node}
+                active={active}
+                hovered={hovered}
+                onEnter={() => setHoveredId(node.id)}
+                onLeave={() => setHoveredId(null)}
+                onClick={() =>
+                  setSelectedId((prev) => (prev === node.id ? null : node.id))
+                }
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Typography */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4 text-center">
+        <h2 className="leading-[0.8] tracking-[-0.08em] text-white/84">
+          <span className="block text-[14vw] font-black uppercase md:text-[10vw]">
+            Borderless
+          </span>
+          <span className="block bg-gradient-to-r from-[#00d9ff] via-white to-[#fe009c] bg-clip-text text-[14vw] font-black uppercase italic text-transparent md:text-[10vw]">
             Payments.
           </span>
         </h2>
-        <div className="mt-8 max-w-md pointer-events-auto">
-          <p className="font-mono text-xs md:text-sm text-white/70 uppercase tracking-widest bg-black/40 backdrop-blur-md p-4 border border-white/10 rounded-sm">
-            <span className="text-infinite-cyan font-bold block mb-2">[Live Network]</span>
-            Click a country node to explore.<br/>
-            Converting crypto to NGN, GHS, ZAR, and TZS instantly.
-          </p>
-        </div>
       </div>
-      
     </section>
   );
 }

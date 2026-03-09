@@ -1,152 +1,336 @@
 'use client';
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
-// 🟢 NEW: Updated with user-centric, everyday language
-const LAYERS = [
-  { 
-    id: "01", 
-    title: "Start a Chat", 
-    tag: "STEP 1",
-    detail: "Message our WhatsApp number and tell us how much USDT you want to sell. No accounts to create, no passwords to remember." 
+import { useMemo, useRef, useState } from 'react';
+import {
+  motion,
+  useInView,
+  useScroll,
+  useTransform,
+} from 'framer-motion';
+
+type Layer = {
+  id: string;
+  title: string;
+  tag: string;
+  detail: string;
+  micro: string;
+};
+
+const LAYERS: Layer[] = [
+  {
+    id: '01',
+    title: 'Start a Chat',
+    tag: 'STEP 1',
+    detail:
+      'Message our WhatsApp line and tell us how much USDT you want to sell. No signup forms, no app installation, and no dashboard friction.',
+    micro: 'Initiate request',
   },
-  { 
-    id: "02", 
-    title: "Lock in the Rate", 
-    tag: "STEP 2",
-    detail: "We instantly give you the best exchange rate. What you see is exactly what you get—no hidden fees or surprises." 
+  {
+    id: '02',
+    title: 'Lock in the Rate',
+    tag: 'STEP 2',
+    detail:
+      'You immediately receive a live quote. The rate is clear, transparent, and visible before you commit to the transaction.',
+    micro: 'Confirm pricing',
   },
-  { 
-    id: "03", 
-    title: "Send Your Crypto", 
-    tag: "STEP 3",
-    detail: "We generate a secure, one-time wallet address just for you. Send your USDT safely from TrustWallet, Binance, or any exchange." 
+  {
+    id: '03',
+    title: 'Send Your Crypto',
+    tag: 'STEP 3',
+    detail:
+      'A dedicated wallet address is generated for your transaction. Send from Trust Wallet, Binance, or any compatible wallet or exchange.',
+    micro: 'Transfer asset',
   },
-  { 
-    id: "04", 
-    title: "Get Paid Instantly", 
-    tag: "STEP 4",
-    detail: "The moment your USDT arrives, the cash is sent directly to your local bank account. No waiting periods, no withdrawal requests." 
-  }
+  {
+    id: '04',
+    title: 'Get Paid Instantly',
+    tag: 'STEP 4',
+    detail:
+      'Once the transfer is confirmed, local currency is sent directly to your bank account with status visibility throughout the process.',
+    micro: 'Payout executed',
+  },
 ];
 
-export default function Protocol() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    
-    // 1. Progress Line Animation
-    if (lineRef.current) {
-        gsap.fromTo(lineRef.current,
-            { height: "0%" },
-            { 
-                height: "100%", 
-                ease: "none",
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top center",
-                    end: "bottom center",
-                    scrub: 0.5
-                }
-            }
-        );
-    }
-
-    // 2. Item Activation Animation
-    const items = gsap.utils.toArray('.protocol-item');
-    items.forEach((item: any) => {
-      // Fade in and slide up
-      gsap.fromTo(item, 
-        { opacity: 0.3, y: 30 },
-        { 
-          opacity: 1, 
-          y: 0,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: item,
-            start: "top 80%",
-            end: "top 50%",
-            toggleActions: "play none none reverse"
-          }
-        }
-      );
-    });
-  }, []);
+function GrainTexture() {
+  const dots = useMemo(
+    () =>
+      Array.from({ length: 120 }, (_, index) => ({
+        id: index,
+        left: `${(index * 17) % 100}%`,
+        top: `${(index * 21) % 100}%`,
+        opacity: ((index % 6) + 2) / 28,
+        size: index % 3 === 0 ? 1 : 2,
+      })),
+    []
+  );
 
   return (
-    <section ref={containerRef} className="relative min-h-screen py-32 px-6 md:px-10 border-t border-black/5 bg-transparent overflow-hidden">
-      
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
-        
-        {/* Left Side: Sticky Header & Narrative */}
-        <div className="lg:sticky lg:top-32 h-fit">
-           <div className="mb-12">
-             <span className="font-mono text-[10px] text-infinite-blue font-bold uppercase tracking-[0.6em] block mb-4 border-l-2 border-infinite-blue pl-4">
-               The Process // How To Use
-             </span>
-             <h2 className="font-display text-5xl md:text-[6rem] uppercase leading-[0.9] text-ink-black tracking-tighter mb-8">
-               From Crypto <br /> <span className="text-infinite-magenta italic">To Cash.</span>
-             </h2>
-             <p className="font-body text-lg md:text-xl text-ink-black/60 max-w-md leading-relaxed">
-               We’ve stripped away the complexity of crypto. 
-               Infinitswap does all the heavy lifting in the background so you can get your money fast.
-             </p>
-           </div>
-           
-           {/* Decorative 'System Status' Box - Left this alone for aesthetic trust signals */}
-           <div className="hidden lg:block p-6 bg-white/50 backdrop-blur-md border border-black/5 rounded-sm max-w-xs">
-              <div className="flex items-center gap-3 mb-2">
-                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                 <span className="font-mono text-[10px] uppercase tracking-widest opacity-50">System Active</span>
-              </div>
-              <p className="font-mono text-[10px] text-ink-black/40">
-                 Listening for liquidity requests... <br/>
-                 Latency: 12ms <br/>
-                 Security: TLS 1.3 Enforced
-              </p>
-           </div>
+    <div className="pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-multiply">
+      {dots.map((dot) => (
+        <span
+          key={dot.id}
+          className="absolute rounded-full bg-black"
+          style={{
+            left: dot.left,
+            top: dot.top,
+            width: dot.size,
+            height: dot.size,
+            opacity: dot.opacity,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ProtocolCard({
+  layer,
+  index,
+  active,
+}: {
+  layer: Layer;
+  index: number;
+  active: boolean;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.25 }}
+      transition={{ duration: 0.65, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className={[
+        'group relative overflow-hidden rounded-[2rem] border p-6 md:p-8 transition-all duration-500',
+        active
+          ? 'border-[#0827dc]/14 bg-[#fffdf8] shadow-[0_28px_80px_rgba(0,0,0,0.10)]'
+          : 'border-black/8 bg-[#fcfaf5] hover:border-black/12 hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)]',
+      ].join(' ')}
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.46),transparent_42%)]" />
+
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[#0827dc]/8 px-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#0827dc]">
+              {layer.id}
+            </span>
+            <span className="rounded-full border border-black/8 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.26em] text-black/42">
+              {layer.tag}
+            </span>
+          </div>
+
+          <div
+            className={[
+              'h-3 w-3 rounded-full transition-all duration-500',
+              active ? 'bg-[#0827dc] shadow-[0_0_24px_rgba(8,39,220,0.55)]' : 'bg-black/12',
+            ].join(' ')}
+          />
         </div>
 
-        {/* Right Side: The Protocol Steps (Circuit Board Layout) */}
-        <div className="relative pl-8 md:pl-12">
-          
-          {/* The Vertical Circuit Line Background */}
-          <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-black/5" />
-          
-          {/* The Active Progress Line (Fills on scroll) */}
-          <div ref={lineRef} className="absolute left-0 top-0 w-[1px] bg-gradient-to-b from-infinite-blue to-infinite-magenta z-10" />
+        <div className="mt-6">
+          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-black/34">
+            {layer.micro}
+          </p>
 
-          <div className="space-y-20">
-            {LAYERS.map((layer, index) => (
-              <div 
-                key={layer.id} 
-                className="protocol-item relative group"
+          <h4 className="mt-3 text-[2rem] font-semibold leading-[0.94] tracking-[-0.06em] text-[#111111] md:text-[2.8rem]">
+            {layer.title.split(' ').map((word, idx, arr) => (
+              <span
+                key={`${word}-${idx}`}
+                className={idx === arr.length - 1 ? 'block text-[#0827dc]' : 'block'}
               >
-                {/* Timeline Dot */}
-                <div className="absolute -left-[43px] md:-left-[59px] top-2 w-3 h-3 rounded-full border-2 border-white bg-black/10 group-hover:bg-infinite-magenta group-hover:scale-125 transition-all duration-300 z-20 shadow-sm" />
-                
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-baseline gap-4">
-                     <span className="font-mono text-xs font-bold text-infinite-blue">0{index + 1}</span>
-                     <span className="font-mono text-[9px] uppercase tracking-widest opacity-40 border border-black/10 px-2 py-1 rounded-sm">{layer.tag}</span>
-                  </div>
-                  
-                  <h4 className="font-display text-3xl md:text-5xl uppercase text-ink-black group-hover:text-infinite-blue transition-colors duration-300">
-                    {layer.title}
-                  </h4>
-                  
-                  <p className="font-body text-ink-black/50 text-base md:text-lg max-w-lg leading-relaxed group-hover:text-ink-black/80 transition-colors duration-300">
-                    {layer.detail}
-                  </p>
-                </div>
-              </div>
+                {word}
+              </span>
             ))}
+          </h4>
+
+          <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-black/60 md:text-[1.02rem]">
+            {layer.detail}
+          </p>
+        </div>
+
+        <div className="mt-8 flex items-center justify-between gap-4 border-t border-black/8 pt-5">
+          <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-black/34">
+            Orchestrated flow
+          </span>
+
+          <div className="flex items-center gap-3">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+              className="relative flex h-10 w-10 items-center justify-center"
+            >
+              <div className="absolute inset-0 rounded-full border border-black/10" />
+              <div className="absolute inset-[7px] rounded-full border border-[#0827dc]/30" />
+              <div className="h-2 w-2 rounded-full bg-[#0827dc]" />
+            </motion.div>
+
+            <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-black/34">
+              Node active
+            </span>
           </div>
         </div>
+      </div>
+    </motion.article>
+  );
+}
 
+export default function Protocol() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const [glow, setGlow] = useState({ x: 50, y: 50 });
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const inView = useInView(sectionRef, { amount: 0.2, once: false });
+
+  const { scrollYProgress } = useScroll({
+    target: rightRef,
+    offset: ['start 75%', 'end 35%'],
+  });
+
+  const progressHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%']);
+
+  const handleGlowMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setGlow({ x, y });
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      onMouseMove={handleGlowMove}
+      className="relative isolate overflow-hidden bg-[#f3efe8] px-6 py-24 md:px-10 xl:px-12"
+    >
+      {/* Background */}
+      <div className="absolute inset-0 -z-30 bg-[linear-gradient(180deg,#f7f3ec_0%,#f0ebe2_44%,#e9e2d7_100%)]" />
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_18%_14%,rgba(8,39,220,0.08),transparent_24%),radial-gradient(circle_at_82%_22%,rgba(254,0,156,0.06),transparent_20%),radial-gradient(circle_at_56%_60%,rgba(8,39,220,0.05),transparent_28%)]" />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 transition-opacity duration-200"
+        style={{
+          background: `radial-gradient(520px circle at ${glow.x}% ${glow.y}%, rgba(8,39,220,0.10), transparent 34%)`,
+        }}
+      />
+      <div className="absolute inset-0 -z-10 opacity-[0.14] [background-image:linear-gradient(to_right,rgba(0,0,0,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.055)_1px,transparent_1px)] [background-size:74px_74px]" />
+      <div className="absolute inset-y-0 left-[7.5%] w-px bg-black/10" />
+      <div className="absolute inset-y-0 right-[7.5%] w-px bg-black/10" />
+      <div className="absolute left-0 right-0 top-[14%] h-px bg-black/8" />
+      <div className="absolute left-0 right-0 bottom-[12%] h-px bg-black/8" />
+      <GrainTexture />
+
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
+          {/* Left side */}
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-28">
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/60 px-4 py-2">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-[#0827dc]">
+                  Protocol / how it works
+                </span>
+              </div>
+
+              <h2 className="leading-[0.84] tracking-[-0.08em] text-black">
+                <span className="block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[6.8vw]">
+                  From
+                </span>
+                <span className="block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[6.8vw]">
+                  Crypto
+                </span>
+                <span className="block text-[14vw] font-black uppercase text-[#0827dc] md:text-[10vw] lg:text-[6.8vw]">
+                  To Cash.
+                </span>
+              </h2>
+
+              <div className="mt-8 max-w-md border-l-2 border-[#fe009c] pl-6">
+                <p className="text-base leading-relaxed text-black/62 md:text-[1.08rem]">
+                  We’ve removed the traditional friction of crypto off-ramping.
+                  The experience is direct on the surface, while the system
+                  coordinates quoting, routing, confirmation, and payout in the
+                  background.
+                </p>
+              </div>
+
+              <div className="mt-10 grid max-w-sm gap-4">
+                <div className="rounded-[1.7rem] border border-black/8 bg-[#fffdf8] p-5 shadow-[0_18px_40px_rgba(0,0,0,0.05)]">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-black/34">
+                    System status
+                  </p>
+                  <div className="mt-4 flex items-center gap-3">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    </span>
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-black/52">
+                      Active / ready
+                    </span>
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-black/58">
+                    Listening for incoming liquidity requests and monitoring
+                    payout execution across supported rails.
+                  </p>
+                </div>
+
+                <div className="rounded-[1.7rem] border border-black/8 bg-[#fffdf8] p-5 shadow-[0_18px_40px_rgba(0,0,0,0.05)]">
+                  <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-black/34">
+                    Performance
+                  </p>
+                  <div className="mt-4 flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-3xl font-semibold tracking-[-0.05em] text-[#0827dc]">
+                        12ms
+                      </p>
+                      <p className="mt-1 text-sm text-black/50">response latency</p>
+                    </div>
+                    <div className="h-12 w-px bg-black/8" />
+                    <div>
+                      <p className="text-3xl font-semibold tracking-[-0.05em] text-black/86">
+                        24/7
+                      </p>
+                      <p className="mt-1 text-sm text-black/50">availability</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right side */}
+          <div ref={rightRef} className="relative lg:col-span-7">
+            {/* timeline rail */}
+            <div className="absolute left-4 top-4 bottom-4 hidden w-px bg-black/8 md:block" />
+            <motion.div
+              style={{ height: progressHeight }}
+              className="absolute left-4 top-4 hidden w-px bg-gradient-to-b from-[#0827dc] to-[#fe009c] md:block"
+            />
+
+            <div className="space-y-6 md:space-y-8">
+              {LAYERS.map((layer, index) => {
+                const active = activeIndex === index || (inView && index === 0);
+
+                return (
+                  <div
+                    key={layer.id}
+                    className="relative md:pl-12"
+                    onMouseEnter={() => setActiveIndex(index)}
+                  >
+                    <div className="absolute left-[10px] top-10 hidden h-3 w-3 -translate-x-1/2 rounded-full border-2 border-[#f3efe8] bg-[#0827dc] shadow-[0_0_20px_rgba(8,39,220,0.4)] md:block" />
+
+                    <ProtocolCard
+                      layer={layer}
+                      index={index}
+                      active={active}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pointer-events-none absolute bottom-0 right-[-4%] select-none opacity-[0.018]">
+        <span className="text-[24vw] font-black uppercase tracking-[-0.08em] text-black">
+          Cash
+        </span>
       </div>
     </section>
   );

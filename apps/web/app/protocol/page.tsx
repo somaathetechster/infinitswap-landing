@@ -1,86 +1,126 @@
 'use client';
+
 import Protocol from '../../components/Protocol';
 import { motion } from 'framer-motion';
 
+const pillars = [
+  {
+    id: '01',
+    title: 'Instant Verification',
+    text: 'Transactions move through a confirmation-aware flow so payout only proceeds when the system has the right level of settlement confidence.',
+    accent: 'bg-[#0827dc]',
+  },
+  {
+    id: '02',
+    title: 'Best-Rate Logic',
+    text: 'The routing layer is designed to surface clear pricing and reduce unnecessary slippage, helping users move from quote to payout with better visibility.',
+    accent: 'bg-[#fe009c]',
+  },
+  {
+    id: '03',
+    title: 'Regulated Rails',
+    text: 'Risk checks, partner-led payment infrastructure, and jurisdiction-aware transaction logic help support a safer operational environment.',
+    accent: 'bg-emerald-500',
+  },
+];
+
 export default function ProtocolPage() {
   return (
-    <div className="pt-48 bg-transparent min-h-screen">
-      
-      {/* HEADER: Massive, Staggered Typography */}
-      <section className="px-6 md:px-10 mb-32 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full"
-        >
-          <span className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.6em] font-bold mb-6 block border-l-2 border-infinite-blue pl-4">
-            Execution // The Protocol
-          </span>
-          <h1 className="font-display text-[15vw] md:text-[11vw] uppercase leading-[0.8] tracking-tighter text-ink-black flex flex-col">
-            <span>The Rules</span>
-            <span className="text-infinite-magenta italic md:self-end">of Flow.</span>
-          </h1>
-          <div className="mt-12 md:mt-0 md:max-w-2xl">
-            <p className="font-body text-xl md:text-2xl text-ink-black/60 leading-relaxed">
-              Infinitswap operates on a strictly defined orchestration protocol. 
-              We bridge user intent with bank-grade liquidity rails to ensure 
-              your crypto arrives as cash, every single time.
-            </p>
+    <main className="relative min-h-screen overflow-hidden bg-[#f3efe8] pt-40 text-[#111111]">
+      {/* Background */}
+      <div className="absolute inset-0 -z-30 bg-[linear-gradient(180deg,#f7f3ec_0%,#f0ebe2_44%,#e9e2d7_100%)]" />
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_18%_14%,rgba(8,39,220,0.08),transparent_24%),radial-gradient(circle_at_82%_22%,rgba(254,0,156,0.06),transparent_20%),radial-gradient(circle_at_56%_60%,rgba(8,39,220,0.05),transparent_28%)]" />
+      <div className="absolute inset-0 -z-10 opacity-[0.14] [background-image:linear-gradient(to_right,rgba(0,0,0,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.055)_1px,transparent_1px)] [background-size:74px_74px]" />
+      <div className="absolute inset-y-0 left-[7.5%] w-px bg-black/10" />
+      <div className="absolute inset-y-0 right-[7.5%] w-px bg-black/10" />
+      <div className="absolute left-0 right-0 top-[13%] h-px bg-black/8" />
+      <div className="absolute left-0 right-0 bottom-[8%] h-px bg-black/8" />
+
+      {/* Header */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 md:px-10 xl:px-12">
+        <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/60 px-4 py-2">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-[#0827dc]">
+                  Execution / the protocol
+                </span>
+              </div>
+
+              <h1 className="leading-[0.82] tracking-[-0.08em] text-black">
+                <span className="block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[7.2vw]">
+                  The Rules
+                </span>
+                <span className="block text-[14vw] font-black uppercase text-[#0827dc] md:text-[10vw] lg:text-[7.2vw]">
+                  of Flow.
+                </span>
+              </h1>
+            </motion.div>
           </div>
-        </motion.div>
-      </section>
 
-      {/* The Animated Timeline Component */}
-      <Protocol />
-      
-      {/* Additional Technical Specs: The Trust Pillars */}
-      <section className="py-40 px-6 md:px-10 border-t border-black/5 bg-white/[0.02]">
-        <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24">
-              
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-infinite-blue" />
-                    <h4 className="font-display text-2xl uppercase tracking-tight">Instant Verification</h4>
-                </div>
-                <p className="text-base text-ink-black/50 font-body leading-relaxed">
-                  Transactions are only finalized once the local bank confirms credit. 
-                  This removes settlement risk and ensures you see your money instantly.
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-infinite-magenta" />
-                    <h4 className="font-display text-2xl uppercase tracking-tight">Best-Rate Guarantee</h4>
-                </div>
-                <p className="text-base text-ink-black/50 font-body leading-relaxed">
-                  Our engine sweeps multiple liquidity providers in real-time to capture the mid-market rate, 
-                  eliminating hidden fees and slippage.
-                </p>
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <h4 className="font-display text-2xl uppercase tracking-tight">Regulated Rails</h4>
-                </div>
-                <p className="text-base text-ink-black/50 font-body leading-relaxed">
-                  Built-in AML triggers respond to jurisdictional requirements in real-time. 
-                  Safety without the slowdown, powered by bank-grade security.
-                </p>
-              </div>
-
+          <div className="lg:col-span-5 lg:pb-4">
+            <div className="max-w-md border-l-2 border-[#fe009c] pl-6">
+              <p className="text-base leading-relaxed text-black/62 md:text-[1.08rem]">
+                Infinitswap is designed around a structured orchestration model
+                that translates user intent into a guided sequence of quoting,
+                routing, confirmation, and payout.
+              </p>
             </div>
-            
-            {/* Live Status Accent */}
-            <div className="mt-24 pt-12 border-t border-black/5 flex justify-between items-center opacity-30">
-                <span className="font-mono text-[9px] uppercase tracking-widest">Protocol Version: 4.0.2 Secure</span>
-                <span className="font-mono text-[9px] uppercase tracking-widest">All Nodes Operational</span>
-            </div>
+          </div>
         </div>
       </section>
-    </div>
+
+      {/* Protocol component */}
+      <div className="relative z-10 mt-14">
+        <Protocol />
+      </div>
+
+      {/* Pillars / technical specs */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 py-24 md:px-10 xl:px-12">
+        <div className="mb-6 flex items-center gap-4">
+          <div className="h-px w-14 bg-[#0827dc]/30" />
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-black/42">
+            Execution pillars
+          </p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3">
+          {pillars.map((pillar) => (
+            <article
+              key={pillar.id}
+              className="rounded-[1.9rem] border border-black/8 bg-[#fffdf8] p-6 shadow-[0_18px_50px_rgba(0,0,0,0.05)]"
+            >
+              <div className="flex items-center gap-3">
+                <span className={`h-2.5 w-2.5 rounded-full ${pillar.accent}`} />
+                <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-black/34">
+                  {pillar.id}
+                </span>
+              </div>
+
+              <h2 className="mt-5 text-[1.7rem] font-semibold leading-[1] tracking-[-0.05em] text-black md:text-[2rem]">
+                {pillar.title}
+              </h2>
+
+              <p className="mt-4 text-sm leading-relaxed text-black/60 md:text-base">
+                {pillar.text}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-14 flex flex-col gap-4 border-t border-black/8 pt-8 md:flex-row md:items-center md:justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-black/38">
+            Protocol version / 4.0.2 secure
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-black/38">
+            All nodes operational
+          </span>
+        </div>
+      </section>
+    </main>
   );
 }

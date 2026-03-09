@@ -1,163 +1,171 @@
 'use client';
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 
-export default function Infrastructure() {
-  const sectionRef = useRef<HTMLDivElement>(null);
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+
+const USE_CASES = [
+  {
+    id: 1,
+    image:
+      'https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1200&auto=format&fit=crop',
+    action: 'Paid a designer',
+    recipient: 'for a logo project in naira',
+    bankColor: 'bg-[#fe009c]',
+    bankInitial: '₦',
+    alt: 'Creative freelancer being paid for a design service',
+  },
+  {
+    id: 2,
+    image:
+      'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1200&auto=format&fit=crop',
+    action: 'Received money',
+    recipient: 'from family in another African country',
+    bankColor: 'bg-[#0827dc]',
+    bankInitial: 'AF',
+    alt: 'Woman receiving money support from a relative abroad',
+  },
+  {
+    id: 3,
+    image:
+      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop',
+    action: 'Bought airtime',
+    recipient: 'and topped up mobile data instantly',
+    bankColor: 'bg-[#4bba2e]',
+    bankInitial: 'AIR',
+    alt: 'Person using a phone to buy airtime and data',
+  },
+  {
+    id: 4,
+    image:
+      'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=1200&auto=format&fit=crop',
+    action: 'Sent an invoice',
+    recipient: 'and got paid through chat',
+    bankColor: 'bg-[#00b578]',
+    bankInitial: 'INV',
+    alt: 'Small business owner sending an invoice and getting paid',
+  },
+];
+
+export default function EverydayUseCases() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const chatRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start end', 'end start'],
+  });
 
-    const ctx = gsap.context(() => {
-      // 1. Text & Content Entrance
-      const elements = containerRef.current?.querySelectorAll('.reveal');
-      if (elements) {
-        gsap.fromTo(elements,
-          { y: 40, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1.2,
-            stagger: 0.1,
-            ease: "power4.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 60%",
-            }
-          }
-        );
-      }
-
-      // 2. WhatsApp Chat Bubbles Animation
-      const bubbles = chatRef.current?.children;
-      if (bubbles) {
-        gsap.fromTo(bubbles,
-          { y: 20, opacity: 0, scale: 0.95 },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.8, // Delays each bubble to look like a real conversation
-            ease: "back.out(1.2)",
-            scrollTrigger: {
-              trigger: chatRef.current,
-              start: "top 75%",
-            }
-          }
-        );
-      }
-
-      // 3. Stats Hover/Glow effect
-      const stats = statsRef.current?.children;
-      if (stats) {
-        gsap.fromTo(stats, 
-          { scale: 0.95, opacity: 0 },
-          { 
-            scale: 1, 
-            opacity: 1, 
-            stagger: 0.2, 
-            scrollTrigger: {
-              trigger: statsRef.current,
-              start: "top 80%",
-            }
-          }
-        );
-      }
-    });
-
-    return () => ctx.revert();
-  }, []);
+  const y = useTransform(scrollYProgress, [0, 1], [50, -50]);
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center py-32 px-6 md:px-10 bg-transparent overflow-hidden"
+    <section
+      ref={containerRef}
+      className="relative overflow-hidden border-t border-white/5 bg-[#010208] py-32"
     >
-      {/* Background Architectural Grid */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none -z-10"
-           style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-      
-      <div ref={containerRef} className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-        
-        {/* Left Column: The Human Story */}
-        <div className="lg:col-span-6">
-          <div className="reveal">
-            <span className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.6em] mb-12 block font-bold border-l-2 border-infinite-blue pl-4">
-              How It Works // Simple & Fast
-            </span>
-          </div>
-          
-          <h2 className="reveal font-display text-6xl md:text-[7.5rem] leading-[0.85] uppercase mb-10 text-ink-black tracking-tighter">
-            Chat. Send.<br />
-            <span className="text-ink-black/20 italic">Get Paid.</span>
-          </h2>
-          
-          <p className="reveal font-body text-xl md:text-2xl text-ink-black/60 leading-tight max-w-xl">
-            No confusing charts, no wallet connect buttons, no waiting for withdrawals. Just text our smart assistant, send your USDT, and the cash hits your local bank account instantly.
-          </p>
-        </div>
-
-        {/* Right Column: WhatsApp Mockup + Stats */}
-        <div className="lg:col-span-6 relative">
-          
-          <div className="relative bg-white/40 backdrop-blur-xl border border-white/60 p-8 md:p-12 rounded-sm shadow-2xl shadow-infinite-blue/5">
-            
-            {/* 🟢 NEW: WHATSAPP CHAT MOCKUP */}
-            <div ref={chatRef} className="flex flex-col gap-4 mb-12 font-body text-sm">
-              {/* User Bubble */}
-              <div className="self-end bg-[#E7FFDB] text-ink-black px-4 py-3 rounded-2xl rounded-tr-none shadow-sm max-w-[80%]">
-                Hi, I want to sell 100 USDT.
-              </div>
-              {/* Bot Bubble 1 */}
-              <div className="self-start bg-white text-ink-black px-4 py-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-black/5">
-                <span className="text-infinite-blue font-bold block mb-1">Infinitswap</span>
-                Current rate is 1,520 NGN. You will receive <strong>152,000 NGN</strong>. Send USDT to this address:
-                <br/><span className="font-mono text-[10px] bg-black/5 px-1 py-0.5 rounded mt-2 block break-all">TXYZ123...890</span>
-              </div>
-              {/* Bot Bubble 2 (Success) */}
-              <div className="self-start bg-white text-ink-black px-4 py-3 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-black/5">
-                <span className="text-infinite-blue font-bold block mb-1">Infinitswap</span>
-                ✅ <strong>Payment Sent!</strong> 152,000 NGN has been deposited into your Access Bank account.
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="w-full h-px bg-black/5 mb-8" />
-
-            {/* Existing Stats (Slightly simplified to fit below the chat) */}
-            <div ref={statsRef} className="flex justify-between items-end">
-              <div className="group">
-                <span className="font-mono text-[10px] uppercase opacity-40 block mb-2 group-hover:text-infinite-blue transition-colors">
-                  Average Time
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-display text-4xl uppercase italic leading-none">60 SEC</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                </div>
-              </div>
-
-              <div className="group text-right">
-                <span className="font-mono text-[10px] uppercase opacity-40 block mb-2 group-hover:text-infinite-magenta transition-colors">
-                  Hidden Fees
-                </span>
-                <div className="flex items-baseline justify-end gap-2">
-                  <span className="font-display text-4xl uppercase italic leading-none text-infinite-magenta">ZERO</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Decorative Corner Elements */}
-            <div className="absolute top-0 right-0 w-20 h-20 border-t border-r border-infinite-blue/20" />
-            <div className="absolute bottom-0 left-0 w-20 h-20 border-b border-l border-infinite-magenta/20" />
-          </div>
-        </div>
-
+      {/* HEADER */}
+      <div className="mx-auto mb-16 max-w-7xl px-6 md:mb-24 md:px-10">
+        <motion.h2
+          style={{ y }}
+          className="font-display text-5xl uppercase leading-[0.85] tracking-tighter text-white md:text-7xl"
+        >
+          Where Crypto Meets <br />
+          <span className="text-infinite-magenta italic">Everyday Life.</span>
+        </motion.h2>
       </div>
+
+      {/* HORIZONTAL GALLERY */}
+      <div className="hide-scrollbar w-full snap-x snap-mandatory overflow-x-auto pl-6 pb-10 md:pl-10">
+        <div className="flex w-max gap-6 pr-10">
+          {USE_CASES.map((useCase) => (
+            <motion.div
+              key={useCase.id}
+              whileHover={{ y: -10 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              className="group relative h-[450px] w-[300px] shrink-0 snap-center overflow-hidden rounded-[2rem] shadow-2xl md:h-[550px] md:w-[380px]"
+            >
+              {/* IMAGE */}
+              <img
+                src={useCase.image}
+                alt={useCase.alt}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+
+              {/* OVERLAY */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/65" />
+
+              {/* TOP USE CASE PILL */}
+              <div className="absolute left-6 right-6 top-6">
+                <div className="flex items-center gap-3 rounded-full bg-white/95 px-2 py-2 shadow-xl backdrop-blur-md">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-infinite-magenta/10">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#fe009c"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="7" y1="17" x2="17" y2="7"></line>
+                      <polyline points="7 7 17 7 17 17"></polyline>
+                    </svg>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="font-display text-sm font-bold leading-tight text-ink-black">
+                      {useCase.action}
+                    </span>
+                    <span className="font-body text-[11px] text-ink-black/60">
+                      {useCase.recipient}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* OPTIONAL BOTTOM CONTEXT TEXT */}
+              <div className="absolute bottom-24 left-6 right-6">
+                <p className="max-w-[85%] font-body text-sm leading-relaxed text-white/88 md:text-base">
+                  {useCase.id === 1 &&
+                    'Use crypto to settle real creative work quickly, without payment friction.'}
+                  {useCase.id === 2 &&
+                    'Receive support from loved ones across borders and access it locally with ease.'}
+                  {useCase.id === 3 &&
+                    'Turn digital value into something immediately useful for daily communication.'}
+                  {useCase.id === 4 &&
+                    'Help freelancers and small businesses move from invoice to payment faster.'}
+                </p>
+              </div>
+
+              {/* BOTTOM BADGE */}
+              <div className="absolute bottom-6 left-6">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-1 shadow-2xl transition-transform duration-300 group-hover:scale-110">
+                  <div
+                    className={`${useCase.bankColor} flex h-full w-full items-center justify-center rounded-xl`}
+                  >
+                    <span className="font-display text-lg font-bold text-white">
+                      {useCase.bankInitial}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .hide-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+            .hide-scrollbar {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `,
+        }}
+      />
     </section>
   );
 }

@@ -1,89 +1,196 @@
 'use client';
 
 export default function CompliancePage() {
+  const pillars = [
+    {
+      title: 'Identity & Safety',
+      text: 'Identity verification and transaction screening are handled through licensed partners and internal risk checks designed to support compliance requirements without creating unnecessary user friction.',
+    },
+    {
+      title: 'Non-Custodial Design',
+      text: 'Infinitswap is designed as an instruction-routing and orchestration layer. Users are guided through the flow while settlement and regulated payment handling sit with approved infrastructure partners.',
+    },
+    {
+      title: 'Data Privacy',
+      text: 'User communication and transaction data are treated with strict privacy controls. Encrypted messaging, secure internal transport layers, and controlled system access all support operational safety.',
+    },
+  ];
+
+  const regulators = [
+    { name: 'Central Bank of Nigeria', code: 'CBN' },
+    { name: 'South African Reserve Bank', code: 'SARB' },
+    { name: 'Bank of Ghana', code: 'BOG' },
+    { name: 'Bank of Tanzania', code: 'BOT' },
+  ];
+
   return (
-    <div className="pt-48 pb-32 px-6 max-w-5xl mx-auto font-body min-h-screen">
-      
-      {/* Header with a focus on Trust */}
-      <div className="mb-20">
-        <span className="font-mono text-[10px] text-infinite-blue uppercase tracking-[0.6em] mb-4 block font-bold">
-          Security // Protocol
-        </span>
-        <h1 className="font-display text-5xl md:text-8xl uppercase leading-none text-ink-black tracking-tighter">
-          Trust & <br /> <span className="text-infinite-magenta italic">Compliance.</span>
-        </h1>
-      </div>
-      
-      <div className="space-y-16 text-ink-black/80 leading-relaxed">
-        
-        {/* Main Regulatory Block */}
-        <section>
-          <h2 className="text-sm font-bold mb-6 uppercase text-infinite-blue tracking-widest border-l-2 border-infinite-blue pl-4">
-            Regulatory Framework
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-            <div className="md:col-span-7">
-              <p className="text-xl md:text-2xl text-ink-black/70 mb-6 leading-snug">
-                Infinitswap is a financial technology infrastructure provider. 
-                We build the intelligent layer that connects your digital assets 
-                to local bank accounts across Africa.
-              </p>
-              <p className="text-base text-ink-black/50">
-                Our technology acts as a non-custodial instruction-routing interface. 
-                We do not hold, custody, or settle funds directly. All monetary value 
-                is managed by our licensed and regulated financial partners.
-              </p>
+    <main className="relative overflow-hidden bg-[#f3efe8] px-6 pb-24 pt-40 text-[#111111] md:px-10 xl:px-12">
+      {/* Background */}
+      <div className="absolute inset-0 -z-30 bg-[linear-gradient(180deg,#f7f3ec_0%,#f0ebe2_44%,#e9e2d7_100%)]" />
+      <div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_18%_14%,rgba(8,39,220,0.08),transparent_24%),radial-gradient(circle_at_82%_22%,rgba(254,0,156,0.06),transparent_20%),radial-gradient(circle_at_56%_60%,rgba(8,39,220,0.05),transparent_28%)]" />
+      <div className="absolute inset-0 -z-10 opacity-[0.14] [background-image:linear-gradient(to_right,rgba(0,0,0,0.055)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.055)_1px,transparent_1px)] [background-size:74px_74px]" />
+      <div className="absolute inset-y-0 left-[7.5%] w-px bg-black/10" />
+      <div className="absolute inset-y-0 right-[7.5%] w-px bg-black/10" />
+      <div className="absolute left-0 right-0 top-[14%] h-px bg-black/8" />
+      <div className="absolute left-0 right-0 bottom-[10%] h-px bg-black/8" />
+
+      <div className="relative mx-auto max-w-7xl">
+        {/* Header */}
+        <section className="grid gap-10 lg:grid-cols-12 lg:items-end">
+          <div className="lg:col-span-7">
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/60 px-4 py-2">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-[#0827dc]">
+                Security / protocol
+              </span>
             </div>
-            
-            <div className="md:col-span-5 bg-black/[0.02] p-8 border border-black/5 rounded-sm">
-              <h3 className="font-mono text-[10px] uppercase font-bold mb-6 opacity-40">Regulated By</h3>
-              <ul className="space-y-4 font-display text-lg uppercase italic">
-                <li className="flex justify-between border-b border-black/5 pb-2">Central Bank of Nigeria <span className="text-[10px] font-mono not-italic opacity-40">CBN</span></li>
-                <li className="flex justify-between border-b border-black/5 pb-2">South African Reserve Bank <span className="text-[10px] font-mono not-italic opacity-40">SARB</span></li>
-                <li className="flex justify-between border-b border-black/5 pb-2">Bank of Ghana <span className="text-[10px] font-mono not-italic opacity-40">BOG</span></li>
-                <li className="flex justify-between border-b border-black/5 pb-2">Bank of Tanzania <span className="text-[10px] font-mono not-italic opacity-40">BOT</span></li>
-              </ul>
+
+            <h1 className="leading-[0.84] tracking-[-0.08em] text-black">
+              <span className="block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[7vw]">
+                Trust &
+              </span>
+              <span className="block text-[14vw] font-black uppercase text-[#0827dc] md:text-[10vw] lg:text-[7vw]">
+                Compliance.
+              </span>
+            </h1>
+          </div>
+
+          <div className="lg:col-span-5 lg:pb-4">
+            <div className="max-w-md border-l-2 border-[#fe009c] pl-6">
+              <p className="text-base leading-relaxed text-black/62 md:text-[1.08rem]">
+                A clearer view of how Infinitswap approaches regulatory structure,
+                payment orchestration, user protection, and operational trust.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* The Three Pillars of Safety */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-black/10 pt-16">
-          <div>
-            <h3 className="font-bold uppercase text-xs mb-4 text-infinite-blue">Identity & Safety</h3>
-            <p className="text-sm text-ink-black/60">
-              Identity verification (KYC) is conducted in real-time through our licensed 
-              partners. We ensure all transactions meet local Anti-Money Laundering (AML) 
-              requirements without slowing down your experience.
+        {/* Main Framework */}
+        <section className="mt-16 grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-7 rounded-[2rem] border border-black/8 bg-[#fffdf8] p-7 shadow-[0_20px_60px_rgba(0,0,0,0.06)] md:p-9">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.30em] text-[#0827dc]">
+              Regulatory framework
             </p>
-          </div>
-          
-          <div>
-            <h3 className="font-bold uppercase text-xs mb-4 text-infinite-blue">Non-Custodial</h3>
-            <p className="text-sm text-ink-black/60">
-              Infinitswap never touches your keys or holds your cash. 
-              Funds move directly from your wallet to a licensed payment 
-              provider, ensuring your money is always in safe, regulated hands.
-            </p>
+
+            <div className="mt-6 space-y-6">
+              <p className="max-w-2xl text-xl leading-snug tracking-[-0.03em] text-black/74 md:text-[1.8rem]">
+                Infinitswap is positioned as a financial technology infrastructure
+                and orchestration layer connecting digital asset flows to local
+                payout rails.
+              </p>
+
+              <p className="max-w-2xl text-base leading-relaxed text-black/60">
+                The product experience is designed to be direct for the user,
+                while regulated monetary handling, settlement functions, and
+                licensed payment operations are carried out through appropriate
+                partner infrastructure rather than direct custody by the interface
+                layer itself.
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-black/8 bg-white p-5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-black/36">
+                  Operating model
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-black/62">
+                  Non-custodial interface design focused on routing, visibility,
+                  and user-guided execution.
+                </p>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-black/8 bg-white p-5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-black/36">
+                  Compliance posture
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-black/62">
+                  Structured around partner-led regulated operations, monitoring,
+                  and transaction governance.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h3 className="font-bold uppercase text-xs mb-4 text-infinite-blue">Data Privacy</h3>
-            <p className="text-sm text-ink-black/60">
-              Your conversations are your business. Our WhatsApp interface uses 
-              end-to-end encryption, and our internal systems enforce TLS 1.3 standards 
-              to keep your transaction data private and secure.
+          <div className="lg:col-span-5 rounded-[2rem] border border-black/8 bg-[#0827dc] p-7 text-white shadow-[0_26px_70px_rgba(8,39,220,0.22)] md:p-9">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.30em] text-white/64">
+              Referenced regulators
+            </p>
+
+            <div className="mt-6 divide-y divide-white/10">
+              {regulators.map((regulator) => (
+                <div
+                  key={regulator.code}
+                  className="flex items-center justify-between gap-4 py-4"
+                >
+                  <span className="text-lg font-medium tracking-[-0.03em] text-white/92">
+                    {regulator.name}
+                  </span>
+                  <span className="rounded-full border border-white/12 px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-white/62">
+                    {regulator.code}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-6 text-sm leading-relaxed text-white/72">
+              Regional financial and banking compliance expectations inform how
+              partner rails and transaction pathways are structured across
+              supported markets.
             </p>
           </div>
         </section>
 
-        {/* Contact CTA for Compliance officers */}
-        <div className="bg-parchment border border-black/5 p-8 text-center rounded-sm">
-          <p className="font-mono text-[10px] uppercase tracking-widest opacity-40 mb-2">Inquiries</p>
-          <p className="text-sm">For regulatory or partnership inquiries, please contact <a href="mailto:compliance@infinitswap.ai" className="text-infinite-blue font-bold underline">compliance@infinitswap.ai</a></p>
-        </div>
+        {/* Pillars */}
+        <section className="mt-16">
+          <div className="mb-6 flex items-center gap-4">
+            <div className="h-px w-14 bg-[#0827dc]/30" />
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-black/42">
+              Safety pillars
+            </p>
+          </div>
 
+          <div className="grid gap-5 md:grid-cols-3">
+            {pillars.map((pillar) => (
+              <article
+                key={pillar.title}
+                className="rounded-[1.8rem] border border-black/8 bg-[#fffdf8] p-6 shadow-[0_16px_40px_rgba(0,0,0,0.05)]"
+              >
+                <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-[#0827dc]">
+                  {pillar.title}
+                </p>
+                <p className="mt-4 text-sm leading-relaxed text-black/62">
+                  {pillar.text}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Inquiry CTA */}
+        <section className="mt-16 rounded-[2rem] border border-black/8 bg-[#fffdf8] p-7 shadow-[0_18px_50px_rgba(0,0,0,0.05)] md:p-9">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.30em] text-black/38">
+                Inquiries
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-black md:text-4xl">
+                Regulatory and partnership contact
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-black/62 md:text-base">
+                For compliance-related communication, ecosystem partnerships, or
+                formal due diligence requests, contact the compliance desk.
+              </p>
+            </div>
+
+            <a
+              href="mailto:compliance@infinitswap.ai"
+              className="inline-flex items-center gap-3 rounded-full bg-[#0827dc] px-6 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-white transition-transform duration-300 hover:scale-[1.02]"
+            >
+              <span>compliance@infinitswap.ai</span>
+              <span>→</span>
+            </a>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

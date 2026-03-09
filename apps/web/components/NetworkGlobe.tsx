@@ -2,19 +2,23 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { gsap } from 'gsap';
 
-// --- WHATSAPP-INSPIRED BRAND COLORS ---
-const WA_GREEN_DARK = '#075e54'; // WhatsApp Header Green
-const WA_GREEN_LIGHT = '#25d366'; // WhatsApp Logo/Online Green
-const WA_TEAL = '#128c7e'; // WhatsApp Secondary Teal
-const INFINITE_BLUE = '#0827dc'; // Your brand blue (used as a subtle accent)
+const INFINITE_BLUE = '#0827dc';
+const INFINITE_MAGENTA = '#fe009c';
+const SOFT_TEAL = '#8df3d3';
+const SOFT_WHITE = '#f8fbff';
 
-// --- SHADER DEFINITIONS ---
+const NATIONS = [
+  { name: 'Nigeria', lat: 9.08, lng: 8.67, color: new THREE.Color(INFINITE_BLUE) },
+  { name: 'Ghana', lat: 7.94, lng: -1.02, color: new THREE.Color(INFINITE_MAGENTA) },
+  { name: 'South Africa', lat: -30.55, lng: 22.93, color: new THREE.Color(INFINITE_BLUE) },
+  { name: 'Kenya', lat: -1.29, lng: 36.82, color: new THREE.Color(INFINITE_MAGENTA) },
+];
 
 const vertexShader = `
   varying vec3 vNormal;
   varying vec3 vPosition;
+
   void main() {
     vNormal = normalize(normalMatrix * normal);
     vPosition = position;
@@ -27,55 +31,46 @@ const fragmentShader = `
   varying vec3 vPosition;
   uniform vec3 color;
   uniform float time;
-  
+
   void main() {
-    // Soft Frosted Glass / Fresnel Effect
-    float intensity = pow(0.7 - dot(vNormal, vec3(0, 0, 1.0)), 3.0);
-    
-    // Subtle flowing lines instead of harsh grids
-    float flow = abs(sin(vPosition.y * 5.0 + time * 0.5));
-    flow = smoothstep(0.98, 1.0, flow) * 0.2;
-    
-    // Mix the base color with the glowing edges
-    vec3 finalColor = color + vec3(0.04, 0.36, 0.32) * intensity * 1.5; // Teal edge glow
-    finalColor += vec3(flow);
-    
-    gl_FragColor = vec4(finalColor, 0.85); // High opacity for a solid, premium feel
+    float fresnel = pow(0.82 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.4);
+    float bands = abs(sin(vPosition.y * 4.0 + time * 0.4));
+    bands = smoothstep(0.94, 1.0, bands) * 0.12;
+
+    vec3 finalColor = color;
+    finalColor += vec3(0.02, 0.08, 0.32) * fresnel * 1.15;
+    finalColor += vec3(bands);
+
+    gl_FragColor = vec4(finalColor, 0.88);
   }
 `;
 
 const atmosphereVertexShader = `
   varying vec3 vNormal;
+
   void main() {
     vNormal = normalize(normalMatrix * normal);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 0.95);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 
 const atmosphereFragmentShader = `
   varying vec3 vNormal;
+
   void main() {
-    float intensity = pow(0.6 - dot(vNormal, vec3(0, 0, 1.0)), 2.5);
-    // Soft, clean teal/white glow
-    gl_FragColor = vec4(0.07, 0.54, 0.49, 1.0) * intensity * 1.2; 
+    float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+    gl_FragColor = vec4(0.10, 0.22, 0.86, 1.0) * intensity * 0.8;
   }
 `;
 
-// --- DATA ---
-const NATIONS = [
-  { name: "Nigeria", lat: 9.08, lng: 8.67, color: new THREE.Color(WA_GREEN_LIGHT) },
-  { name: "Ghana", lat: 7.94, lng: -1.02, color: new THREE.Color(WA_GREEN_LIGHT) },
-  { name: "South Africa", lat: -30.55, lng: 22.93, color: new THREE.Color(WA_GREEN_LIGHT) },
-  { name: "Kenya", lat: -1.29, lng: 36.82, color: new THREE.Color(WA_GREEN_LIGHT) },
-];
-
-// Helper: Convert Lat/Lng to Vector3 on Sphere
-function calcPosFromLatLonRad(lat: number, lon: number, radius: number) {
+function latLngToVector3(lat: number, lng: number, radius: number) {
   const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
+  const theta = (lng + 180) * (Math.PI / 180);
+
   const x = -(radius * Math.sin(phi) * Math.cos(theta));
   const z = radius * Math.sin(phi) * Math.sin(theta);
   const y = radius * Math.cos(phi);
+
   return new THREE.Vector3(x, y, z);
 }
 
@@ -83,187 +78,289 @@ export default function AdvancedGlobe() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    // --- SCENE SETUP ---
-    const scene = new THREE.Scene();
-    
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // Adjusted camera position to slightly offset the globe, framing the text better
-    camera.position.set(2, 0, 14); 
-    
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      alpha: true 
+    let animationFrameId = 0;
+    let renderer: THREE.WebGLRenderer | null = null;
+    let scene: THREE.Scene | null = null;
+    let camera: THREE.PerspectiveCamera | null = null;
+    let globeGroup: THREE.Group | null = null;
+    let globeMaterial: THREE.ShaderMaterial | null = null;
+
+    const mouse = { x: 0, y: 0 };
+    const currentRotation = { x: 0.22, z: 0 };
+    const targetRotation = { x: 0.22, z: 0 };
+
+    const getContainerSize = () => {
+      const { width, height } = container.getBoundingClientRect();
+      return {
+        width: Math.max(width, 1),
+        height: Math.max(height, 1),
+      };
+    };
+
+    const { width, height } = getContainerSize();
+
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+    camera.position.set(1.8, 0.4, 12);
+
+    renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance',
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    containerRef.current.appendChild(renderer.domElement);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+    renderer.setSize(width, height);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    // --- GROUPING ---
-    const globeGroup = new THREE.Group();
-    // Tilt the globe to feature Africa prominently
-    globeGroup.rotation.x = 0.2; 
-    globeGroup.rotation.y = -0.5;
+    container.appendChild(renderer.domElement);
+
+    globeGroup = new THREE.Group();
+    globeGroup.rotation.x = 0.22;
+    globeGroup.rotation.y = -0.52;
     scene.add(globeGroup);
 
-    // --- 1. THE MAIN GLOBE (SHADER MATERIAL) ---
-    const globeGeometry = new THREE.SphereGeometry(3, 64, 64);
-    const globeMaterial = new THREE.ShaderMaterial({
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    directionalLight.position.set(6, 4, 10);
+    scene.add(directionalLight);
+
+    const globeGeometry = new THREE.SphereGeometry(3, 48, 48);
+    globeMaterial = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
       uniforms: {
-        // Base color: A very light, frosted mint/teal
-        color: { value: new THREE.Vector3(0.95, 0.98, 0.97) }, 
-        time: { value: 0 }
+        color: { value: new THREE.Vector3(0.97, 0.985, 1.0) },
+        time: { value: 0 },
       },
       transparent: true,
-      blending: THREE.NormalBlending, 
       depthWrite: false,
     });
+
     const globe = new THREE.Mesh(globeGeometry, globeMaterial);
     globeGroup.add(globe);
 
-    // --- 2. INNER SOLID CORE (Occlusion) ---
-    const coreGeometry = new THREE.SphereGeometry(2.95, 64, 64);
-    // A clean, solid white core to give the glass material something to bounce off
-    const coreMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const coreGeometry = new THREE.SphereGeometry(2.94, 40, 40);
+    const coreMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(SOFT_WHITE),
+      transparent: true,
+      opacity: 0.95,
+    });
     const core = new THREE.Mesh(coreGeometry, coreMaterial);
     globeGroup.add(core);
 
-    // --- 3. ATMOSPHERE GLOW ---
-    const atmosGeometry = new THREE.SphereGeometry(3.2, 64, 64);
-    const atmosMaterial = new THREE.ShaderMaterial({
+    const atmosphereGeometry = new THREE.SphereGeometry(3.22, 40, 40);
+    const atmosphereMaterial = new THREE.ShaderMaterial({
       vertexShader: atmosphereVertexShader,
       fragmentShader: atmosphereFragmentShader,
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
       transparent: true,
-      opacity: 0.5
+      opacity: 0.42,
+      depthWrite: false,
     });
-    const atmosphere = new THREE.Mesh(atmosGeometry, atmosMaterial);
+    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
     scene.add(atmosphere);
 
-    // --- 4. DATA POINTS (The African Nations) ---
+    const orbitalGroup = new THREE.Group();
+    globeGroup.add(orbitalGroup);
+
+    const createRing = (
+      radius: number,
+      axis: 'x' | 'y' | 'z',
+      color: string,
+      opacity: number
+    ) => {
+      const geometry = new THREE.TorusGeometry(radius, 0.008, 10, 120);
+      const material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(color),
+        transparent: true,
+        opacity,
+      });
+      const ring = new THREE.Mesh(geometry, material);
+
+      if (axis === 'x') ring.rotation.x = Math.PI / 2;
+      if (axis === 'y') ring.rotation.y = Math.PI / 2;
+      if (axis === 'z') ring.rotation.z = Math.PI / 2;
+
+      orbitalGroup.add(ring);
+      return ring;
+    };
+
+    const ring1 = createRing(3.78, 'x', INFINITE_BLUE, 0.18);
+    const ring2 = createRing(4.1, 'y', INFINITE_MAGENTA, 0.12);
+
     const pinsGroup = new THREE.Group();
     globeGroup.add(pinsGroup);
 
-    NATIONS.forEach((nation) => {
-      const pos = calcPosFromLatLonRad(nation.lat, nation.lng, 3);
-      
-      // The "Online" Dot
-      const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.06, 16, 16),
-        new THREE.MeshBasicMaterial({ color: nation.color })
-      );
-      mesh.position.copy(pos);
-      pinsGroup.add(mesh);
+    const pulseRings: THREE.Mesh[] = [];
+    const pulseDots: THREE.Mesh[] = [];
 
-      // The Pulse Ring
+    NATIONS.forEach((nation, index) => {
+      const pos = latLngToVector3(nation.lat, nation.lng, 3.03);
+
+      const dotMaterial = new THREE.MeshBasicMaterial({
+        color: nation.color,
+        transparent: true,
+        opacity: 0.95,
+      });
+
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(0.07, 14, 14),
+        dotMaterial
+      );
+      dot.position.copy(pos);
+      pinsGroup.add(dot);
+      pulseDots.push(dot);
+
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: nation.color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.32,
+      });
+
       const ring = new THREE.Mesh(
-        new THREE.RingGeometry(0.08, 0.12, 32),
-        new THREE.MeshBasicMaterial({ color: nation.color, side: THREE.DoubleSide, transparent: true, opacity: 0.4 })
+        new THREE.RingGeometry(0.10, 0.145, 32),
+        ringMaterial
       );
-      ring.position.copy(pos);
-      ring.lookAt(new THREE.Vector3(0,0,0));
+      ring.position.copy(pos.clone().multiplyScalar(1.002));
+      ring.lookAt(new THREE.Vector3(0, 0, 0));
       pinsGroup.add(ring);
+      pulseRings.push(ring);
 
-      // Animation: Pulse like a WhatsApp typing indicator/notification
-      gsap.to(ring.scale, {
-        x: 2.5, y: 2.5,
-        duration: 2,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut"
+      const beamMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(SOFT_TEAL),
+        transparent: true,
+        opacity: 0.10,
       });
-      
-      gsap.to(mesh.material, {
-        opacity: 0.7,
-        duration: 1,
-        repeat: -1,
-        yoyo: true
-      });
+
+      const beam = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.008, 0.008, 0.35, 8),
+        beamMaterial
+      );
+      beam.position.copy(pos.clone().multiplyScalar(1.06));
+      beam.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        pos.clone().normalize()
+      );
+      pinsGroup.add(beam);
+
+      dot.userData.phase = index * 0.8;
+      ring.userData.phase = index * 0.8;
     });
 
-    // --- 5. ORBITAL RINGS (Sleek Data Paths) ---
-    const createRing = (radius: number, axis: 'x'|'y'|'z', opacity: number) => {
-       const ringGeo = new THREE.TorusGeometry(radius, 0.005, 16, 100); // Extremely thin
-       // Using the brand blue here as a subtle contrast to the green
-       const ringMat = new THREE.MeshBasicMaterial({ color: INFINITE_BLUE, transparent: true, opacity: opacity });
-       const ring = new THREE.Mesh(ringGeo, ringMat);
-       if (axis === 'x') ring.rotation.x = Math.PI / 2;
-       if (axis === 'y') ring.rotation.y = Math.PI / 2;
-       globeGroup.add(ring);
-       return ring;
+    const onPointerMove = (event: PointerEvent) => {
+      const rect = container.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+
+      targetRotation.x = 0.22 + mouse.y * 0.08;
+      targetRotation.z = -mouse.x * 0.08;
     };
 
-    const ring1 = createRing(3.8, 'x', 0.15);
-    const ring2 = createRing(4.2, 'y', 0.1);
+    const onPointerLeave = () => {
+      targetRotation.x = 0.22;
+      targetRotation.z = 0;
+    };
 
-    // --- ANIMATION LOOP ---
+    const onResize = () => {
+      if (!renderer || !camera) return;
+      const { width: nextWidth, height: nextHeight } = getContainerSize();
+      camera.aspect = nextWidth / nextHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nextWidth, nextHeight);
+    };
+
+    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerleave', onPointerLeave);
+    window.addEventListener('resize', onResize);
+
+    const clock = new THREE.Clock();
+
     const animate = () => {
-      requestAnimationFrame(animate);
-      
-      // Shader Time Update
-      globeMaterial.uniforms.time!.value += 0.01;
+      if (!renderer || !scene || !camera || !globeGroup || !globeMaterial) return;
 
-      // Base Rotation - Slow and majestic
-      globeGroup.rotation.y += 0.001;
-      
-      // Ring Rotations
-      ring1.rotation.y += 0.002;
-      ring1.rotation.x += 0.001;
-      ring2.rotation.x -= 0.002;
+      const elapsed = clock.getElapsedTime();
+
+      globeGroup.rotation.y += 0.0018;
+      orbitalGroup.rotation.y += 0.0015;
+      ring1.rotation.y += 0.0018;
+      ring1.rotation.x += 0.0008;
+      ring2.rotation.x -= 0.0014;
+
+      currentRotation.x += (targetRotation.x - currentRotation.x) * 0.06;
+      currentRotation.z += (targetRotation.z - currentRotation.z) * 0.06;
+
+      globeGroup.rotation.x = currentRotation.x;
+      globeGroup.rotation.z = currentRotation.z;
+      atmosphere.rotation.x = currentRotation.x;
+      atmosphere.rotation.y = globeGroup.rotation.y;
+      atmosphere.rotation.z = currentRotation.z;
+
+      pulseRings.forEach((ring) => {
+        const phase = ring.userData.phase || 0;
+        const pulse = (Math.sin(elapsed * 1.8 + phase) + 1) / 2;
+        const scale = 1 + pulse * 0.85;
+        ring.scale.set(scale, scale, scale);
+        const mat = ring.material as THREE.MeshBasicMaterial;
+        mat.opacity = 0.14 + pulse * 0.22;
+      });
+
+      pulseDots.forEach((dot) => {
+        const phase = dot.userData.phase || 0;
+        const pulse = (Math.sin(elapsed * 2.1 + phase) + 1) / 2;
+        const mat = dot.material as THREE.MeshBasicMaterial;
+        mat.opacity = 0.72 + pulse * 0.28;
+      });
 
       renderer.render(scene, camera);
+      animationFrameId = window.requestAnimationFrame(animate);
     };
+
     animate();
 
-    // --- SCROLL INTERACTION (GSAP) ---
-    const handleScroll = () => {
-      globeGroup.rotation.y += 0.02; // A gentler spin on scroll
-    };
-    window.addEventListener('scroll', handleScroll);
-
-    // --- MOUSE PARALLAX ---
-    const onMouseMove = (event: MouseEvent) => {
-      const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-      const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-      
-      gsap.to(globeGroup.rotation, {
-        x: (mouseY * 0.1) + 0.2, // Keep the Africa tilt while reacting
-        z: -(mouseX * 0.1),
-        duration: 1.5,
-        ease: "power2.out"
-      });
-    };
-    window.addEventListener('mousemove', onMouseMove);
-
-    // --- RESIZE HANDLER ---
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    // CLEANUP
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('resize', handleResize);
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement);
+      window.cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', onResize);
+      container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('pointerleave', onPointerLeave);
+
+      if (scene) {
+        scene.traverse((object) => {
+          const mesh = object as THREE.Mesh;
+          if (mesh.geometry) {
+            mesh.geometry.dispose();
+          }
+
+          if (mesh.material) {
+            const materials = Array.isArray(mesh.material)
+              ? mesh.material
+              : [mesh.material];
+
+            materials.forEach((material) => material.dispose());
+          }
+        });
       }
-      renderer.dispose();
+
+      renderer?.dispose();
+
+      if (renderer?.domElement && container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
     };
   }, []);
 
   return (
-    <div 
-      ref={containerRef} 
-      className="fixed top-0 left-0 w-full h-full -z-10"
-      style={{ pointerEvents: 'none' }}
+    <div
+      ref={containerRef}
+      className="absolute inset-0 h-full w-full"
+      style={{ pointerEvents: 'auto' }}
     />
   );
 }

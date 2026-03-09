@@ -2,14 +2,21 @@
 
 @theme {
   /* High-Authority "Deep Parchment" Palette */
-  --color-parchment: #e2dac7; /* A darker, aged vellum - NOT bright */
+  --color-parchment: #e2dac7; 
   --color-ink-black: #0a0a0a;
   --color-infinite-blue: #0827dc;
   --color-infinite-magenta: #fe009c;
+  --color-infinite-cyan: #00f0ff;
+
+  /* WhatsApp Native Palette */
+  --color-wa-teal: #075e54;
+  --color-wa-light-green: #e7ffdb;
+  --color-wa-bg: #e5ddd5;
+  --color-wa-button-blue: #f0f7ff;
 
   /* Drafting Line Colors */
-  --line-subtle: rgba(139, 125, 107, 0.15); /* Minor grid lines */
-  --line-strong: rgba(139, 125, 107, 0.4);  /* Major structural lines */
+  --line-subtle: rgba(139, 125, 107, 0.15); 
+  --line-strong: rgba(139, 125, 107, 0.4); 
 
   --font-display: "HK Modular", sans-serif;
   --font-body: "Helvetica Now Display", sans-serif;
@@ -30,23 +37,53 @@
   }
 }
 
-/* MASTER TECHNICAL GRID 
-   Uses layered gradients to create evident, 
-   professional drafting lines.
+/* 🟢 THE WHATSAPP NATIVE ENGINE 
+   Recreates the exact doodle background from your reference
 */
+.wa-bg-container {
+  background-color: var(--color-wa-bg);
+  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+  background-blend-mode: overlay;
+  background-size: 450px;
+  position: relative;
+}
+
+/* MASTER TECHNICAL GRID */
 .technical-grid {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
   background-image: 
-    /* Major Grid (Every 50px) - Bold enough to see */
     linear-gradient(to right, var(--line-strong) 1.5px, transparent 1.5px),
     linear-gradient(to bottom, var(--line-strong) 1.5px, transparent 1.5px),
-    /* Minor Grid (Every 10px) - Gives that "paper" texture */
     linear-gradient(to right, var(--line-subtle) 1px, transparent 1px),
     linear-gradient(to bottom, var(--line-subtle) 1px, transparent 1px);
   background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+}
+
+/* XARA FILM GRAIN OVERLAY 
+   Gives the UI that "Award-Winning" texture
+*/
+.grain-texture::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.04;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+}
+
+/* HIDE SCROLLBARS BUT KEEP FUNCTIONALITY */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 ::selection {
@@ -60,4 +97,9 @@
 }
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+/* EASE EXPO for superior transitions */
+.ease-expo {
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }

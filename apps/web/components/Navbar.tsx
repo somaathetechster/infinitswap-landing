@@ -1,13 +1,59 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import AccessBotButton from './AccessBotButton';
 
+type Times = {
+  lagos: string;
+  joburg: string;
+  accra: string;
+  daressalam: string;
+};
+
+function TimeItem({ code, value }: { code: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-infinite-blue">
+        {code}
+      </span>
+      <span
+        suppressHydrationWarning
+        className="font-mono text-[9px] uppercase tracking-[0.08em] text-ink-black/58"
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function NavLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="group relative font-mono text-[10px] font-bold uppercase tracking-[0.30em] text-ink-black/58 transition-colors duration-300 hover:text-infinite-blue"
+    >
+      {label}
+      <span className="absolute -bottom-1 left-0 h-px w-0 bg-infinite-blue transition-all duration-300 group-hover:w-full" />
+    </Link>
+  );
+}
+
 export default function Navbar() {
-  const [times, setTimes] = useState({ lagos: '--:--:--', joburg: '--:--:--', accra: '--:--:--', daressalam: '--:--:--' });
+  const [times, setTimes] = useState<Times>({
+    lagos: '--:--:--',
+    joburg: '--:--:--',
+    accra: '--:--:--',
+    daressalam: '--:--:--',
+  });
+
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
+      const now = new Date();
+
       const options: Intl.DateTimeFormatOptions = {
         hour: '2-digit',
         minute: '2-digit',
@@ -16,92 +62,152 @@ export default function Navbar() {
       };
 
       setTimes({
-        lagos: new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'Africa/Lagos' }).format(new Date()),
-        joburg: new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'Africa/Johannesburg' }).format(new Date()),
-        accra: new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'Africa/Accra' }).format(new Date()),
-        daressalam: new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'Africa/Dar_es_Salaam' }).format(new Date()),
+        lagos: new Intl.DateTimeFormat('en-GB', {
+          ...options,
+          timeZone: 'Africa/Lagos',
+        }).format(now),
+        joburg: new Intl.DateTimeFormat('en-GB', {
+          ...options,
+          timeZone: 'Africa/Johannesburg',
+        }).format(now),
+        accra: new Intl.DateTimeFormat('en-GB', {
+          ...options,
+          timeZone: 'Africa/Accra',
+        }).format(now),
+        daressalam: new Intl.DateTimeFormat('en-GB', {
+          ...options,
+          timeZone: 'Africa/Dar_es_Salaam',
+        }).format(now),
       });
     };
 
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 18);
+    };
+
     updateTime();
-    const timer = setInterval(updateTime, 1000);
-    return () => clearInterval(timer);
+    handleScroll();
+
+    const timer = window.setInterval(updateTime, 1000);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 flex flex-col pointer-events-none">
-      {/* LAYER 01: SYSTEM MONITOR */}
-      <div className="w-full bg-parchment/80 backdrop-blur-md border-b border-black/5 px-10 py-2 flex justify-between items-center pointer-events-auto">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.3em] font-bold text-ink-black/40">
-              System Online // Africa
-            </span>
-          </div>
-          
-          <div className="hidden lg:flex gap-6 border-l border-black/10 pl-6">
-            <div className="flex gap-2">
-              <span className="font-mono text-[9px] text-infinite-blue uppercase font-bold">LOS</span>
-              <span suppressHydrationWarning className="font-mono text-[9px] text-ink-black/60">{times.lagos}</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-mono text-[9px] text-infinite-blue uppercase font-bold">JNB</span>
-              <span suppressHydrationWarning className="font-mono text-[9px] text-ink-black/60">{times.joburg}</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-mono text-[9px] text-infinite-blue uppercase font-bold">ACC</span>
-              <span suppressHydrationWarning className="font-mono text-[9px] text-ink-black/60">{times.accra}</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-mono text-[9px] text-infinite-blue uppercase font-bold">DAR</span>
-              <span suppressHydrationWarning className="font-mono text-[9px] text-ink-black/60">{times.daressalam}</span>
-            </div>
-          </div>
-        </div>
+    <nav className="pointer-events-none fixed inset-x-0 top-0 z-50 flex flex-col">
+      {/* SYSTEM STATUS BAR */}
+      <div className="pointer-events-auto relative">
+        <div
+          className={[
+            'mx-auto mt-3 w-[calc(100%-1.5rem)] max-w-[1580px] rounded-full border transition-all duration-500 md:w-[calc(100%-2.5rem)]',
+            scrolled
+              ? 'border-black/8 bg-[#f4efe7]/78 shadow-[0_12px_40px_rgba(17,17,17,0.08)] backdrop-blur-xl'
+              : 'border-black/6 bg-[#f4efe7]/56 backdrop-blur-md',
+          ].join(' ')}
+        >
+          <div className="flex items-center justify-between px-4 py-2 md:px-6 xl:px-8">
+            <div className="flex items-center gap-4 md:gap-6">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                </span>
+                <span className="font-mono text-[9px] font-bold uppercase tracking-[0.30em] text-ink-black/42">
+                  System Online // Africa
+                </span>
+              </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:block h-1 w-24 bg-black/5 rounded-full overflow-hidden">
-            <div className="h-full bg-infinite-blue w-2/3 animate-[pulse_2s_infinite]" />
+              <div className="hidden items-center gap-5 border-l border-black/10 pl-5 lg:flex">
+                <TimeItem code="LOS" value={times.lagos} />
+                <TimeItem code="JNB" value={times.joburg} />
+                <TimeItem code="ACC" value={times.accra} />
+                <TimeItem code="DAR" value={times.daressalam} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="hidden h-1 w-24 overflow-hidden rounded-full bg-black/6 sm:block">
+                <div className="h-full w-2/3 animate-[pulse_2s_infinite] rounded-full bg-infinite-blue" />
+              </div>
+              <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-ink-black/34">
+                Latency: 14ms
+              </span>
+            </div>
           </div>
-          <span className="font-mono text-[9px] uppercase tracking-widest text-ink-black/30">
-            Latency: 14ms
-          </span>
         </div>
       </div>
 
-      {/* LAYER 02: PRIMARY NAVIGATION */}
-      <div className="w-full px-10 py-6 flex justify-between items-center pointer-events-auto">
-        <Link href="/" className="block -mt-20 group">
-          <img 
-            src="/logob.png" 
-            alt="Infinitswap" 
-            className="h-40 w-auto object-contain 
-                       transition-all duration-300 ease-out
-                       hover:drop-shadow-[0_0_8px_rgba(8,39,220,0.3)]
-                       hover:scale-105
-                       active:scale-95 active:duration-100" 
-          />
-        </Link>
-        
-        <div className="flex items-center gap-12">
-          {/* MAPPING: UI Name -> Physical Page Path */}
-          <div className="hidden md:flex gap-10 font-body text-[10px] uppercase tracking-[0.3em] font-bold text-ink-black/60">
-            <Link href="/protocol" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">
-              How It Works
-            </Link>
-            <Link href="/network" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">
-              Rates & Regions
-            </Link>
-            <Link href="/compliance" className="hover:text-infinite-blue transition-colors relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[1px] after:bg-infinite-blue after:transition-all hover:after:w-full">
-              Trust & Safety
-            </Link>
+      {/* MAIN FLOATING NAV */}
+      <div className="pointer-events-auto relative">
+        <div
+          className={[
+            'mx-auto mt-3 w-[calc(100%-1.5rem)] max-w-[1580px] rounded-[1.75rem] border transition-all duration-500 md:w-[calc(100%-2.5rem)]',
+            scrolled
+              ? 'border-black/8 bg-white/50 shadow-[0_24px_80px_rgba(17,17,17,0.10)] backdrop-blur-2xl'
+              : 'border-black/6 bg-white/32 backdrop-blur-xl',
+          ].join(' ')}
+        >
+          <div className="relative overflow-hidden rounded-[1.75rem]">
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.38),rgba(255,255,255,0.08))]" />
+            <div className="absolute inset-y-0 left-[34%] hidden w-px bg-black/6 xl:block" />
+            <div className="absolute inset-y-0 right-[26%] hidden w-px bg-black/6 xl:block" />
+
+            <div className="relative flex items-center justify-between gap-6 px-4 py-4 md:px-6 xl:px-8">
+              {/* BRAND */}
+              <Link
+                href="/"
+                className="group flex shrink-0 items-center gap-3"
+                aria-label="Infinitswap home"
+              >
+                <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 shadow-[0_12px_30px_rgba(17,17,17,0.06)] backdrop-blur-xl transition-all duration-300 group-hover:scale-105 group-hover:shadow-[0_16px_40px_rgba(8,39,220,0.16)]">
+                  <Image
+                    src="/logo-emblem.png"
+                    alt="Infinitswap emblem"
+                    width={24}
+                    height={24}
+                    priority
+                    className="object-contain transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
+
+                <div className="leading-none">
+                  <span className="block text-[24px] font-semibold tracking-[-0.05em] text-infinite-blue">
+                    infinitswap
+                  </span>
+                  <span className="mt-1 hidden font-mono text-[8px] uppercase tracking-[0.34em] text-ink-black/36 sm:block">
+                    Premium chat-native exchange
+                  </span>
+                </div>
+              </Link>
+
+              {/* NAV LINKS */}
+              <div className="hidden items-center gap-8 xl:flex">
+                <NavLink href="/protocol" label="How It Works" />
+                <NavLink href="/network" label="Rates & Regions" />
+                <NavLink href="/compliance" label="Trust & Safety" />
+              </div>
+
+              {/* RIGHT SIDE */}
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="hidden items-center gap-2 lg:flex">
+                  {['NGN', 'TZS', 'ZAR', 'GHS'].map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-black/8 bg-white/62 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-ink-black/48 shadow-[0_8px_24px_rgba(17,17,17,0.04)] backdrop-blur-xl"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+
+                <AccessBotButton />
+              </div>
+            </div>
           </div>
-          
-          <AccessBotButton />
         </div>
       </div>
     </nav>
