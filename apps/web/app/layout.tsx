@@ -1,9 +1,9 @@
 'use client'; // Required because Lenis is a client-side interaction provider
 
 import { ReactLenis } from '@studio-freight/react-lenis';
-import "./globals.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import "./globals.css";
 
 // Note: Metadata and Viewport exports must remain in a separate 
 // 'layout.tsx' if you want them to be server-rendered, OR 
