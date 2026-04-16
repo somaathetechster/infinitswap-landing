@@ -175,7 +175,8 @@ function ErrorScreen({ message }: { message: string }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier1Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
-  const idTypes = COUNTRY_ID_TYPES[countryCode]?.tier1 ?? COUNTRY_ID_TYPES["NG"].tier1;
+  const idTypes = COUNTRY_ID_TYPES[countryCode]?.tier1 ?? COUNTRY_ID_TYPES["NG"]?.tier1 ?? [];
+  
 
   const [fields, setFields]       = useState<Tier1Fields>({ firstName: "", lastName: "", docType: "", idNumber: "" });
   const [state, setState]         = useState<FormState>("idle");
@@ -225,7 +226,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   if (underReview)         return <UnderReviewScreen waLink={waLink} />;
   if (state === "success") return <SuccessScreen message="Your identity has been verified. Your Tier 1 limits are now active." waLink={waLink} />;
 
-  const limits = TIER_LIMITS[1];
+  const limits = TIER_LIMITS[1] ?? { daily: "2,000 USDT/day", monthly: "5,000 USDT/month" };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -308,7 +309,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier2Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink     = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
-  const docTypes   = COUNTRY_ID_TYPES[countryCode]?.tier2 ?? COUNTRY_ID_TYPES["NG"].tier2;
+  const docTypes   = COUNTRY_ID_TYPES[countryCode]?.tier2 ?? COUNTRY_ID_TYPES["NG"]?.tier2 ?? [];
 
   const [fields, setFields]     = useState<Tier2Fields>({ addressLine1: "", addressLine2: "", city: "", docType: "", document: null });
   const [state, setState]       = useState<FormState>("idle");
@@ -364,7 +365,7 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
   if (underReview)         return <UnderReviewScreen waLink={waLink} />;
   if (state === "success") return <SuccessScreen message="Your address has been verified. Your Tier 2 limits are now active." waLink={waLink} />;
 
-  const limits = TIER_LIMITS[2];
+  const limits = TIER_LIMITS[2] ?? { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

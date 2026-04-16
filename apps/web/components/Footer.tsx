@@ -128,22 +128,22 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex items-center gap-12 opacity-30 hover:opacity-100 transition-opacity">
-  <div className="text-center group">
-    <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-ink-black group-hover:text-infinite-blue transition-colors">Engineered By</p>
-    
-      <a href="https://domanimedia.com"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="font-sans font-black text-[12px] text-infinite-blue tracking-tighter hover:underline"
-    >
-      DOMANI
-    </a>
-    </p>
-  </div>
-</div>
-
+        <div className="flex items-center gap-12 opacity-30 hover:opacity-100 transition-opacity">
+          <div className="text-center group">
+            <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-ink-black group-hover:text-infinite-blue transition-colors">
+              Engineered By
+            </p>
+            <a href="https://domanimedia.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-sans font-black text-[12px] text-infinite-blue tracking-tighter hover:underline"
+            >
+              DOMANI
+            </a>
+          </div>
+        </div>
       </div>
-    </footer>
+    </div>
+  </footer>
   );
 }
