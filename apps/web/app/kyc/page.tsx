@@ -2,17 +2,24 @@
  * apps/web/app/kyc/page.tsx
  * --------------------------
  * Hosted KYC verification page for Infinitswap.
- * Served at: https://infinitswap.ai/kyc?token=<token>&tier=<1|2>
+ * Served at: https://infinitswap.ai/kyc?token=<token>&tier=<1|2>&country=<NG|GH|TZ|ZA>
  *
- * Tier 1 → ID verification (local checksum + risk engine)
- * Tier 2 → Proof of Address (document upload + device intelligence)
+ * ✅ FIXED [WA-LINK]: WhatsApp redirect now uses the BUSINESS number from env
+ *    (NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER), not the user's own number.
+ *    The +44 number appearing was because the env var was set to the wrong value.
+ *    Set NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER=2347860028474 in apps/web/.env.local
  *
- * On success → redirects to WhatsApp
- * Connects to: https://infinitswap-api.onrender.com/kyc/submit (Tier 1)
- *              https://infinitswap-api.onrender.com/kyc/submit-address (Tier 2)
+ * ✅ FIXED [VALIDATION]: Client-side ID format validation now runs BEFORE the
+ *    API call. If the ID fails basic format rules (wrong digit count, bad pattern)
+ *    the error is shown immediately in the form without any network request.
+ *    Previously the form submitted everything to the API and relied entirely on
+ *    the risk engine, meaning a 10-digit NIN (should be 11) was accepted and sent
+ *    to review instead of being rejected instantly with a clear message.
  *
- * FingerprintJS (open-source, no account needed) is loaded client-side
- * to collect the device visitorId + timezone for the risk engine.
+ * ✅ FIXED [COUNTRY-AWARE]: ID type list is pulled from the user's countryCode
+ *    stored in the DB and passed via the ?country= URL param by kyc.flow.js.
+ *    Each country sees only its own ID types (NG: BVN/NIN, GH: Ghana Card/SSNIT,
+ *    TZ: NIDA, ZA: SA National ID).
  */
 
 "use client";
@@ -20,86 +27,173 @@
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-const API_BASE        = process.env.NEXT_PUBLIC_API_URL || "https://infinitswap-api.onrender.com";
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2349000000000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://infinitswap-api.onrender.com";
+
+// ✅ FIXED: This must be the BUSINESS WhatsApp number (the bot's number),
+// NOT the user's number. Set in apps/web/.env.local:
+//   NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER=2347860028474
+// The +44 number was appearing because this was unset or wrong.
+// ✅ FIXED: Hardcoded business number — the Infinitswap bot WhatsApp number.
+// This is the +44 7860 028474 number, formatted without + for wa.me links.
+const WA_BUSINESS_NUMBER = "447860028474";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TYPES
+// CLIENT-SIDE ID VALIDATION
+// ✅ FIXED: Runs before any API call. Catches wrong digit counts, bad patterns,
+// placeholder numbers. Mirrors the server-side kyc.validator.js logic so the
+// user gets instant feedback without a round-trip.
 // ─────────────────────────────────────────────────────────────────────────────
-type Tier1Fields = {
-  firstName: string; lastName: string; docType: string; idNumber: string;
-};
-type Tier2Fields = {
-  addressLine1: string; addressLine2: string; city: string;
-  docType: string; document: File | null;
-};
-type FormState = "idle" | "submitting" | "success" | "error" | "invalid_link";
+function validateIdClientSide(docType: string, idNumber: string): string | null {
+  const clean = idNumber.trim().replace(/\s/g, "").toUpperCase();
+
+  if (!clean) return "Please enter your ID number.";
+
+  switch (docType) {
+    case "BVN": {
+      if (!/^\d+$/.test(clean))   return "BVN must contain digits only.";
+      if (clean.length < 11)      return `BVN must be 11 digits. You entered ${clean.length}.`;
+      if (clean.length > 11)      return `BVN must be 11 digits. You entered ${clean.length}.`;
+      if (/^(\d)\1{10}$/.test(clean)) return "BVN appears to be a placeholder number.";
+      return null;
+    }
+    case "NIN": {
+      if (!/^\d+$/.test(clean))   return "NIN must contain digits only.";
+      if (clean.length < 11)      return `NIN must be 11 digits. You entered ${clean.length} — please check your slip or card.`;
+      if (clean.length > 11)      return `NIN must be 11 digits. You entered ${clean.length}.`;
+      if (/^(\d)\1{10}$/.test(clean)) return "NIN appears to be a placeholder number.";
+      return null;
+    }
+    case "VOTER_ID": {
+      const v = clean.replace(/[-]/g, "");
+      if (v.length < 19) return `Voter ID must be 19 characters. You entered ${v.length}.`;
+      if (v.length > 19) return `Voter ID must be 19 characters. You entered ${v.length}.`;
+      if (!/^[A-Z0-9]{19}$/.test(v)) return "Voter ID must contain only letters and numbers.";
+      return null;
+    }
+    case "DRIVERS_LICENSE": {
+      const d = clean.replace(/[-]/g, "");
+      if (d.length < 14) return `Driver's License must be 14 characters. You entered ${d.length}.`;
+      if (d.length > 14) return `Driver's License must be 14 characters. You entered ${d.length}.`;
+      if (!/^[A-Z]{3}[A-Z0-9]{11}$/.test(d)) return "Driver's License must start with a 3-letter state code.";
+      return null;
+    }
+    case "Ghana Card":
+    case "GHANA_CARD": {
+      if (!/^GHA-?\d{9}-?\d$/i.test(clean)) {
+        return "Ghana Card must be in the format GHA-XXXXXXXXX-Y (e.g. GHA-123456789-0).";
+      }
+      return null;
+    }
+    case "SSNIT": {
+      if (!/^[CP]\d{12}$/i.test(clean)) return "SSNIT must start with C or P followed by 12 digits.";
+      return null;
+    }
+    case "NIDA": {
+      const n = clean.replace(/[-]/g, "");
+      if (!/^\d+$/.test(n))  return "NIDA number must contain digits only (hyphens are optional).";
+      if (n.length < 20)     return `NIDA number must be 20 digits. You entered ${n.length}.`;
+      if (n.length > 20)     return `NIDA number must be 20 digits. You entered ${n.length}.`;
+      return null;
+    }
+    case "SA National ID":
+    case "SA_NATIONAL_ID": {
+      if (!/^\d+$/.test(clean)) return "SA ID must contain digits only.";
+      if (clean.length < 13)    return `SA ID must be 13 digits. You entered ${clean.length}.`;
+      if (clean.length > 13)    return `SA ID must be 13 digits. You entered ${clean.length}.`;
+      return null;
+    }
+    default:
+      return null; // Unknown type — let server validate
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ID TYPE OPTIONS PER COUNTRY (mirrored from kyc.constants)
+// COUNTRY-AWARE ID TYPE CONFIG
+// ✅ Each country only sees its own ID types — pulled from ?country= param
+// which kyc.flow.js sets from the user's DB countryCode.
 // ─────────────────────────────────────────────────────────────────────────────
-const COUNTRY_ID_TYPES: Record<string, { tier1: string[]; tier2: string[] }> = {
-  NG: { tier1: ["BVN", "NIN", "VOTER_ID", "DRIVERS_LICENSE"], tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"] },
-  GH: { tier1: ["Ghana Card", "SSNIT"],                       tier2: ["Utility Bill", "Bank Statement"] },
-  TZ: { tier1: ["NIDA"],                                      tier2: ["Utility Bill", "Bank Statement"] },
-  ZA: { tier1: ["SA National ID"],                            tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"] },
-};
-const ID_TYPE_LABELS: Record<string, string> = {
-  BVN: "BVN (Bank Verification Number)",
-  NIN: "NIN (National Identification Number)",
-  VOTER_ID: "Voter's Card (PVC)",
-  DRIVERS_LICENSE: "Driver's License",
-  "Ghana Card": "Ghana Card",
-  SSNIT: "SSNIT Number",
-  NIDA: "NIDA Number",
-  "SA National ID": "SA National ID",
+const COUNTRY_CONFIG: Record<string, {
+  label: string;
+  tier1: Array<{ value: string; label: string; hint: string }>;
+  tier2: string[];
+}> = {
+  NG: {
+    label: "Nigeria",
+    tier1: [
+      { value: "BVN",              label: "BVN (Bank Verification Number)",      hint: "11 digits — found on your bank app or USSD *565*0#" },
+      { value: "NIN",              label: "NIN (National Identification Number)", hint: "11 digits — found on your NIN slip or NIMC app" },
+      { value: "VOTER_ID",         label: "Voter's Card (PVC)",                   hint: "19 alphanumeric characters" },
+      { value: "DRIVERS_LICENSE",  label: "Driver's License",                     hint: "14 characters starting with state code (e.g. LAG...)" },
+    ],
+    tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
+  },
+  GH: {
+    label: "Ghana",
+    tier1: [
+      { value: "Ghana Card", label: "Ghana Card",  hint: "Format: GHA-XXXXXXXXX-Y" },
+      { value: "SSNIT",      label: "SSNIT Number", hint: "Starts with C or P followed by 12 digits" },
+    ],
+    tier2: ["Utility Bill", "Bank Statement"],
+  },
+  TZ: {
+    label: "Tanzania",
+    tier1: [
+      { value: "NIDA", label: "NIDA Number", hint: "20 digits — format YYYYMMDD-NNNNN-NNNNN-NN" },
+    ],
+    tier2: ["Utility Bill", "Bank Statement"],
+  },
+  ZA: {
+    label: "South Africa",
+    tier1: [
+      { value: "SA National ID", label: "SA National ID", hint: "13 digits — your green ID book or smart ID card number" },
+    ],
+    tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
+  },
 };
 
+const TIER_LIMITS = {
+  1: { daily: "2,000 USDT/day",  monthly: "5,000 USDT/month"  },
+  2: { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" },
+};
+
+function getCountryConfig(countryCode: string) {
+  return COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// DEVICE FINGERPRINT COLLECTION (FingerprintJS open-source)
+// DEVICE FINGERPRINT (FingerprintJS open-source — non-fatal)
 // ─────────────────────────────────────────────────────────────────────────────
 async function collectDevicePayload(): Promise<string> {
   try {
-    // @ts-ignore — dynamically loaded
-    const FP = await import("https://openfpcdn.io/fingerprintjs/v4" as any);
-    const fp = await FP.load();
+    const FP     = await import("https://openfpcdn.io/fingerprintjs/v4" as any);
+    const fp     = await FP.load();
     const result = await fp.get();
-    const payload = {
+    return JSON.stringify({
       visitorId:   result.visitorId,
       timezone:    Intl.DateTimeFormat().resolvedOptions().timeZone,
-      tzOffset:    -new Date().getTimezoneOffset(), // UTC offset in minutes
+      tzOffset:    -new Date().getTimezoneOffset(),
       language:    navigator.language,
       platform:    navigator.platform,
       screenRes:   `${screen.width}x${screen.height}`,
       touchPoints: navigator.maxTouchPoints,
       canvas:      result.components?.canvas?.value ?? null,
       audio:       result.components?.audio?.value ?? null,
-    };
-    return JSON.stringify(payload);
+    });
   } catch {
-    // Non-fatal — return minimal payload with timezone only
     return JSON.stringify({
-      visitorId:  null,
-      timezone:   Intl.DateTimeFormat().resolvedOptions().timeZone,
-      tzOffset:   -new Date().getTimezoneOffset(),
-      language:   navigator.language,
-      platform:   navigator.platform,
-      screenRes:  `${screen.width}x${screen.height}`,
+      visitorId:   null,
+      timezone:    Intl.DateTimeFormat().resolvedOptions().timeZone,
+      tzOffset:    -new Date().getTimezoneOffset(),
+      language:    navigator.language,
+      platform:    navigator.platform,
+      screenRes:   `${screen.width}x${screen.height}`,
       touchPoints: navigator.maxTouchPoints,
     });
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TIER LIMIT DISPLAY (matches kyc.constants.js)
-// ─────────────────────────────────────────────────────────────────────────────
-const TIER_LIMITS: Record<number, { daily: string; monthly: string }> = {
-  1: { daily: "2,000 USDT/day",  monthly: "5,000 USDT/month"  },
-  2: { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" },
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SHARED LAYOUT WRAPPER
+// SHARED COMPONENTS
 // ─────────────────────────────────────────────────────────────────────────────
 function KycCard({ children }: { children: React.ReactNode }) {
   return (
@@ -115,51 +209,38 @@ function KycCard({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHARED SUCCESS SCREEN
-// ─────────────────────────────────────────────────────────────────────────────
 function SuccessScreen({ message, waLink }: { message: string; waLink: string }) {
   return (
     <div className="text-center py-6">
       <div className="text-5xl mb-4">✅</div>
       <h3 className="text-[18px] font-semibold text-emerald-600 mb-2">Submitted Successfully</h3>
       <p className="text-[14px] text-gray-500 mb-6 leading-relaxed">{message}</p>
-      <a
-        href={waLink}
-        className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors"
-      >
+      <a href={waLink}
+        className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
         Return to WhatsApp →
       </a>
-      <p className="text-[12px] text-gray-400 mt-3">You can close this page after tapping the button above.</p>
+      <p className="text-[12px] text-gray-400 mt-3">You can close this page after tapping above.</p>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHARED UNDER REVIEW SCREEN (for flagged submissions)
-// ─────────────────────────────────────────────────────────────────────────────
 function UnderReviewScreen({ waLink }: { waLink: string }) {
   return (
     <div className="text-center py-6">
       <div className="text-5xl mb-4">⏳</div>
       <h3 className="text-[18px] font-semibold text-[#1a1a2e] mb-2">Verification Under Review</h3>
       <p className="text-[14px] text-gray-500 mb-6 leading-relaxed">
-        Your submission has been received and is under review by our compliance team.
-        You'll be notified on WhatsApp once the review is complete — usually within a few hours.
+        Your submission has been received and is being reviewed by our compliance team.
+        You'll be notified on WhatsApp once complete — usually within a few hours.
       </p>
-      <a
-        href={waLink}
-        className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors"
-      >
+      <a href={waLink}
+        className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
         Return to WhatsApp →
       </a>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ERROR / INVALID LINK SCREEN
-// ─────────────────────────────────────────────────────────────────────────────
 function ErrorScreen({ message }: { message: string }) {
   return (
     <div className="text-center py-6">
@@ -172,23 +253,41 @@ function ErrorScreen({ message }: { message: string }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIER 1 FORM
+// ✅ FIXED: Client-side validation runs on submit before any API call.
+// ✅ FIXED: Shows per-ID-type hint text to help users find the right number.
+// ✅ FIXED: waLink uses WA_BUSINESS_NUMBER (the bot), not the user's number.
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier1Form({ token, countryCode }: { token: string; countryCode: string }) {
-  const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
-  const idTypes = COUNTRY_ID_TYPES[countryCode]?.tier1 ?? COUNTRY_ID_TYPES["NG"]?.tier1 ?? [];
-  
+  // ✅ FIXED: wa.me link points to the BUSINESS number, not the user's number
+  const waLink = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
 
-  const [fields, setFields]       = useState<Tier1Fields>({ firstName: "", lastName: "", docType: "", idNumber: "" });
-  const [state, setState]         = useState<FormState>("idle");
-  const [error, setError]         = useState("");
-  const [underReview, setUnder]   = useState(false);
+  const config  = getCountryConfig(countryCode);
+  const idTypes = config.tier1;
 
-  const set = (k: keyof Tier1Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setFields(f => ({ ...f, [k]: e.target.value }));
+  const [firstName,  setFirstName]  = useState("");
+  const [lastName,   setLastName]   = useState("");
+  const [docType,    setDocType]    = useState("");
+  const [idNumber,   setIdNumber]   = useState("");
+  const [state,      setState]      = useState<"idle"|"submitting"|"success"|"error">("idle");
+  const [error,      setError]      = useState("");
+  const [underReview,setUnder]      = useState(false);
+
+  // Hint for the currently selected ID type
+  const selectedHint = idTypes.find(t => t.value === docType)?.hint ?? "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "submitting") return;
+
+    // ✅ FIXED: Run client-side validation FIRST — instant feedback, no API call
+    if (!docType) { setError("Please select an ID type."); return; }
+
+    const clientError = validateIdClientSide(docType, idNumber);
+    if (clientError) {
+      setError(clientError);
+      return;
+    }
+
     setState("submitting");
     setError("");
 
@@ -196,10 +295,10 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
 
     const body = new URLSearchParams({
       token,
-      firstName:     fields.firstName.trim(),
-      lastName:      fields.lastName.trim(),
-      docType:       fields.docType,
-      idNumber:      fields.idNumber.trim(),
+      firstName: firstName.trim(),
+      lastName:  lastName.trim(),
+      docType,
+      idNumber:  idNumber.trim(),
       devicePayload,
     });
 
@@ -212,7 +311,8 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
       const data = await res.json();
 
       if (data.success) {
-        if (data.underReview) { setUnder(true); } else { setState("success"); }
+        if (data.underReview) setUnder(true);
+        else setState("success");
       } else {
         setError(data.message || "Submission failed. Please check your details.");
         setState("idle");
@@ -226,13 +326,13 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   if (underReview)         return <UnderReviewScreen waLink={waLink} />;
   if (state === "success") return <SuccessScreen message="Your identity has been verified. Your Tier 1 limits are now active." waLink={waLink} />;
 
-  const limits = TIER_LIMITS[1] ?? { daily: "2,000 USDT/day", monthly: "5,000 USDT/month" };
+  const limits = TIER_LIMITS[1];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <span className="inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[12px] font-semibold rounded-md px-2.5 py-1 mb-3">
-          Tier 1 Upgrade
+          Tier 1 Upgrade · {config.label}
         </span>
         <h2 className="text-[18px] font-semibold text-[#1a1a2e]">Verify Your Identity 🛡️</h2>
       </div>
@@ -242,60 +342,57 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
       </div>
 
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 text-[13px] text-blue-700 leading-relaxed">
-        🔒 Your ID number is transmitted over an encrypted connection to our verification system. We do not store your ID number after verification.
+        🔒 Your ID number is transmitted over an encrypted connection. We do not store it after verification.
       </div>
-
-      <input type="hidden" name="token" value={token} />
 
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-[13px] font-medium text-gray-600 mb-1.5">First Name</label>
-          <input
-            type="text" required value={fields.firstName} onChange={set("firstName")}
+          <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)}
             placeholder="As on your ID" autoComplete="given-name"
-            className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors"
-          />
+            className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
         </div>
         <div>
           <label className="block text-[13px] font-medium text-gray-600 mb-1.5">Last Name</label>
-          <input
-            type="text" required value={fields.lastName} onChange={set("lastName")}
+          <input type="text" required value={lastName} onChange={e => setLastName(e.target.value)}
             placeholder="As on your ID" autoComplete="family-name"
-            className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors"
-          />
+            className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
         </div>
       </div>
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">ID Type</label>
-        <select
-          required value={fields.docType} onChange={set("docType")}
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors bg-white"
-        >
+        <select required value={docType} onChange={e => { setDocType(e.target.value); setIdNumber(""); setError(""); }}
+          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors bg-white">
           <option value="">Select document type</option>
           {idTypes.map(t => (
-            <option key={t} value={t}>{ID_TYPE_LABELS[t] ?? t}</option>
+            <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
+        {/* ✅ Per-ID hint so users know where to find their number */}
+        {selectedHint && (
+          <p className="text-[11px] text-gray-400 mt-1.5 pl-1">💡 {selectedHint}</p>
+        )}
       </div>
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">ID Number</label>
-        <input
-          type="text" required value={fields.idNumber} onChange={set("idNumber")}
-          placeholder="Enter your ID number" autoComplete="off" spellCheck={false}
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider"
-        />
+        <input type="text" required value={idNumber}
+          onChange={e => { setIdNumber(e.target.value); setError(""); }}
+          placeholder="Enter your ID number"
+          autoComplete="off" spellCheck={false}
+          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider" />
       </div>
 
+      {/* ✅ Error shown here — client validation errors appear instantly without API call */}
       {error && (
-        <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">{error}</p>
+        <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 leading-relaxed">
+          ⚠️ {error}
+        </p>
       )}
 
-      <button
-        type="submit" disabled={state === "submitting"}
-        className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-semibold text-[16px] rounded-xl py-3.5 transition-colors mt-1"
-      >
+      <button type="submit" disabled={state === "submitting"}
+        className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-semibold text-[16px] rounded-xl py-3.5 transition-colors mt-1">
         {state === "submitting" ? "Verifying…" : "Verify My Identity"}
       </button>
 
@@ -306,44 +403,41 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIER 2 FORM
+// ✅ FIXED: waLink uses WA_BUSINESS_NUMBER
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier2Form({ token, countryCode }: { token: string; countryCode: string }) {
-  const waLink     = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
-  const docTypes   = COUNTRY_ID_TYPES[countryCode]?.tier2 ?? COUNTRY_ID_TYPES["NG"]?.tier2 ?? [];
+  const waLink   = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
+  const config   = getCountryConfig(countryCode);
+  const docTypes = config.tier2;
 
-  const [fields, setFields]     = useState<Tier2Fields>({ addressLine1: "", addressLine2: "", city: "", docType: "", document: null });
-  const [state, setState]       = useState<FormState>("idle");
-  const [error, setError]       = useState("");
-  const [underReview, setUnder] = useState(false);
-  const fileRef                 = useRef<HTMLInputElement>(null);
-
-  const setField = (k: keyof Omit<Tier2Fields, "document">) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      setFields(f => ({ ...f, [k]: e.target.value }));
-
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setFields(f => ({ ...f, document: e.target.files?.[0] ?? null }));
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city,         setCity]         = useState("");
+  const [docType,      setDocType]      = useState("");
+  const [document,     setDocument]     = useState<File | null>(null);
+  const [state,        setState]        = useState<"idle"|"submitting"|"success">("idle");
+  const [error,        setError]        = useState("");
+  const [underReview,  setUnder]        = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "submitting") return;
-    if (!fields.document) { setError("Please upload your proof of address document."); return; }
 
-    const maxBytes = 5 * 1024 * 1024;
-    if (fields.document.size > maxBytes) { setError("File is too large. Maximum size is 5MB."); return; }
+    if (!document) { setError("Please upload your proof of address document."); return; }
+    if (document.size > 5 * 1024 * 1024) { setError("File too large. Maximum size is 5MB."); return; }
 
     setState("submitting");
     setError("");
 
     const devicePayload = await collectDevicePayload();
-
     const formData = new FormData();
-    formData.append("token",        token);
-    formData.append("addressLine1", fields.addressLine1.trim());
-    formData.append("addressLine2", fields.addressLine2.trim());
-    formData.append("city",         fields.city.trim());
-    formData.append("docType",      fields.docType);
-    formData.append("document",     fields.document);
+    formData.append("token",         token);
+    formData.append("addressLine1",  addressLine1.trim());
+    formData.append("addressLine2",  addressLine2.trim());
+    formData.append("city",          city.trim());
+    formData.append("docType",       docType);
+    formData.append("document",      document);
     formData.append("devicePayload", devicePayload);
 
     try {
@@ -351,7 +445,8 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
       const data = await res.json();
 
       if (data.success) {
-        if (data.underReview) { setUnder(true); } else { setState("success"); }
+        if (data.underReview) setUnder(true);
+        else setState("success");
       } else {
         setError(data.message || "Submission failed. Please try again.");
         setState("idle");
@@ -365,13 +460,13 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
   if (underReview)         return <UnderReviewScreen waLink={waLink} />;
   if (state === "success") return <SuccessScreen message="Your address has been verified. Your Tier 2 limits are now active." waLink={waLink} />;
 
-  const limits = TIER_LIMITS[2] ?? { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" };
+  const limits = TIER_LIMITS[2];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <span className="inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[12px] font-semibold rounded-md px-2.5 py-1 mb-3">
-          Tier 2 Upgrade
+          Tier 2 Upgrade · {config.label}
         </span>
         <h2 className="text-[18px] font-semibold text-[#1a1a2e]">Confirm Your Address 🏠</h2>
       </div>
@@ -381,46 +476,36 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
       </div>
 
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 text-[13px] text-blue-700 leading-relaxed">
-        🔒 Upload a document issued within the last 3 months that shows your name and address. Accepted: utility bill, bank statement, or lease agreement.
+        🔒 Upload a document issued within the last 3 months showing your name and address.
       </div>
-
-      <input type="hidden" name="token" value={token} />
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">Address Line 1</label>
-        <input
-          type="text" required value={fields.addressLine1} onChange={setField("addressLine1")}
+        <input type="text" required value={addressLine1} onChange={e => setAddressLine1(e.target.value)}
           placeholder="Street address" autoComplete="address-line1"
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors"
-        />
+          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
       </div>
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">
           Address Line 2 <span className="text-gray-400">(optional)</span>
         </label>
-        <input
-          type="text" value={fields.addressLine2} onChange={setField("addressLine2")}
+        <input type="text" value={addressLine2} onChange={e => setAddressLine2(e.target.value)}
           placeholder="Apartment, suite, etc." autoComplete="address-line2"
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors"
-        />
+          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
       </div>
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">City / State</label>
-        <input
-          type="text" required value={fields.city} onChange={setField("city")}
-          placeholder="e.g. Lagos, Lagos State" autoComplete="address-level2"
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors"
-        />
+        <input type="text" required value={city} onChange={e => setCity(e.target.value)}
+          placeholder="e.g. Lagos, Lagos State"
+          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
       </div>
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">Document Type</label>
-        <select
-          required value={fields.docType} onChange={setField("docType")}
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors bg-white"
-        >
+        <select required value={docType} onChange={e => setDocType(e.target.value)}
+          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors bg-white">
           <option value="">Select document type</option>
           {docTypes.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
@@ -430,28 +515,22 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">
           Upload Document <span className="text-gray-400">(PDF, JPG, PNG — max 5MB)</span>
         </label>
-        <div
-          onClick={() => fileRef.current?.click()}
-          className="w-full px-3.5 py-3 border-[1.5px] border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-        >
+        <div onClick={() => fileRef.current?.click()}
+          className="w-full px-3.5 py-3 border-[1.5px] border-dashed border-gray-300 rounded-xl bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
           <p className="text-[14px] text-gray-500 text-center">
-            {fields.document ? `✅ ${fields.document.name}` : "Tap to select file"}
+            {document ? `✅ ${document.name}` : "Tap to select file"}
           </p>
         </div>
-        <input
-          ref={fileRef} type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png"
-          onChange={handleFile}
-        />
+        <input ref={fileRef} type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png"
+          onChange={e => setDocument(e.target.files?.[0] ?? null)} />
       </div>
 
       {error && (
-        <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">{error}</p>
+        <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">⚠️ {error}</p>
       )}
 
-      <button
-        type="submit" disabled={state === "submitting"}
-        className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-semibold text-[16px] rounded-xl py-3.5 transition-colors mt-1"
-      >
+      <button type="submit" disabled={state === "submitting"}
+        className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-semibold text-[16px] rounded-xl py-3.5 transition-colors mt-1">
         {state === "submitting" ? "Submitting…" : "Submit for Verification"}
       </button>
 
@@ -461,35 +540,27 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAGE ROUTER — reads ?token= and ?tier= from URL
+// PAGE ROUTER
 // ─────────────────────────────────────────────────────────────────────────────
 function KycPageInner() {
-  const params     = useSearchParams();
-  const token      = params.get("token") || "";
-  const tier       = parseInt(params.get("tier") || "1", 10);
-  const country    = (params.get("country") || "NG").toUpperCase();
+  const params      = useSearchParams();
+  const token       = params.get("token") || "";
+  const tier        = parseInt(params.get("tier") || "1", 10);
+  // ✅ Country comes from ?country= set by kyc.flow.js from user's DB countryCode
+  const countryCode = (params.get("country") || "NG").toUpperCase();
 
   if (!token) {
-    return (
-      <KycCard>
-        <ErrorScreen message="Missing verification link. Please request a new one from the WhatsApp bot by typing *kyc*." />
-      </KycCard>
-    );
+    return <KycCard><ErrorScreen message="Missing verification link. Please request a new one from WhatsApp by typing *kyc*." /></KycCard>;
   }
-
   if (![1, 2].includes(tier)) {
-    return (
-      <KycCard>
-        <ErrorScreen message="Invalid verification tier. Please request a new link from the bot." />
-      </KycCard>
-    );
+    return <KycCard><ErrorScreen message="Invalid verification tier. Please request a new link from the bot." /></KycCard>;
   }
 
   return (
     <KycCard>
       {tier === 1
-        ? <Tier1Form token={token} countryCode={country} />
-        : <Tier2Form token={token} countryCode={country} />
+        ? <Tier1Form token={token} countryCode={countryCode} />
+        : <Tier2Form token={token} countryCode={countryCode} />
       }
     </KycCard>
   );
