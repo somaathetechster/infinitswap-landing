@@ -120,7 +120,7 @@ const COUNTRY_CONFIG: Record<string, {
   NG: {
     label: "Nigeria",
     tier1: [
-      { value: "BVN",              label: "BVN (Bank Verification Number)",      hint: "11 digits — found on your bank app or USSD *565*0#" },
+      { value: "BVN",              label: "BVN (Bank Verification Number) ⭐ Recommended", hint: "11 digits — find yours via your bank app or dial *565*0# on your registered number" },
       { value: "NIN",              label: "NIN (National Identification Number)", hint: "11 digits — found on your NIN slip or NIMC app" },
       { value: "VOTER_ID",         label: "Voter's Card (PVC)",                   hint: "19 alphanumeric characters" },
       { value: "DRIVERS_LICENSE",  label: "Driver's License",                     hint: "14 characters starting with state code (e.g. LAG...)" },
@@ -155,10 +155,6 @@ const TIER_LIMITS = {
   1: { daily: "2,000 USDT/day",  monthly: "5,000 USDT/month"  },
   2: { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" },
 };
-
-function getCountryConfig(countryCode: string) {
-  return COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DEVICE FINGERPRINT (FingerprintJS open-source — non-fatal)
@@ -261,8 +257,8 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   // ✅ FIXED: wa.me link points to the BUSINESS number, not the user's number
   const waLink = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
 
-  const config  = getCountryConfig(countryCode);
-  const idTypes = config.tier1;
+  const config = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
+const idTypes = config.tier1;
 
   const [firstName,  setFirstName]  = useState("");
   const [lastName,   setLastName]   = useState("");
@@ -332,7 +328,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <span className="inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[12px] font-semibold rounded-md px-2.5 py-1 mb-3">
-          Tier 1 Upgrade · {config.label}
+          Tier 1 Upgrade · {config!.label}
         </span>
         <h2 className="text-[18px] font-semibold text-[#1a1a2e]">Verify Your Identity 🛡️</h2>
       </div>
@@ -407,8 +403,8 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier2Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink   = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
-  const config   = getCountryConfig(countryCode);
-  const docTypes = config.tier2;
+  const config = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
+const docTypes = config.tier2;
 
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -466,7 +462,7 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <span className="inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[12px] font-semibold rounded-md px-2.5 py-1 mb-3">
-          Tier 2 Upgrade · {config.label}
+          Tier 2 Upgrade · {config!.label}
         </span>
         <h2 className="text-[18px] font-semibold text-[#1a1a2e]">Confirm Your Address 🏠</h2>
       </div>
