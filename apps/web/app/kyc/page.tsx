@@ -1,116 +1,123 @@
+"use client";
+
 /**
  * apps/web/app/kyc/page.tsx
- * --------------------------
- * Hosted KYC verification page for Infinitswap.
- * Served at: https://infinitswap.ai/kyc?token=<token>&tier=<1|2>&country=<NG|GH|TZ|ZA>
  *
- * ✅ FIXED [WA-LINK]: WhatsApp redirect now uses the BUSINESS number from env
- *    (NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER), not the user's own number.
- *    The +44 number appearing was because the env var was set to the wrong value.
- *    Set NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER=2347860028474 in apps/web/.env.local
+ * ✅ FIX [DRIVERS-LICENSE-NG]: Removed Driver's License from Nigeria Tier 1.
+ *    Nigeria now only accepts BVN and NIN.
  *
- * ✅ FIXED [VALIDATION]: Client-side ID format validation now runs BEFORE the
- *    API call. If the ID fails basic format rules (wrong digit count, bad pattern)
- *    the error is shown immediately in the form without any network request.
- *    Previously the form submitted everything to the API and relied entirely on
- *    the risk engine, meaning a 10-digit NIN (should be 11) was accepted and sent
- *    to review instead of being rejected instantly with a clear message.
+ * ✅ FIX [BVN-CHECKSUM]: Removed BVN checksum from client-side validation.
+ *    BVN has no public checksum algorithm. Only length (11 digits) and
+ *    non-placeholder checks are valid. Prembly does the real verification.
  *
- * ✅ FIXED [COUNTRY-AWARE]: ID type list is pulled from the user's countryCode
- *    stored in the DB and passed via the ?country= URL param by kyc.flow.js.
- *    Each country sees only its own ID types (NG: BVN/NIN, GH: Ghana Card/SSNIT,
- *    TZ: NIDA, ZA: SA National ID).
+ * ✅ FIX [NIN-PREFIX]: Removed NIN prefix validation. NINs starting with
+ *    22x, 33x, or any other digits are valid — NIMC assigns sequentially.
+ *    Only length (11 digits) and non-placeholder checks are valid.
+ *
+ * ✅ PRESERVED: Ghana Card, SSNIT, NIDA, SA National ID validation unchanged.
+ *    Voter's Card still in NG (can be removed in a future iteration if needed).
  */
-
-"use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://infinitswap-api.onrender.com";
-
-// ✅ FIXED: This must be the BUSINESS WhatsApp number (the bot's number),
-// NOT the user's number. Set in apps/web/.env.local:
-//   NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER=2347860028474
-// The +44 number was appearing because this was unset or wrong.
-// ✅ FIXED: Hardcoded business number — the Infinitswap bot WhatsApp number.
-// This is the +44 7860 028474 number, formatted without + for wa.me links.
 const WA_BUSINESS_NUMBER = "447860028474";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CLIENT-SIDE ID VALIDATION
-// ✅ FIXED: Runs before any API call. Catches wrong digit counts, bad patterns,
-// placeholder numbers. Mirrors the server-side kyc.validator.js logic so the
-// user gets instant feedback without a round-trip.
+// FORMAT GATE ONLY — catches wrong length, bad characters, placeholder numbers.
+// Does NOT implement checksums for BVN or prefix rules for NIN.
 // ─────────────────────────────────────────────────────────────────────────────
 function validateIdClientSide(docType: string, idNumber: string): string | null {
   const clean = idNumber.trim().replace(/\s/g, "").toUpperCase();
-
   if (!clean) return "Please enter your ID number.";
 
+  const isAllSameDigit = /^(\d)\1+$/.test(clean);
+
   switch (docType) {
+
+    // ── BVN ── Format only: 11 digits, no checksum
     case "BVN": {
-      if (!/^\d+$/.test(clean))   return "BVN must contain digits only.";
-      if (clean.length < 11)      return `BVN must be 11 digits. You entered ${clean.length}.`;
-      if (clean.length > 11)      return `BVN must be 11 digits. You entered ${clean.length}.`;
-      if (/^(\d)\1{10}$/.test(clean)) return "BVN appears to be a placeholder number.";
-      return null;
+      if (!/^\d+$/.test(clean))
+        return "BVN must contain digits only.";
+      if (clean.length < 11)
+        return `BVN must be 11 digits. You entered ${clean.length}.`;
+      if (clean.length > 11)
+        return `BVN must be 11 digits. You entered ${clean.length}.`;
+      if (isAllSameDigit)
+        return "BVN appears to be a placeholder number. Please enter your real BVN.";
+      return null; // ✅ Any valid-length numeric BVN passes — Prembly verifies it
     }
+
+    // ── NIN ── Format only: 11 digits, no prefix rules
     case "NIN": {
-      if (!/^\d+$/.test(clean))   return "NIN must contain digits only.";
-      if (clean.length < 11)      return `NIN must be 11 digits. You entered ${clean.length} — please check your slip or card.`;
-      if (clean.length > 11)      return `NIN must be 11 digits. You entered ${clean.length}.`;
-      if (/^(\d)\1{10}$/.test(clean)) return "NIN appears to be a placeholder number.";
-      return null;
+      if (!/^\d+$/.test(clean))
+        return "NIN must contain digits only.";
+      if (clean.length < 11)
+        return `NIN must be 11 digits. You entered ${clean.length} — please check your NIN slip, NIMC card, or dial *346# to retrieve it.`;
+      if (clean.length > 11)
+        return `NIN must be 11 digits. You entered ${clean.length}.`;
+      if (isAllSameDigit)
+        return "NIN appears to be a placeholder number. Please enter your real NIN.";
+      return null; // ✅ Any valid-length numeric NIN passes — Prembly verifies against NIMC
     }
+
+    // ── VOTER ID ──
     case "VOTER_ID": {
-      const v = clean.replace(/[-]/g, "");
-      if (v.length < 19) return `Voter ID must be 19 characters. You entered ${v.length}.`;
-      if (v.length > 19) return `Voter ID must be 19 characters. You entered ${v.length}.`;
-      if (!/^[A-Z0-9]{19}$/.test(v)) return "Voter ID must contain only letters and numbers.";
+      const stripped = clean.replace(/[-]/g, "");
+      if (stripped.length < 19) return `Voter ID must be 19 characters. You entered ${stripped.length}.`;
+      if (stripped.length > 19) return `Voter ID must be 19 characters. You entered ${stripped.length}.`;
+      if (!/^[A-Z0-9]{19}$/.test(stripped)) return "Voter ID must contain only letters and numbers.";
       return null;
     }
-    case "DRIVERS_LICENSE": {
-      const d = clean.replace(/[-]/g, "");
-      if (d.length < 14) return `Driver's License must be 14 characters. You entered ${d.length}.`;
-      if (d.length > 14) return `Driver's License must be 14 characters. You entered ${d.length}.`;
-      if (!/^[A-Z]{3}[A-Z0-9]{11}$/.test(d)) return "Driver's License must start with a 3-letter state code.";
-      return null;
-    }
+
+    // ── GHANA CARD ──
     case "Ghana Card":
     case "GHANA_CARD": {
-      if (!/^GHA-?\d{9}-?\d$/i.test(clean)) {
+      if (!/^GHA-?\d{9}-?\d$/i.test(clean))
         return "Ghana Card must be in the format GHA-XXXXXXXXX-Y (e.g. GHA-123456789-0).";
-      }
       return null;
     }
+
+    // ── SSNIT ──
     case "SSNIT": {
-      if (!/^[CP]\d{12}$/i.test(clean)) return "SSNIT must start with C or P followed by 12 digits.";
+      if (!/^[CP]\d{12}$/i.test(clean))
+        return "SSNIT must start with C or P followed by 12 digits.";
       return null;
     }
+
+    // ── NIDA (Tanzania) ──
     case "NIDA": {
       const n = clean.replace(/[-]/g, "");
-      if (!/^\d+$/.test(n))  return "NIDA number must contain digits only (hyphens are optional).";
-      if (n.length < 20)     return `NIDA number must be 20 digits. You entered ${n.length}.`;
-      if (n.length > 20)     return `NIDA number must be 20 digits. You entered ${n.length}.`;
+      if (!/^\d+$/.test(n)) return "NIDA number must contain digits only (hyphens are optional).";
+      if (n.length < 20)    return `NIDA number must be 20 digits. You entered ${n.length}.`;
+      if (n.length > 20)    return `NIDA number must be 20 digits. You entered ${n.length}.`;
       return null;
     }
+
+    // ── SA NATIONAL ID — has a real Luhn checksum ──
     case "SA National ID":
     case "SA_NATIONAL_ID": {
       if (!/^\d+$/.test(clean)) return "SA ID must contain digits only.";
-      if (clean.length < 13)    return `SA ID must be 13 digits. You entered ${clean.length}.`;
-      if (clean.length > 13)    return `SA ID must be 13 digits. You entered ${clean.length}.`;
+      if (clean.length < 13)   return `SA ID must be 13 digits. You entered ${clean.length}.`;
+      if (clean.length > 13)   return `SA ID must be 13 digits. You entered ${clean.length}.`;
+      // SA ID month/day basic sanity
+      const month = parseInt(clean.slice(2, 4), 10);
+      const day   = parseInt(clean.slice(4, 6), 10);
+      if (month < 1 || month > 12 || day < 1 || day > 31)
+        return "SA ID contains an invalid date of birth. Please re-check your 13-digit ID number.";
       return null;
     }
+
     default:
-      return null; // Unknown type — let server validate
+      return null;
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COUNTRY-AWARE ID TYPE CONFIG
-// ✅ Each country only sees its own ID types — pulled from ?country= param
-// which kyc.flow.js sets from the user's DB countryCode.
+// COUNTRY CONFIG
+// ✅ Nigeria: Driver's License removed. Only BVN, NIN, Voter's Card.
 // ─────────────────────────────────────────────────────────────────────────────
 const COUNTRY_CONFIG: Record<string, {
   label: string;
@@ -120,17 +127,29 @@ const COUNTRY_CONFIG: Record<string, {
   NG: {
     label: "Nigeria",
     tier1: [
-      { value: "BVN",              label: "BVN (Bank Verification Number) ⭐ Recommended", hint: "11 digits — find yours via your bank app or dial *565*0# on your registered number" },
-      { value: "NIN",              label: "NIN (National Identification Number)", hint: "11 digits — found on your NIN slip or NIMC app" },
-      { value: "VOTER_ID",         label: "Voter's Card (PVC)",                   hint: "19 alphanumeric characters" },
-      { value: "DRIVERS_LICENSE",  label: "Driver's License",                     hint: "14 characters starting with state code (e.g. LAG...)" },
+      {
+        value: "BVN",
+        label: "BVN (Bank Verification Number) ⭐ Recommended",
+        hint:  "11 digits — find yours via your bank app or dial *565*0# on your registered number",
+      },
+      {
+        value: "NIN",
+        label: "NIN (National Identification Number)",
+        hint:  "11 digits — found on your NIN slip, NIMC card, or dial *346# to retrieve it",
+      },
+      {
+        value: "VOTER_ID",
+        label: "Voter's Card (PVC)",
+        hint:  "19 alphanumeric characters — found on the face of your PVC",
+      },
+      // ✅ Driver's License removed from Nigeria
     ],
     tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
   },
   GH: {
     label: "Ghana",
     tier1: [
-      { value: "Ghana Card", label: "Ghana Card",  hint: "Format: GHA-XXXXXXXXX-Y" },
+      { value: "Ghana Card", label: "Ghana Card",   hint: "Format: GHA-XXXXXXXXX-Y" },
       { value: "SSNIT",      label: "SSNIT Number", hint: "Starts with C or P followed by 12 digits" },
     ],
     tier2: ["Utility Bill", "Bank Statement"],
@@ -157,7 +176,7 @@ const TIER_LIMITS = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DEVICE FINGERPRINT (FingerprintJS open-source — non-fatal)
+// DEVICE FINGERPRINT
 // ─────────────────────────────────────────────────────────────────────────────
 async function collectDevicePayload(): Promise<string> {
   try {
@@ -249,46 +268,35 @@ function ErrorScreen({ message }: { message: string }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIER 1 FORM
-// ✅ FIXED: Client-side validation runs on submit before any API call.
-// ✅ FIXED: Shows per-ID-type hint text to help users find the right number.
-// ✅ FIXED: waLink uses WA_BUSINESS_NUMBER (the bot), not the user's number.
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier1Form({ token, countryCode }: { token: string; countryCode: string }) {
-  // ✅ FIXED: wa.me link points to the BUSINESS number, not the user's number
   const waLink = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
+  const config  = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
+  const idTypes = config.tier1;
 
-  const config = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
-const idTypes = config.tier1;
+  const [firstName,   setFirstName]   = useState("");
+  const [lastName,    setLastName]    = useState("");
+  const [docType,     setDocType]     = useState("");
+  const [idNumber,    setIdNumber]    = useState("");
+  const [state,       setState]       = useState<"idle"|"submitting"|"success"|"error">("idle");
+  const [error,       setError]       = useState("");
+  const [underReview, setUnderReview] = useState(false);
 
-  const [firstName,  setFirstName]  = useState("");
-  const [lastName,   setLastName]   = useState("");
-  const [docType,    setDocType]    = useState("");
-  const [idNumber,   setIdNumber]   = useState("");
-  const [state,      setState]      = useState<"idle"|"submitting"|"success"|"error">("idle");
-  const [error,      setError]      = useState("");
-  const [underReview,setUnder]      = useState(false);
-
-  // Hint for the currently selected ID type
   const selectedHint = idTypes.find(t => t.value === docType)?.hint ?? "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "submitting") return;
-
-    // ✅ FIXED: Run client-side validation FIRST — instant feedback, no API call
     if (!docType) { setError("Please select an ID type."); return; }
 
+    // Client-side format gate — instant, no API call
     const clientError = validateIdClientSide(docType, idNumber);
-    if (clientError) {
-      setError(clientError);
-      return;
-    }
+    if (clientError) { setError(clientError); return; }
 
     setState("submitting");
     setError("");
 
     const devicePayload = await collectDevicePayload();
-
     const body = new URLSearchParams({
       token,
       firstName: firstName.trim(),
@@ -307,10 +315,10 @@ const idTypes = config.tier1;
       const data = await res.json();
 
       if (data.success) {
-        if (data.underReview) setUnder(true);
+        if (data.underReview) setUnderReview(true);
         else setState("success");
       } else {
-        setError(data.message || "Submission failed. Please check your details.");
+        setError(data.message || "Submission failed. Please check your details and try again.");
         setState("idle");
       }
     } catch {
@@ -365,7 +373,6 @@ const idTypes = config.tier1;
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
-        {/* ✅ Per-ID hint so users know where to find their number */}
         {selectedHint && (
           <p className="text-[11px] text-gray-400 mt-1.5 pl-1">💡 {selectedHint}</p>
         )}
@@ -377,10 +384,10 @@ const idTypes = config.tier1;
           onChange={e => { setIdNumber(e.target.value); setError(""); }}
           placeholder="Enter your ID number"
           autoComplete="off" spellCheck={false}
+          inputMode="numeric"
           className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider" />
       </div>
 
-      {/* ✅ Error shown here — client validation errors appear instantly without API call */}
       {error && (
         <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 leading-relaxed">
           ⚠️ {error}
@@ -392,6 +399,12 @@ const idTypes = config.tier1;
         {state === "submitting" ? "Verifying…" : "Verify My Identity"}
       </button>
 
+      {state === "submitting" && (
+        <p className="text-[12px] text-gray-400 text-center animate-pulse">
+          Checking your ID with government database…
+        </p>
+      )}
+
       <p className="text-[12px] text-gray-400 text-center">🔐 256-bit encrypted · ID not stored after verification</p>
     </form>
   );
@@ -399,12 +412,11 @@ const idTypes = config.tier1;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIER 2 FORM
-// ✅ FIXED: waLink uses WA_BUSINESS_NUMBER
 // ─────────────────────────────────────────────────────────────────────────────
 function Tier2Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink   = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
-  const config = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
-const docTypes = config.tier2;
+  const config   = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
+  const docTypes = config.tier2;
 
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -413,13 +425,12 @@ const docTypes = config.tier2;
   const [document,     setDocument]     = useState<File | null>(null);
   const [state,        setState]        = useState<"idle"|"submitting"|"success">("idle");
   const [error,        setError]        = useState("");
-  const [underReview,  setUnder]        = useState(false);
+  const [underReview,  setUnderReview]  = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (state === "submitting") return;
-
     if (!document) { setError("Please upload your proof of address document."); return; }
     if (document.size > 5 * 1024 * 1024) { setError("File too large. Maximum size is 5MB."); return; }
 
@@ -439,9 +450,8 @@ const docTypes = config.tier2;
     try {
       const res  = await fetch(`${API_BASE}/kyc/submit-address`, { method: "POST", body: formData });
       const data = await res.json();
-
       if (data.success) {
-        if (data.underReview) setUnder(true);
+        if (data.underReview) setUnderReview(true);
         else setState("success");
       } else {
         setError(data.message || "Submission failed. Please try again.");
@@ -542,7 +552,6 @@ function KycPageInner() {
   const params      = useSearchParams();
   const token       = params.get("token") || "";
   const tier        = parseInt(params.get("tier") || "1", 10);
-  // ✅ Country comes from ?country= set by kyc.flow.js from user's DB countryCode
   const countryCode = (params.get("country") || "NG").toUpperCase();
 
   if (!token) {
