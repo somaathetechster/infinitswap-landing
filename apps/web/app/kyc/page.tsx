@@ -157,7 +157,11 @@ const COUNTRY_CONFIG: Record<string, {
   TZ: {
     label: "Tanzania",
     tier1: [
-      { value: "NIDA", label: "NIDA Number", hint: "20 digits — format YYYYMMDD-NNNNN-NNNNN-NN" },
+      {
+        value: "NIDA",
+        label: "NIDA Number",
+        hint:  "20 digits — format YYYYMMDD-NNNNN-NNNNN-NN. Also have your ID issue date ready.",
+      },
     ],
     tier2: ["Utility Bill", "Bank Statement"],
   },
@@ -278,6 +282,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   const [lastName,    setLastName]    = useState("");
   const [docType,     setDocType]     = useState("");
   const [idNumber,    setIdNumber]    = useState("");
+  const [issueDate,   setIssueDate]   = useState("");  // Tanzania NIDA requires issue date
   const [state,       setState]       = useState<"idle"|"submitting"|"success"|"error">("idle");
   const [error,       setError]       = useState("");
   const [underReview, setUnderReview] = useState(false);
@@ -299,10 +304,11 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
     const devicePayload = await collectDevicePayload();
     const body = new URLSearchParams({
       token,
-      firstName: firstName.trim(),
-      lastName:  lastName.trim(),
+      firstName:  firstName.trim(),
+      lastName:   lastName.trim(),
       docType,
-      idNumber:  idNumber.trim(),
+      idNumber:   idNumber.trim(),
+      issueDate:  issueDate.trim(),
       devicePayload,
     });
 
@@ -366,7 +372,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
 
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">ID Type</label>
-        <select required value={docType} onChange={e => { setDocType(e.target.value); setIdNumber(""); setError(""); }}
+        <select required value={docType} onChange={e => { setDocType(e.target.value); setIdNumber(""); setIssueDate(""); setError(""); }}
           className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors bg-white">
           <option value="">Select document type</option>
           {idTypes.map(t => (
@@ -387,6 +393,20 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
           inputMode="numeric"
           className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider" />
       </div>
+
+      {/* Issue date — only required for Tanzania NIDA */}
+      {docType === "NIDA" && countryCode === "TZ" && (
+        <div>
+          <label className="block text-[13px] font-medium text-gray-600 mb-1.5">
+            ID Issue Date <span className="text-red-400">*</span>
+          </label>
+          <input type="date" required value={issueDate}
+            onChange={e => setIssueDate(e.target.value)}
+            max={new Date().toISOString().split("T")[0]}
+            className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
+          <p className="text-[11px] text-gray-400 mt-1.5 pl-1">💡 Date shown on your NIDA card</p>
+        </div>
+      )}
 
       {error && (
         <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 leading-relaxed">
