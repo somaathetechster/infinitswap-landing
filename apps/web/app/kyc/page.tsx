@@ -51,7 +51,7 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
     }
 
     // ── NIN ── Format only: 11 digits, no prefix rules
-    case "NIN": {
+    /* case "NIN": {
       if (!/^\d+$/.test(clean))
         return "NIN must contain digits only.";
       if (clean.length < 11)
@@ -61,7 +61,7 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
       if (isAllSameDigit)
         return "NIN appears to be a placeholder number. Please enter your real NIN.";
       return null; // ✅ Any valid-length numeric NIN passes — Prembly verifies against NIMC
-    }
+    }  */
 
     // ── VOTER ID ──
     case "VOTER_ID": {
@@ -132,11 +132,11 @@ const COUNTRY_CONFIG: Record<string, {
         label: "BVN (Bank Verification Number) ⭐ Recommended",
         hint:  "11 digits — find yours via your bank app or dial *565*0# on your registered number",
       },
-      {
+      /* {
         value: "NIN",
         label: "NIN (National Identification Number)",
         hint:  "11 digits — found on your NIN slip, NIMC card, or dial *346# to retrieve it",
-      },
+      }, */
       {
         value: "VOTER_ID",
         label: "Voter's Card (PVC)",
