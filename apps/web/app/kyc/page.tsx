@@ -3,32 +3,18 @@
 /**
  * apps/web/app/kyc/page.tsx
  *
- * ✅ FIX [DRIVERS-LICENSE-NG]: Removed Driver's License from Nigeria Tier 1.
- *    Nigeria now only accepts BVN and NIN.
- *
- * ✅ FIX [BVN-CHECKSUM]: Removed BVN checksum from client-side validation.
- *    BVN has no public checksum algorithm. Only length (11 digits) and
- *    non-placeholder checks are valid. Prembly does the real verification.
- *
- * ✅ FIX [NIN-PREFIX]: Removed NIN prefix validation. NINs starting with
- *    22x, 33x, or any other digits are valid — NIMC assigns sequentially.
- *    Only length (11 digits) and non-placeholder checks are valid.
- *
- * ✅ PRESERVED: Ghana Card, SSNIT, NIDA, SA National ID validation unchanged.
- *    Voter's Card still in NG (can be removed in a future iteration if needed).
+ * ✅ ADDED [NIN]: NIN re-enabled for Nigeria Tier 1.
+ * ✅ ADDED [DRIVERS-LICENSE-NG]: Driver's License re-added for Nigeria Tier 1.
+ * ✅ ADDED [NIN-VALIDATION]: Client-side NIN validation (format only, no prefix rules).
+ * ✅ ADDED [DRIVERS-LICENSE-VALIDATION]: Client-side DL validation.
  */
 
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://infinitswap-api.onrender.com";
 const WA_BUSINESS_NUMBER = "447860028474";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CLIENT-SIDE ID VALIDATION
-// FORMAT GATE ONLY — catches wrong length, bad characters, placeholder numbers.
-// Does NOT implement checksums for BVN or prefix rules for NIN.
-// ─────────────────────────────────────────────────────────────────────────────
 function validateIdClientSide(docType: string, idNumber: string): string | null {
   const clean = idNumber.trim().replace(/\s/g, "").toUpperCase();
   if (!clean) return "Please enter your ID number.";
@@ -37,42 +23,34 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
 
   switch (docType) {
 
-    // ── BVN ── Format only: 11 digits, no checksum
     case "BVN": {
-      if (!/^\d+$/.test(clean))
-        return "BVN must contain digits only.";
-      if (clean.length < 11)
-        return `BVN must be 11 digits. You entered ${clean.length}.`;
-      if (clean.length > 11)
-        return `BVN must be 11 digits. You entered ${clean.length}.`;
-      if (isAllSameDigit)
-        return "BVN appears to be a placeholder number. Please enter your real BVN.";
-      return null; // ✅ Any valid-length numeric BVN passes — Prembly verifies it
+      if (!/^\d+$/.test(clean)) return "BVN must contain digits only.";
+      if (clean.length !== 11)  return `BVN must be 11 digits. You entered ${clean.length}.`;
+      if (isAllSameDigit)       return "BVN appears to be a placeholder number.";
+      return null;
     }
 
-    // ── NIN ── Format only: 11 digits, no prefix rules
-    /* case "NIN": {
-      if (!/^\d+$/.test(clean))
-        return "NIN must contain digits only.";
-      if (clean.length < 11)
-        return `NIN must be 11 digits. You entered ${clean.length} — please check your NIN slip, NIMC card, or dial *346# to retrieve it.`;
-      if (clean.length > 11)
-        return `NIN must be 11 digits. You entered ${clean.length}.`;
-      if (isAllSameDigit)
-        return "NIN appears to be a placeholder number. Please enter your real NIN.";
-      return null; // ✅ Any valid-length numeric NIN passes — Prembly verifies against NIMC
-    }  */
+    case "NIN": {
+      if (!/^\d+$/.test(clean)) return "NIN must contain digits only.";
+      if (clean.length !== 11)  return `NIN must be 11 digits. You entered ${clean.length} — check your NIN slip, NIMC card, or dial *346# to retrieve it.`;
+      if (isAllSameDigit)       return "NIN appears to be a placeholder number.";
+      return null;
+    }
 
-    // ── VOTER ID ──
     case "VOTER_ID": {
       const stripped = clean.replace(/[-]/g, "");
-      if (stripped.length < 19) return `Voter ID must be 19 characters. You entered ${stripped.length}.`;
-      if (stripped.length > 19) return `Voter ID must be 19 characters. You entered ${stripped.length}.`;
+      if (stripped.length !== 19)         return `Voter ID must be 19 characters. You entered ${stripped.length}.`;
       if (!/^[A-Z0-9]{19}$/.test(stripped)) return "Voter ID must contain only letters and numbers.";
       return null;
     }
 
-    // ── GHANA CARD ──
+    case "DRIVERS_LICENSE": {
+      // Nigerian DL: 3-letter state code + 11 alphanumeric = 14 chars
+      if (clean.length !== 14) return `Driver's License must be 14 characters. You entered ${clean.length}.`;
+      if (!/^[A-Z]{3}[A-Z0-9]{11}$/.test(clean)) return "Driver's License must start with a 3-letter state code (e.g. LAG, ABJ).";
+      return null;
+    }
+
     case "Ghana Card":
     case "GHANA_CARD": {
       if (!/^GHA-?\d{9}-?\d$/i.test(clean))
@@ -80,29 +58,23 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
       return null;
     }
 
-    // ── SSNIT ──
     case "SSNIT": {
       if (!/^[CP]\d{12}$/i.test(clean))
         return "SSNIT must start with C or P followed by 12 digits.";
       return null;
     }
 
-    // ── NIDA (Tanzania) ──
     case "NIDA": {
       const n = clean.replace(/[-]/g, "");
       if (!/^\d+$/.test(n)) return "NIDA number must contain digits only (hyphens are optional).";
-      if (n.length < 20)    return `NIDA number must be 20 digits. You entered ${n.length}.`;
-      if (n.length > 20)    return `NIDA number must be 20 digits. You entered ${n.length}.`;
+      if (n.length !== 20)  return `NIDA number must be 20 digits. You entered ${n.length}.`;
       return null;
     }
 
-    // ── SA NATIONAL ID — has a real Luhn checksum ──
     case "SA National ID":
     case "SA_NATIONAL_ID": {
       if (!/^\d+$/.test(clean)) return "SA ID must contain digits only.";
-      if (clean.length < 13)   return `SA ID must be 13 digits. You entered ${clean.length}.`;
-      if (clean.length > 13)   return `SA ID must be 13 digits. You entered ${clean.length}.`;
-      // SA ID month/day basic sanity
+      if (clean.length !== 13)  return `SA ID must be 13 digits. You entered ${clean.length}.`;
       const month = parseInt(clean.slice(2, 4), 10);
       const day   = parseInt(clean.slice(4, 6), 10);
       if (month < 1 || month > 12 || day < 1 || day > 31)
@@ -115,10 +87,6 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// COUNTRY CONFIG
-// ✅ Nigeria: Driver's License removed. Only BVN, NIN, Voter's Card.
-// ─────────────────────────────────────────────────────────────────────────────
 const COUNTRY_CONFIG: Record<string, {
   label: string;
   tier1: Array<{ value: string; label: string; hint: string }>;
@@ -132,17 +100,21 @@ const COUNTRY_CONFIG: Record<string, {
         label: "BVN (Bank Verification Number) ⭐ Recommended",
         hint:  "11 digits — find yours via your bank app or dial *565*0# on your registered number",
       },
-      /* {
+      {
         value: "NIN",
         label: "NIN (National Identification Number)",
         hint:  "11 digits — found on your NIN slip, NIMC card, or dial *346# to retrieve it",
-      }, */
+      },
       {
         value: "VOTER_ID",
         label: "Voter's Card (PVC)",
         hint:  "19 alphanumeric characters — found on the face of your PVC",
       },
-      // ✅ Driver's License removed from Nigeria
+      {
+        value: "DRIVERS_LICENSE",
+        label: "Driver's License",
+        hint:  "14 characters — 3-letter state code followed by 11 characters (e.g. LAG12345678901)",
+      },
     ],
     tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
   },
@@ -179,9 +151,6 @@ const TIER_LIMITS = {
   2: { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" },
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DEVICE FINGERPRINT
-// ─────────────────────────────────────────────────────────────────────────────
 async function collectDevicePayload(): Promise<string> {
   try {
     const FP     = await import("https://openfpcdn.io/fingerprintjs/v4" as any);
@@ -211,9 +180,6 @@ async function collectDevicePayload(): Promise<string> {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHARED COMPONENTS
-// ─────────────────────────────────────────────────────────────────────────────
 function KycCard({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f0f4f8] flex items-center justify-center p-4">
@@ -234,8 +200,7 @@ function SuccessScreen({ message, waLink }: { message: string; waLink: string })
       <div className="text-5xl mb-4">✅</div>
       <h3 className="text-[18px] font-semibold text-emerald-600 mb-2">Submitted Successfully</h3>
       <p className="text-[14px] text-gray-500 mb-6 leading-relaxed">{message}</p>
-      <a href={waLink}
-        className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
+      <a href={waLink} className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
         Return to WhatsApp →
       </a>
       <p className="text-[12px] text-gray-400 mt-3">You can close this page after tapping above.</p>
@@ -252,8 +217,7 @@ function UnderReviewScreen({ waLink }: { waLink: string }) {
         Your submission has been received and is being reviewed by our compliance team.
         You'll be notified on WhatsApp once complete — usually within a few hours.
       </p>
-      <a href={waLink}
-        className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
+      <a href={waLink} className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
         Return to WhatsApp →
       </a>
     </div>
@@ -270,11 +234,8 @@ function ErrorScreen({ message }: { message: string }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TIER 1 FORM
-// ─────────────────────────────────────────────────────────────────────────────
 function Tier1Form({ token, countryCode }: { token: string; countryCode: string }) {
-  const waLink = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
+  const waLink  = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
   const config  = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
   const idTypes = config.tier1;
 
@@ -282,7 +243,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   const [lastName,    setLastName]    = useState("");
   const [docType,     setDocType]     = useState("");
   const [idNumber,    setIdNumber]    = useState("");
-  const [issueDate,   setIssueDate]   = useState("");  // Tanzania NIDA requires issue date
+  const [issueDate,   setIssueDate]   = useState("");
   const [state,       setState]       = useState<"idle"|"submitting"|"success"|"error">("idle");
   const [error,       setError]       = useState("");
   const [underReview, setUnderReview] = useState(false);
@@ -294,7 +255,6 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
     if (state === "submitting") return;
     if (!docType) { setError("Please select an ID type."); return; }
 
-    // Client-side format gate — instant, no API call
     const clientError = validateIdClientSide(docType, idNumber);
     if (clientError) { setError(clientError); return; }
 
@@ -319,7 +279,6 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
         body:    body.toString(),
       });
       const data = await res.json();
-
       if (data.success) {
         if (data.underReview) setUnderReview(true);
         else setState("success");
@@ -390,11 +349,10 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
           onChange={e => { setIdNumber(e.target.value); setError(""); }}
           placeholder="Enter your ID number"
           autoComplete="off" spellCheck={false}
-          inputMode="numeric"
+          inputMode={docType === "DRIVERS_LICENSE" || docType === "VOTER_ID" ? "text" : "numeric"}
           className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider" />
       </div>
 
-      {/* Issue date — only required for Tanzania NIDA */}
       {docType === "NIDA" && countryCode === "TZ" && (
         <div>
           <label className="block text-[13px] font-medium text-gray-600 mb-1.5">
@@ -430,9 +388,6 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TIER 2 FORM
-// ─────────────────────────────────────────────────────────────────────────────
 function Tier2Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink   = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
   const config   = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
@@ -565,9 +520,6 @@ function Tier2Form({ token, countryCode }: { token: string; countryCode: string 
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE ROUTER
-// ─────────────────────────────────────────────────────────────────────────────
 function KycPageInner() {
   const params      = useSearchParams();
   const token       = params.get("token") || "";
