@@ -7,6 +7,14 @@
  * ✅ ADDED [DRIVERS-LICENSE-NG]: Driver's License re-added for Nigeria Tier 1.
  * ✅ ADDED [NIN-VALIDATION]: Client-side NIN validation (format only, no prefix rules).
  * ✅ ADDED [DRIVERS-LICENSE-VALIDATION]: Client-side DL validation.
+ *
+ * ✅ NEW [ID-MASKING]: The ID Number input in Tier1Form was a plain
+ *    type="text" field, meaning BVN/NIN/etc. displayed in cleartext as the
+ *    user typed — this is exactly what ended up visible in a beta tester's
+ *    screenshot of this page that was then attached to a bug report. Field
+ *    is now type="password" by default with a "Show"/"Hide" toggle so users
+ *    can still verify what they typed before submitting, but the number
+ *    isn't rendered in plaintext on-screen (or in a screenshot) by default.
  */
 
 import { useRef, useState, Suspense } from "react";
@@ -247,6 +255,8 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   const [state,       setState]       = useState<"idle"|"submitting"|"success"|"error">("idle");
   const [error,       setError]       = useState("");
   const [underReview, setUnderReview] = useState(false);
+  // ✅ NEW [ID-MASKING]
+  const [showId,      setShowId]      = useState(false);
 
   const selectedHint = idTypes.find(t => t.value === docType)?.hint ?? "";
 
@@ -343,14 +353,33 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
         )}
       </div>
 
+      {/* ✅ NEW [ID-MASKING]: type toggles between password/text, default masked */}
       <div>
         <label className="block text-[13px] font-medium text-gray-600 mb-1.5">ID Number</label>
-        <input type="text" required value={idNumber}
-          onChange={e => { setIdNumber(e.target.value); setError(""); }}
-          placeholder="Enter your ID number"
-          autoComplete="off" spellCheck={false}
-          inputMode={docType === "DRIVERS_LICENSE" || docType === "VOTER_ID" ? "text" : "numeric"}
-          className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider" />
+        <div className="relative">
+          <input
+            type={showId ? "text" : "password"}
+            required
+            value={idNumber}
+            onChange={e => { setIdNumber(e.target.value); setError(""); }}
+            placeholder="Enter your ID number"
+            autoComplete="off"
+            spellCheck={false}
+            inputMode={docType === "DRIVERS_LICENSE" || docType === "VOTER_ID" ? "text" : "numeric"}
+            className="w-full px-3.5 py-3 pr-14 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider"
+          />
+          <button
+            type="button"
+            onClick={() => setShowId(s => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-medium text-indigo-500 hover:text-indigo-700"
+            tabIndex={-1}
+          >
+            {showId ? "Hide" : "Show"}
+          </button>
+        </div>
+        <p className="text-[11px] text-gray-400 mt-1.5 pl-1">
+          🔒 Masked by default — tap "Show" only if you need to double-check what you typed.
+        </p>
       </div>
 
       {docType === "NIDA" && countryCode === "TZ" && (
