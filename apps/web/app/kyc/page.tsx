@@ -79,6 +79,16 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
       return null;
     }
 
+    case "DRIVERS_LICENSE_GH": {
+  if (clean.length < 6) return "Please enter your full driver's license number.";
+  return null;
+}
+
+case "VOTER_ID_GH": {
+  if (clean.length < 6) return "Please enter your full voter ID number.";
+  return null;
+}
+
     case "SA National ID":
     case "SA_NATIONAL_ID": {
       if (!/^\d+$/.test(clean)) return "SA ID must contain digits only.";
@@ -126,13 +136,16 @@ const COUNTRY_CONFIG: Record<string, {
     ],
     tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
   },
-  GH: {
-    label: "Ghana",
-    tier1: [
-      { value: "Ghana Card", label: "Ghana Card",   hint: "Format: GHA-XXXXXXXXX-Y" },
-      { value: "SSNIT",      label: "SSNIT Number", hint: "Starts with C or P followed by 12 digits" },
-    ],
-    tier2: ["Utility Bill", "Bank Statement"],
+    GH: {
+  label: "Ghana",
+  tier1: [
+    { value: "SSNIT",          label: "SSNIT Number ⭐ Recommended", hint: "Starts with C or P followed by 12 digits (e.g. C987464748983)" },
+    { value: "DRIVERS_LICENSE_GH", label: "Driver's License",        hint: "Your Ghana driver's license number" },
+    { value: "VOTER_ID_GH",    label: "Voter's Card",                hint: "Your Ghana voter ID number" },
+    { value: "Ghana Card",     label: "Ghana Card (NIA)",            hint: "Format: GHA-XXXXXXXXX-Y — processed manually, may take a few hours" },
+  ],
+  tier2: ["Utility Bill", "Bank Statement"],
+
   },
   TZ: {
     label: "Tanzania",
@@ -365,7 +378,11 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
             placeholder="Enter your ID number"
             autoComplete="off"
             spellCheck={false}
-            inputMode={docType === "DRIVERS_LICENSE" || docType === "VOTER_ID" ? "text" : "numeric"}
+            inputMode={
+  docType === "BVN" || docType === "NIN" || docType === "SSNIT"
+    ? "numeric"
+    : "text"
+}
             className="w-full px-3.5 py-3 pr-14 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider"
           />
           <button
