@@ -158,7 +158,7 @@ This keeps the emotional, real-life register of the original section while showi
 
 **Section header:** *You already use it. Get paid for it.*
 
-> Earn points on deposits, savings, and swaps. Invite a friend and earn when they transact. Redeem points for fee discounts, cashback, or bonus USDT — no separate loyalty app, it's just part of your balance.
+> Earn points and cashback through campaigns, challenges, and eligible activity — deposits, savings, swaps, and referrals can all qualify. Redeem points for fee discounts, cashback, or bonus USDT — no separate loyalty app, it's just part of your balance.
 
 `See rewards →`
 

@@ -12,6 +12,10 @@ export type Country = {
   /** Indicative payout rate per 1 USDT, shown as a live-ish figure. */
   rate: string;
   status: string;
+  /** Airport-style code for the Navbar's system-status clocks, e.g. "LOS". */
+  cityCode: string;
+  /** IANA zone backing that clock. */
+  timeZone: string;
   /** Globe placement. */
   lat: number;
   lng: number;
@@ -28,6 +32,8 @@ export const COUNTRIES: Country[] = [
     region: 'West Africa',
     rate: '1,520 NGN',
     status: 'Operational',
+    cityCode: 'LOS',
+    timeZone: 'Africa/Lagos',
     lat: 9.08,
     lng: 8.67,
     x: 30,
@@ -40,6 +46,8 @@ export const COUNTRIES: Country[] = [
     region: 'West Africa',
     rate: '14.2 GHS',
     status: 'Active',
+    cityCode: 'ACC',
+    timeZone: 'Africa/Accra',
     lat: 7.94,
     lng: -1.02,
     x: 20,
@@ -52,6 +60,8 @@ export const COUNTRIES: Country[] = [
     region: 'Southern Africa',
     rate: '18.9 ZAR',
     status: 'High Liquidity',
+    cityCode: 'JNB',
+    timeZone: 'Africa/Johannesburg',
     lat: -30.55,
     lng: 22.93,
     x: 55,
@@ -64,6 +74,8 @@ export const COUNTRIES: Country[] = [
     region: 'East Africa',
     rate: '2,600 TZS',
     status: 'Active',
+    cityCode: 'DAR',
+    timeZone: 'Africa/Dar_es_Salaam',
     lat: -6.37,
     lng: 34.89,
     x: 70,
@@ -76,6 +88,8 @@ export const COUNTRIES: Country[] = [
     region: 'East Africa',
     rate: '129 KES',
     status: 'Active',
+    cityCode: 'NBO',
+    timeZone: 'Africa/Nairobi',
     lat: -1.29,
     lng: 36.82,
     x: 76,
@@ -88,6 +102,8 @@ export const COUNTRIES: Country[] = [
     region: 'East Africa',
     rate: '3,700 UGX',
     status: 'Active',
+    cityCode: 'KLA',
+    timeZone: 'Africa/Kampala',
     lat: 1.37,
     lng: 32.29,
     x: 64,
@@ -100,6 +116,8 @@ export const COUNTRIES: Country[] = [
     region: 'East Africa',
     rate: '1,340 RWF',
     status: 'Active',
+    cityCode: 'KGL',
+    timeZone: 'Africa/Kigali',
     lat: -1.94,
     lng: 29.87,
     x: 58,

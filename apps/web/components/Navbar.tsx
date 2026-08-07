@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import AccessBotButton from './AccessBotButton';
-import { CURRENCIES } from '../lib/countries';
+import { COUNTRIES, CURRENCIES } from '../lib/countries';
 
 // One list, rendered by both the desktop rail and the mobile sheet.
 const NAV_LINKS = [
@@ -17,16 +17,16 @@ const NAV_LINKS = [
   { href: '/compliance', label: 'Trust & Safety' },
 ];
 
-type Times = {
-  lagos: string;
-  joburg: string;
-  accra: string;
-  daressalam: string;
-};
+/** Clock value per country id, e.g. { NG: '14:32:07' }. */
+type Times = Record<string, string>;
+
+const PLACEHOLDER_TIMES: Times = Object.fromEntries(
+  COUNTRIES.map((c) => [c.id, '--:--:--']),
+);
 
 function TimeItem({ code, value }: { code: string; value: string }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex shrink-0 items-center gap-2">
       <span className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-infinite-blue">
         {code}
       </span>
@@ -62,12 +62,7 @@ function NavLink({
 }
 
 export default function Navbar() {
-  const [times, setTimes] = useState<Times>({
-    lagos: '--:--:--',
-    joburg: '--:--:--',
-    accra: '--:--:--',
-    daressalam: '--:--:--',
-  });
+  const [times, setTimes] = useState<Times>(PLACEHOLDER_TIMES);
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -83,24 +78,17 @@ export default function Navbar() {
         hour12: false,
       };
 
-      setTimes({
-        lagos: new Intl.DateTimeFormat('en-GB', {
-          ...options,
-          timeZone: 'Africa/Lagos',
-        }).format(now),
-        joburg: new Intl.DateTimeFormat('en-GB', {
-          ...options,
-          timeZone: 'Africa/Johannesburg',
-        }).format(now),
-        accra: new Intl.DateTimeFormat('en-GB', {
-          ...options,
-          timeZone: 'Africa/Accra',
-        }).format(now),
-        daressalam: new Intl.DateTimeFormat('en-GB', {
-          ...options,
-          timeZone: 'Africa/Dar_es_Salaam',
-        }).format(now),
-      });
+      setTimes(
+        Object.fromEntries(
+          COUNTRIES.map((country) => [
+            country.id,
+            new Intl.DateTimeFormat('en-GB', {
+              ...options,
+              timeZone: country.timeZone,
+            }).format(now),
+          ]),
+        ),
+      );
     };
 
     const handleScroll = () => {
@@ -142,8 +130,8 @@ export default function Navbar() {
             ].join(' ')}
           >
             <div className="flex items-center justify-between px-4 py-2 md:px-6 xl:px-8">
-              <div className="flex items-center gap-4 md:gap-6">
-                <div className="flex items-center gap-2">
+              <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
+                <div className="flex shrink-0 items-center gap-2">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
@@ -153,16 +141,21 @@ export default function Navbar() {
                   </span>
                 </div>
 
-                <div className="hidden items-center gap-5 border-l border-black/10 pl-5 lg:flex">
-                  <TimeItem code="LOS" value={times.lagos} />
-                  <TimeItem code="JNB" value={times.joburg} />
-                  <TimeItem code="ACC" value={times.accra} />
-                  <TimeItem code="DAR" value={times.daressalam} />
+                {/* All seven market clocks. Rather than dropping nodes on
+                    narrow screens, the rail scrolls horizontally. */}
+                <div className="hide-scrollbar hidden min-w-0 flex-1 items-center gap-4 overflow-x-auto border-l border-black/10 pl-5 sm:flex lg:gap-5">
+                  {COUNTRIES.map((country) => (
+                    <TimeItem
+                      key={country.id}
+                      code={country.cityCode}
+                      value={times[country.id] ?? '--:--:--'}
+                    />
+                  ))}
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="hidden h-1 w-24 overflow-hidden rounded-full bg-black/6 sm:block">
+              <div className="flex shrink-0 items-center gap-3 pl-4 md:gap-4">
+                <div className="hidden h-1 w-24 overflow-hidden rounded-full bg-black/6 xl:block">
                   <div className="h-full w-2/3 animate-[pulse_2s_infinite] rounded-full bg-infinite-blue" />
                 </div>
                 <span className="font-mono text-[9px] uppercase tracking-[0.28em] text-ink-black/34">

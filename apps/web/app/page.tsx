@@ -97,13 +97,13 @@ export default function Home() {
           eyebrow="Rewards / module 05"
           titleTop="You Already Use It."
           titleBottom="Get Paid For It."
-          body="Earn points on deposits, savings, and swaps. Invite a friend and earn when they transact. Redeem points for fee discounts, cashback, or bonus USDT — no separate loyalty app, it's just part of your balance."
+          body="Earn points and cashback through campaigns, challenges, and eligible activity — deposits, savings, and swaps can all qualify. Invite a friend and earn when they transact. Redeem points for fee discounts, cashback, or bonus USDT — no separate loyalty app, it's just part of your balance."
           ctaLabel="See rewards"
           ctaHref="/rewards"
           tone="light"
           accent="magenta"
           stats={[
-            { label: "Earn on", value: "Deposits · Savings · Swaps" },
+            { label: "Qualifying activity", value: "Deposits · Savings · Swaps" },
             { label: "Referrals", value: "Paid when your invite transacts" },
             { label: "Redeem for", value: "Fee discounts · Cashback · USDT" },
           ]}

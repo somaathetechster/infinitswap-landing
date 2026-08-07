@@ -45,7 +45,7 @@ const PILLARS: StepItem[] = [
     micro: 'GetRewarded',
     title: 'Earn',
     detail:
-      'Every deposit, save, and swap earns points. Redeem for fee discounts, cashback, or bonus USDT.',
+      'Earn points and cashback through campaigns, challenges, and eligible activity — deposits, savings, and swaps can all qualify. Redeem for fee discounts, cashback, or bonus USDT.',
   },
 ];
 

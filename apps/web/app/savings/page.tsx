@@ -6,7 +6,7 @@ import { waLink, WA_PREFILL } from '../../lib/whatsapp';
 export const metadata: Metadata = {
   title: 'Savings — Infinitswap',
   description:
-    'Round-up, goal, flexible and locked savings that earn interest, all set up in a WhatsApp chat.',
+    'Round-up, goal, soft, locked and hard savings that earn interest — flexible withdrawals or a strict lock, all set up in a WhatsApp chat.',
 };
 
 const PLANS: StepItem[] = [
@@ -32,15 +32,23 @@ const PLANS: StepItem[] = [
     micro: 'StayFlexible',
     title: 'Soft savings',
     detail:
-      'A separate balance that still earns, but that you can pull back into your wallet the moment you need it. For money you want out of the way, not out of reach.',
+      'A separate balance that still earns, but that you can withdraw back into your wallet at any time, with no penalty and no notice period. For money you want out of the way, not out of reach.',
   },
   {
     id: '04',
     tag: 'Plan type',
-    micro: 'CommitAndForget',
+    micro: 'PickYourTerm',
     title: 'Locked savings',
     detail:
-      'Choose a term and the balance is sealed until it matures, at the highest interest rate we offer. Built for the goals that only work if you cannot touch the money early.',
+      'Choose a lock period — typically 30, 90 or 180 days — and the balance is sealed until it matures, at a higher rate the longer you commit. If your circumstances change, you can request an early unlock in chat; it releases the funds and forfeits the interest accrued on that plan.',
+  },
+  {
+    id: '05',
+    tag: 'Plan type',
+    micro: 'NoEarlyExit',
+    title: 'Hard savings',
+    detail:
+      'The strictest option, and the highest interest rate we offer: the balance cannot be unlocked early at all, only at maturity. Built for the goals that only work if the money is genuinely out of reach.',
   },
 ];
 
@@ -55,9 +63,9 @@ export default function SavingsPage() {
       cardFooterLabel="Savings module"
       cardStatusLabel="Plan active"
       facts={[
-        { label: 'Plan types', value: 'Round-up · Goal · Soft · Locked' },
-        { label: 'Interest', value: 'Accrues daily, paid on maturity' },
-        { label: 'Currencies', value: 'Local wallets and USDT' },
+        { label: 'Plan types', value: 'Round-up · Goal · Soft · Locked · Hard' },
+        { label: 'Interest', value: 'Accrues daily, paid on maturity — higher the longer you lock' },
+        { label: 'Early access', value: 'Anytime on soft · On request on locked · At maturity on hard' },
       ]}
       ctaHref={waLink(WA_PREFILL.savings)}
       ctaLabel="Start a savings goal"

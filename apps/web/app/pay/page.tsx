@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import ModulePage from '../../components/shared/ModulePage';
 import type { StepItem } from '../../components/shared/StepCard';
 import { waLink, WA_PREFILL } from '../../lib/whatsapp';
+import { COUNTRY_LIST, COUNTRY_COUNT } from '../../lib/countries';
 
 export const metadata: Metadata = {
   title: 'Pay & Bills — Infinitswap',
@@ -30,12 +31,20 @@ const BILLS: StepItem[] = [
     id: '03',
     tag: 'Category',
     micro: 'KeepWatching',
-    title: 'Cable and TV',
+    title: 'Internet and cable',
     detail:
-      'Renew DSTV, GOtv, Startimes and the rest by decoder number. Put the subscription on autopay once and the renewal stops being something you have to remember.',
+      'Renew home broadband, and cable packages like DSTV, GOtv and Startimes, by account or decoder number. Put the subscription on autopay once and the renewal stops being something you have to remember.',
   },
   {
     id: '04',
+    tag: 'Category',
+    micro: 'FeesAndFilings',
+    title: 'Education and government',
+    detail:
+      'Pay school and exam fees, and settle government charges and levies where the biller is supported, with a reference you can keep — the kind of payment that usually means a queue and a morning off work.',
+  },
+  {
+    id: '05',
     tag: 'Category',
     micro: 'FundTheWallet',
     title: 'Betting wallets',
@@ -43,12 +52,12 @@ const BILLS: StepItem[] = [
       'Fund a betting account by ID without leaving the conversation, with the same balance and the same limits as every other payment you make.',
   },
   {
-    id: '05',
+    id: '06',
     tag: 'Automation',
     micro: 'SetItAndForgetIt',
     title: 'Bills on autopay',
     detail:
-      'Put any recurring bill on a schedule. Infinitswap reminds you before it charges, pays on the day, retries if a rail is down, and tells you either way — so a missed payment is never a silent one.',
+      'Put any recurring bill on a schedule — weekly, monthly, or on a date you pick. Infinitswap reminds you before it charges, pays on the day, retries if a rail is down or your balance is short, and tells you either way, so a missed payment is never a silent one.',
   },
 ];
 
@@ -63,7 +72,7 @@ export default function PayPage() {
       cardFooterLabel="Bills module"
       cardStatusLabel="Rail active"
       facts={[
-        { label: 'Countries', value: 'Nigeria · Ghana · South Africa · Tanzania · Kenya · Uganda · Rwanda' },
+        { label: `Countries (${COUNTRY_COUNT})`, value: COUNTRY_LIST },
         { label: 'Pay from', value: 'Any local wallet balance' },
         { label: 'Autopay', value: 'Reminder, charge, retry, receipt' },
       ]}
