@@ -1,22 +1,16 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   motion,
   useInView,
   useScroll,
   useTransform,
 } from 'framer-motion';
+import StepCard, { type StepItem } from './shared/StepCard';
+import GrainTexture from './shared/GrainTexture';
 
-type Layer = {
-  id: string;
-  title: string;
-  tag: string;
-  detail: string;
-  micro: string;
-};
-
-const LAYERS: Layer[] = [
+const LAYERS: StepItem[] = [
   {
     id: '01',
     title: 'Start a Chat',
@@ -50,128 +44,6 @@ const LAYERS: Layer[] = [
     micro: 'Payout executed',
   },
 ];
-
-function GrainTexture() {
-  const dots = useMemo(
-    () =>
-      Array.from({ length: 120 }, (_, index) => ({
-        id: index,
-        left: `${(index * 17) % 100}%`,
-        top: `${(index * 21) % 100}%`,
-        opacity: ((index % 6) + 2) / 28,
-        size: index % 3 === 0 ? 1 : 2,
-      })),
-    []
-  );
-
-  return (
-    <div className="pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-multiply">
-      {dots.map((dot) => (
-        <span
-          key={dot.id}
-          className="absolute rounded-full bg-black"
-          style={{
-            left: dot.left,
-            top: dot.top,
-            width: dot.size,
-            height: dot.size,
-            opacity: dot.opacity,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function ProtocolCard({
-  layer,
-  index,
-  active,
-}: {
-  layer: Layer;
-  index: number;
-  active: boolean;
-}) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.25 }}
-      transition={{ duration: 0.65, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className={[
-        'group relative overflow-hidden rounded-[2rem] border p-6 md:p-8 transition-all duration-500',
-        active
-          ? 'border-[#0827dc]/14 bg-[#fffdf8] shadow-[0_28px_80px_rgba(0,0,0,0.10)]'
-          : 'border-black/8 bg-[#fcfaf5] hover:border-black/12 hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)]',
-      ].join(' ')}
-    >
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.46),transparent_42%)]" />
-
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[#0827dc]/8 px-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#0827dc]">
-              {layer.id}
-            </span>
-            <span className="rounded-full border border-black/8 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.26em] text-black/42">
-              {layer.tag}
-            </span>
-          </div>
-
-          <div
-            className={[
-              'h-3 w-3 rounded-full transition-all duration-500',
-              active ? 'bg-[#0827dc] shadow-[0_0_24px_rgba(8,39,220,0.55)]' : 'bg-black/12',
-            ].join(' ')}
-          />
-        </div>
-
-        <div className="mt-6">
-          <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-black/34">
-            {layer.micro}
-          </p>
-
-          <h4 className="mt-3 text-[2rem] font-semibold leading-[0.94] tracking-[-0.06em] text-[#111111] md:text-[2.8rem]">
-            {layer.title.split(' ').map((word, idx, arr) => (
-              <span
-                key={`${word}-${idx}`}
-                className={idx === arr.length - 1 ? 'block text-[#0827dc]' : 'block'}
-              >
-                {word}
-              </span>
-            ))}
-          </h4>
-
-          <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-black/60 md:text-[1.02rem]">
-            {layer.detail}
-          </p>
-        </div>
-
-        <div className="mt-8 flex items-center justify-between gap-4 border-t border-black/8 pt-5">
-          <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-black/34">
-            Orchestrated flow
-          </span>
-
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-              className="relative flex h-10 w-10 items-center justify-center"
-            >
-              <div className="absolute inset-0 rounded-full border border-black/10" />
-              <div className="absolute inset-[7px] rounded-full border border-[#0827dc]/30" />
-              <div className="h-2 w-2 rounded-full bg-[#0827dc]" />
-            </motion.div>
-
-            <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-black/34">
-              Node active
-            </span>
-          </div>
-        </div>
-      </div>
-    </motion.article>
-  );
-}
 
 export default function Protocol() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -314,11 +186,7 @@ export default function Protocol() {
                   >
                     <div className="absolute left-[10px] top-10 hidden h-3 w-3 -translate-x-1/2 rounded-full border-2 border-[#f3efe8] bg-[#0827dc] shadow-[0_0_20px_rgba(8,39,220,0.4)] md:block" />
 
-                    <ProtocolCard
-                      layer={layer}
-                      index={index}
-                      active={active}
-                    />
+                    <StepCard item={layer} index={index} active={active} />
                   </div>
                 );
               })}

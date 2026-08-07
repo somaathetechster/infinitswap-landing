@@ -1,10 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import PhoneMockup, { ChatScreen, type ChatMessage } from './shared/PhoneMockup';
+import GrainTexture from './shared/GrainTexture';
 
-const chatSequence = [
+const chatSequence: ChatMessage[] = [
   {
     id: 1,
     type: 'bot',
@@ -62,18 +63,6 @@ export default function AssistantVisual() {
   const phoneRotate = useTransform(scrollYProgress, [0, 1], [2.5, -2.5]);
   const stageY = useTransform(scrollYProgress, [0, 1], [24, -24]);
 
-  const grainDots = useMemo(
-    () =>
-      Array.from({ length: 95 }, (_, index) => ({
-        id: index,
-        left: `${(index * 17) % 100}%`,
-        top: `${(index * 23) % 100}%`,
-        opacity: ((index % 6) + 2) / 30,
-        size: index % 3 === 0 ? 1 : 2,
-      })),
-    []
-  );
-
   const handleGlowMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -93,21 +82,7 @@ export default function AssistantVisual() {
       <div className="absolute left-0 right-0 bottom-[12%] h-px bg-white/10" />
 
       {/* GRAIN */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-soft-light">
-        {grainDots.map((dot) => (
-          <span
-            key={dot.id}
-            className="absolute rounded-full bg-white"
-            style={{
-              left: dot.left,
-              top: dot.top,
-              width: dot.size,
-              height: dot.size,
-              opacity: dot.opacity,
-            }}
-          />
-        ))}
-      </div>
+      <GrainTexture count={95} tone="light" />
 
       <div
         ref={containerRef}
@@ -207,108 +182,18 @@ export default function AssistantVisual() {
             </div>
 
             {/* PHONE BODY */}
-            <div className="relative h-[590px] w-[300px] rounded-[3.9rem] bg-[linear-gradient(160deg,#090909_0%,#1a1b20_38%,#2b2e37_100%)] p-[8px] shadow-[0_70px_140px_rgba(0,0,0,0.28),0_12px_34px_rgba(0,0,0,0.18)] ring-1 ring-white/12">
-              <div className="absolute inset-[1.5px] rounded-[3.8rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.18),transparent_18%,transparent_82%,rgba(255,255,255,0.06))]" />
-              <div className="absolute inset-y-8 left-[5px] w-px bg-white/20 blur-[1px]" />
-              <div className="absolute inset-y-14 right-[5px] w-px bg-white/12 blur-[1px]" />
-
-              <div className="relative h-full w-full overflow-hidden rounded-[3.15rem] border border-white/10 bg-[#0d1020]">
-                {/* DYNAMIC ISLAND */}
-                <div className="absolute left-1/2 top-3 z-30 h-7 w-28 -translate-x-1/2 rounded-full bg-black" />
-
-                {/* SCREEN BACKGROUND */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_16%,rgba(8,39,220,0.26),transparent_28%),radial-gradient(circle_at_84%_78%,rgba(254,0,156,0.18),transparent_24%),linear-gradient(180deg,#0e1530_0%,#0b1022_100%)]" />
-
-                {/* SCREEN UI */}
-                <div className="relative z-10 flex h-full flex-col px-4 pb-4 pt-14">
-                  {/* Header */}
-                  <div className="rounded-[1.55rem] border border-white/10 bg-white/8 px-3 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0827dc] shadow-[0_12px_28px_rgba(8,39,220,0.25)]">
-                        <Image
-                          src="/logo-emblem.png"
-                          alt="Infinitswap emblem"
-                          width={21}
-                          height={21}
-                          className="object-contain"
-                        />
-                      </div>
-
-                      <div>
-                        <p className="font-mono text-[8px] uppercase tracking-[0.28em] text-white/42">
-                          Verified assistant
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-white/90">
-                          Infinitswap Bot
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* rate card */}
-                  <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-white/8 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-mono text-[8px] uppercase tracking-[0.26em] text-white/42">
-                          Live payout estimate
-                        </p>
-                        <p className="mt-2 text-[1.45rem] font-semibold tracking-[-0.05em] text-white">
-                          ₦ 760,000
-                        </p>
-                      </div>
-                      <span className="rounded-full bg-emerald-500/18 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.20em] text-emerald-300">
-                        Locked
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* chat */}
-                  <div className="mt-4 flex-1 space-y-3">
-                    {chatSequence.map((msg, index) => (
-                      <motion.div
-                        key={msg.id}
-                        initial={{
-                          opacity: 0,
-                          y: 14,
-                          x: msg.type === 'user' ? 10 : -10,
-                        }}
-                        animate={isInView ? { opacity: 1, y: 0, x: 0 } : {}}
-                        transition={{
-                          duration: 0.42,
-                          delay: 0.15 + index * 0.14,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
-                        className={`max-w-[86%] rounded-[1.25rem] px-4 py-3 text-[12px] leading-relaxed shadow-[0_12px_30px_rgba(0,0,0,0.16)] ${
-                          msg.type === 'user'
-                            ? 'ml-auto bg-[#fe009c] text-white'
-                            : 'bg-white/10 text-white/88'
-                        }`}
-                      >
-                        {msg.text}
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* bottom status */}
-                  <div className="mt-4 rounded-[1.5rem] border border-white/10 bg-white/8 p-3">
-                    <div className="flex items-center justify-between">
-                      <p className="font-mono text-[8px] uppercase tracking-[0.24em] text-white/44">
-                        Exchange status
-                      </p>
-                      <span className="rounded-full bg-emerald-500/18 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.20em] text-emerald-300">
-                        Active
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm font-medium text-white/84">
-                      Quote confirmed. Waiting for transfer settlement.
-                    </p>
-                  </div>
-                </div>
-
-                {/* SCREEN REFLECTION */}
-                <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(115deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.06)_18%,transparent_32%,transparent_72%,rgba(255,255,255,0.08)_100%)]" />
-              </div>
-            </div>
+            <PhoneMockup size="md">
+              <ChatScreen
+                messages={chatSequence}
+                animate={isInView}
+                highlightLabel="Live payout estimate"
+                highlightValue="₦ 760,000"
+                highlightBadge="Locked"
+                statusLabel="Exchange status"
+                statusBadge="Active"
+                statusText="Quote confirmed. Waiting for transfer settlement."
+              />
+            </PhoneMockup>
           </motion.div>
         </div>
       </div>
