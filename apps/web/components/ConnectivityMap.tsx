@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { COUNTRIES } from '../lib/countries';
 
-const BRAND_BLUE = '#0827dc';
 const BRAND_MAGENTA = '#fe009c';
 const BRAND_CYAN = '#00d9ff';
 
@@ -18,47 +18,18 @@ type NodeItem = {
   accent: string;
 };
 
+// Country nodes come from the shared footprint; the hub is map-only furniture.
 const NODES: NodeItem[] = [
-  {
-    id: 'NG',
-    label: 'Nigeria',
-    region: 'West Africa',
-    status: 'Operational',
-    rate: '1,520 NGN',
-    x: 33,
-    y: 44,
-    accent: BRAND_CYAN,
-  },
-  {
-    id: 'GH',
-    label: 'Ghana',
-    region: 'West Africa',
-    status: 'Active',
-    rate: '14.2 GHS',
-    x: 24,
-    y: 34,
-    accent: BRAND_MAGENTA,
-  },
-  {
-    id: 'TZ',
-    label: 'Tanzania',
-    region: 'East Africa',
-    status: 'Active',
-    rate: '2,600 TZS',
-    x: 67,
-    y: 42,
-    accent: BRAND_CYAN,
-  },
-  {
-    id: 'SA',
-    label: 'South Africa',
-    region: 'Southern Africa',
-    status: 'High Liquidity',
-    rate: '18.9 ZAR',
-    x: 57,
-    y: 72,
-    accent: BRAND_MAGENTA,
-  },
+  ...COUNTRIES.map((country, index) => ({
+    id: country.id,
+    label: country.name,
+    region: country.region,
+    status: country.status,
+    rate: country.rate,
+    x: country.x,
+    y: country.y,
+    accent: index % 2 === 0 ? BRAND_CYAN : BRAND_MAGENTA,
+  })),
   {
     id: 'HUB',
     label: 'Global Hub',
@@ -66,7 +37,7 @@ const NODES: NodeItem[] = [
     status: 'Master Node',
     rate: 'N/A',
     x: 49,
-    y: 16,
+    y: 14,
     accent: '#ffffff',
   },
 ];
@@ -74,9 +45,12 @@ const NODES: NodeItem[] = [
 const CONNECTIONS: Array<[string, string]> = [
   ['NG', 'HUB'],
   ['GH', 'NG'],
-  ['NG', 'SA'],
-  ['SA', 'TZ'],
-  ['TZ', 'HUB'],
+  ['NG', 'ZA'],
+  ['ZA', 'TZ'],
+  ['TZ', 'KE'],
+  ['KE', 'HUB'],
+  ['UG', 'KE'],
+  ['RW', 'UG'],
 ];
 
 function getNode(id: string) {

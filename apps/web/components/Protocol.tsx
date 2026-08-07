@@ -10,7 +10,9 @@ import {
 import StepCard, { type StepItem } from './shared/StepCard';
 import GrainTexture from './shared/GrainTexture';
 
-const LAYERS: StepItem[] = [
+type Direction = 'sell' | 'buy';
+
+const SELL_LAYERS: StepItem[] = [
   {
     id: '01',
     title: 'Start a Chat',
@@ -45,11 +47,72 @@ const LAYERS: StepItem[] = [
   },
 ];
 
+// The buy side mirrors the sell flow beat for beat, so the toggle swaps content
+// without the layout or the timeline rail changing shape.
+const BUY_LAYERS: StepItem[] = [
+  {
+    id: '01',
+    title: 'Start a Chat',
+    tag: 'STEP 1',
+    detail:
+      'Message the same WhatsApp line and say how much USDT you want to buy, and which local currency you are paying with.',
+    micro: 'Initiate request',
+  },
+  {
+    id: '02',
+    title: 'Lock in the Rate',
+    tag: 'STEP 2',
+    detail:
+      'You get a live quote showing exactly how much local currency buys how much USDT, with the fee stated up front before you commit.',
+    micro: 'Confirm pricing',
+  },
+  {
+    id: '03',
+    title: 'Pay in Local Currency',
+    tag: 'STEP 3',
+    detail:
+      'Pay from your Infinitswap wallet balance or transfer to the account details generated for your order. Both settle against the same quote.',
+    micro: 'Fund the order',
+  },
+  {
+    id: '04',
+    title: 'Receive Your USDT',
+    tag: 'STEP 4',
+    detail:
+      'The USDT lands in your Infinitswap wallet, or goes straight out to an external address you nominate — your choice, stated when you order.',
+    micro: 'Delivery executed',
+  },
+];
+
+const COPY: Record<
+  Direction,
+  { label: string; headline: [string, string, string]; intro: string; watermark: string }
+> = {
+  sell: {
+    label: 'Sell USDT',
+    headline: ['From', 'Crypto', 'To Cash.'],
+    intro:
+      'We’ve removed the traditional friction of crypto off-ramping. The experience is direct on the surface, while the system coordinates quoting, routing, confirmation, and payout in the background.',
+    watermark: 'Cash',
+  },
+  buy: {
+    label: 'Buy USDT',
+    headline: ['From', 'Cash', 'To Crypto.'],
+    intro:
+      'The same flow, run in reverse. Pay in your local currency from a wallet balance you already hold, and take delivery in USDT — with the rate and the fee visible before you commit.',
+    watermark: 'USDT',
+  },
+};
+
 export default function Protocol() {
   const sectionRef = useRef<HTMLElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const [glow, setGlow] = useState({ x: 50, y: 50 });
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState<Direction>('sell');
+
+  const layers = direction === 'sell' ? SELL_LAYERS : BUY_LAYERS;
+  const copy = COPY[direction];
 
   const inView = useInView(sectionRef, { amount: 0.2, once: false });
 
@@ -96,28 +159,53 @@ export default function Protocol() {
             <div className="lg:sticky lg:top-28">
               <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/60 px-4 py-2">
                 <span className="font-mono text-[10px] font-bold uppercase tracking-[0.34em] text-[#0827dc]">
-                  Protocol / how it works
+                  Swap / crypto to cash and back
                 </span>
               </div>
 
               <h2 className="leading-[0.84] tracking-[-0.08em] text-black">
-                <span className="block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[6.8vw]">
-                  From
-                </span>
-                <span className="block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[6.8vw]">
-                  Crypto
-                </span>
-                <span className="block text-[14vw] font-black uppercase text-[#0827dc] md:text-[10vw] lg:text-[6.8vw]">
-                  To Cash.
-                </span>
+                {copy.headline.map((line, index) => (
+                  <span
+                    key={line}
+                    className={`block text-[14vw] font-black uppercase md:text-[10vw] lg:text-[6.8vw] ${
+                      index === 2 ? 'text-[#0827dc]' : ''
+                    }`}
+                  >
+                    {line}
+                  </span>
+                ))}
               </h2>
+
+              {/* DIRECTION TOGGLE — swap runs both ways, so the section shows both */}
+              <div
+                role="tablist"
+                aria-label="Swap direction"
+                className="mt-8 inline-flex items-center gap-1 rounded-full border border-black/10 bg-white/60 p-1"
+              >
+                {(['sell', 'buy'] as Direction[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    role="tab"
+                    aria-selected={direction === option}
+                    onClick={() => {
+                      setDirection(option);
+                      setActiveIndex(0);
+                    }}
+                    className={`rounded-full px-5 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.26em] transition-all duration-300 ${
+                      direction === option
+                        ? 'bg-[#0827dc] text-white shadow-[0_10px_30px_rgba(8,39,220,0.26)]'
+                        : 'text-black/48 hover:text-[#0827dc]'
+                    }`}
+                  >
+                    {COPY[option].label}
+                  </button>
+                ))}
+              </div>
 
               <div className="mt-8 max-w-md border-l-2 border-[#fe009c] pl-6">
                 <p className="text-base leading-relaxed text-black/62 md:text-[1.08rem]">
-                  We’ve removed the traditional friction of crypto off-ramping.
-                  The experience is direct on the surface, while the system
-                  coordinates quoting, routing, confirmation, and payout in the
-                  background.
+                  {copy.intro}
                 </p>
               </div>
 
@@ -175,12 +263,12 @@ export default function Protocol() {
             />
 
             <div className="space-y-6 md:space-y-8">
-              {LAYERS.map((layer, index) => {
+              {layers.map((layer, index) => {
                 const active = activeIndex === index || (inView && index === 0);
 
                 return (
                   <div
-                    key={layer.id}
+                    key={`${direction}-${layer.id}`}
                     className="relative md:pl-12"
                     onMouseEnter={() => setActiveIndex(index)}
                   >
@@ -197,7 +285,7 @@ export default function Protocol() {
 
       <div className="pointer-events-none absolute bottom-0 right-[-4%] select-none opacity-[0.018]">
         <span className="text-[24vw] font-black uppercase tracking-[-0.08em] text-black">
-          Cash
+          {copy.watermark}
         </span>
       </div>
     </section>

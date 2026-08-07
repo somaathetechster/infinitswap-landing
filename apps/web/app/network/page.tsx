@@ -2,16 +2,17 @@
 
 import { motion } from 'framer-motion';
 import AdvancedGlobe from '../../components/NetworkGlobe';
+import { COUNTRIES, COUNTRY_COUNT } from '../../lib/countries';
 
 const networkStats = [
-  { label: 'Routes', value: 'NG • GH • SA • KE' },
+  { label: 'Routes', value: COUNTRIES.map((c) => c.id).join(' • ') },
   { label: 'Latency', value: '14ms' },
-  { label: 'Nodes', value: 'Active / V4' },
+  { label: 'Nodes', value: `${COUNTRY_COUNT} active / V4` },
   { label: 'Uptime', value: '99.99%' },
 ];
 
 const systemLogs = [
-  'Tracking Vector: LOS_JNB_ACC_NBO',
+  'Tracking Vector: LOS_JNB_ACC_NBO_KGL',
   'Protocol: V4.0.2 Secure // TLS 1.3',
   'Engine: WebGL 2.0 // Render_04',
   'Status: Mainnet Liquidity Synced',

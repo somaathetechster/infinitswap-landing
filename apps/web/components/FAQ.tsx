@@ -14,28 +14,40 @@ const FAQS: FAQItem[] = [
     id: 1,
     question: 'What exactly is Infinitswap?',
     answer:
-      'Infinitswap is a premium WhatsApp-based exchange layer that lets you convert USDT and BTC into local cash through a direct automated chat experience.',
+      'Infinitswap is a full financial account built inside WhatsApp — wallets in Naira, Cedis, Rand, and more, plus savings, bill payments, and crypto-to-cash conversion, all in one chat. No app to download.',
   },
   {
     id: 2,
+    question: 'Can I save money with Infinitswap?',
+    answer:
+      'Yes — round-up, goal, locked, and interest-bearing savings, all set up in chat.',
+  },
+  {
+    id: 3,
+    question: 'What bills can I pay?',
+    answer:
+      'Airtime, data, electricity, water, cable TV, betting wallets, and more, across all seven supported countries — one-time or on autopay.',
+  },
+  {
+    id: 4,
     question: 'How fast is the settlement?',
     answer:
       'Most transactions are settled within 3–5 minutes after on-chain confirmation, depending on network conditions and payout rail timing.',
   },
   {
-    id: 3,
+    id: 5,
     question: 'Is there an app I need to download?',
     answer:
       'No. Infinitswap works through chat, so there is no separate app to install or manage.',
   },
   {
-    id: 4,
+    id: 6,
     question: 'Which currencies do you support?',
     answer:
-      'We currently support NGN, TZS, ZAR, and GHS, with more local rails being added over time.',
+      'We currently support NGN, GHS, ZAR, TZS, KES, UGX, and RWF — Nigeria, Ghana, South Africa, Tanzania, Kenya, Uganda, and Rwanda — plus USDT, with more local rails being added over time.',
   },
   {
-    id: 5,
+    id: 7,
     question: 'Is my transaction secure?',
     answer:
       'Yes. Transactions are tracked through the flow and users receive status updates throughout the payout process.',
@@ -122,8 +134,8 @@ export default function FAQ() {
             Frequently Asked Questions
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/72 md:text-base">
-            Everything you need to know before converting crypto into local cash
-            with Infinitswap.
+            Everything you need to know about holding, saving, spending and
+            swapping money with Infinitswap.
           </p>
         </div>
 

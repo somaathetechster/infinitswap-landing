@@ -2,18 +2,20 @@
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { COUNTRIES } from '../lib/countries';
 
 const INFINITE_BLUE = '#0827dc';
 const INFINITE_MAGENTA = '#fe009c';
 const SOFT_TEAL = '#8df3d3';
 const SOFT_WHITE = '#f8fbff';
 
-const NATIONS = [
-  { name: 'Nigeria', lat: 9.08, lng: 8.67, color: new THREE.Color(INFINITE_BLUE) },
-  { name: 'Ghana', lat: 7.94, lng: -1.02, color: new THREE.Color(INFINITE_MAGENTA) },
-  { name: 'South Africa', lat: -30.55, lng: 22.93, color: new THREE.Color(INFINITE_BLUE) },
-  { name: 'Kenya', lat: -1.29, lng: 36.82, color: new THREE.Color(INFINITE_MAGENTA) },
-];
+// Markers follow the shared 7-country footprint, alternating brand colours.
+const NATIONS = COUNTRIES.map((country, index) => ({
+  name: country.name,
+  lat: country.lat,
+  lng: country.lng,
+  color: new THREE.Color(index % 2 === 0 ? INFINITE_BLUE : INFINITE_MAGENTA),
+}));
 
 const vertexShader = `
   varying vec3 vNormal;

@@ -5,6 +5,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import AccessBotButton from './AccessBotButton';
+import { CURRENCIES } from '../lib/countries';
+
+// One list, rendered by both the desktop rail and the mobile sheet.
+const NAV_LINKS = [
+  { href: '/savings', label: 'Savings' },
+  { href: '/pay', label: 'Pay Bills' },
+  { href: '/protocol', label: 'Swap' },
+  { href: '/rewards', label: 'Rewards' },
+  { href: '/network', label: 'Rates & Regions' },
+  { href: '/compliance', label: 'Trust & Safety' },
+];
 
 type Times = {
   lagos: string;
@@ -201,22 +212,24 @@ export default function Navbar() {
                       infinitswap
                     </span>
                     <span className="mt-1 hidden font-mono text-[8px] uppercase tracking-[0.34em] text-ink-black/36 sm:block">
-                      Premium chat-native exchange
+                      Your financial account, in WhatsApp
                     </span>
                   </div>
                 </Link>
 
-                {/* DESKTOP NAV LINKS */}
-                <div className="hidden items-center gap-8 xl:flex">
-                  <NavLink href="/protocol" label="How It Works" />
-                  <NavLink href="/network" label="Rates & Regions" />
-                  <NavLink href="/compliance" label="Trust & Safety" />
+                {/* DESKTOP NAV LINKS — gap tightened for six items */}
+                <div className="hidden items-center gap-6 xl:flex">
+                  {NAV_LINKS.map((link) => (
+                    <NavLink key={link.href} href={link.href} label={link.label} />
+                  ))}
                 </div>
 
                 {/* RIGHT SIDE */}
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="hidden items-center gap-2 lg:flex">
-                    {['NGN', 'TZS', 'ZAR', 'GHS'].map((item) => (
+                  {/* Seven chips only fit once the nav rail has room; below
+                      2xl they live in the mobile sheet instead. */}
+                  <div className="hidden items-center gap-2 2xl:flex">
+                    {CURRENCIES.map((item) => (
                       <span
                         key={item}
                         className="rounded-full border border-black/8 bg-white/62 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-ink-black/48 shadow-[0_8px_24px_rgba(17,17,17,0.04)] backdrop-blur-xl"
@@ -288,29 +301,16 @@ export default function Navbar() {
             >
               <div className="overflow-hidden rounded-[1.75rem] border border-black/8 bg-[#f7f3ec]/96 shadow-[0_24px_80px_rgba(17,17,17,0.14)] backdrop-blur-2xl">
                 <div className="grid gap-1 px-3 py-3">
-                  <Link
-                    href="/protocol"
-                    onClick={closeMobile}
-                    className="rounded-[1.2rem] px-4 py-4 font-mono text-[11px] font-bold uppercase tracking-[0.26em] text-ink-black/72 transition-colors duration-300 hover:bg-white/70 hover:text-[#0827dc]"
-                  >
-                    How It Works
-                  </Link>
-
-                  <Link
-                    href="/network"
-                    onClick={closeMobile}
-                    className="rounded-[1.2rem] px-4 py-4 font-mono text-[11px] font-bold uppercase tracking-[0.26em] text-ink-black/72 transition-colors duration-300 hover:bg-white/70 hover:text-[#0827dc]"
-                  >
-                    Rates & Regions
-                  </Link>
-
-                  <Link
-                    href="/compliance"
-                    onClick={closeMobile}
-                    className="rounded-[1.2rem] px-4 py-4 font-mono text-[11px] font-bold uppercase tracking-[0.26em] text-ink-black/72 transition-colors duration-300 hover:bg-white/70 hover:text-[#0827dc]"
-                  >
-                    Trust & Safety
-                  </Link>
+                  {NAV_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={closeMobile}
+                      className="rounded-[1.2rem] px-4 py-3.5 font-mono text-[11px] font-bold uppercase tracking-[0.26em] text-ink-black/72 transition-colors duration-300 hover:bg-white/70 hover:text-[#0827dc]"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
                 </div>
 
                 <div className="border-t border-black/8 px-5 py-4 sm:hidden">
@@ -319,7 +319,7 @@ export default function Navbar() {
 
                 <div className="border-t border-black/8 px-5 py-4">
                   <div className="flex flex-wrap gap-2">
-                    {['NGN', 'TZS', 'ZAR', 'GHS'].map((item) => (
+                    {CURRENCIES.map((item) => (
                       <span
                         key={item}
                         className="rounded-full border border-black/8 bg-white/70 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-ink-black/48"

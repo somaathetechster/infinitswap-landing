@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { waLink, WA_PREFILL } from '../lib/whatsapp';
 
 const SOCIALS = [
   { 
@@ -49,9 +50,9 @@ export default function Footer() {
             </a>
 
             <p className="font-body text-xl text-ink-black/80 max-w-sm leading-snug">
-              Stop waiting for withdrawals. <br />
-              <span className="text-infinite-magenta font-bold">Swap USDT. Get Paid. Enjoy Life.</span> <br />
-              The fastest way to spend your crypto in Africa.
+              Stop juggling apps for money. <br />
+              <span className="text-infinite-magenta font-bold">Hold it, grow it, spend it, swap it</span> — all from one WhatsApp chat. <br />
+              The financial account built for how Africa actually banks.
             </p>
 
             {/* SOCIALS & MAIL */}
@@ -79,8 +80,10 @@ export default function Footer() {
             <div className="space-y-4">
               <h4 className="font-mono text-[10px] uppercase tracking-widest text-ink-black/40">The Product</h4>
               <ul className="space-y-2 font-body text-sm text-ink-black/70">
-                <li><Link href="/#how-it-works" className="hover:text-infinite-blue transition-colors">Start Swapping</Link></li>
-                <li><Link href="/#experience" className="hover:text-infinite-blue transition-colors">Success Stories</Link></li>
+                <li><a href={waLink(WA_PREFILL.start)} target="_blank" rel="noopener noreferrer" className="hover:text-infinite-blue transition-colors">Start on WhatsApp</a></li>
+                <li><Link href="/savings" className="hover:text-infinite-blue transition-colors">Savings</Link></li>
+                <li><Link href="/pay" className="hover:text-infinite-blue transition-colors">Pay Bills</Link></li>
+                <li><Link href="/protocol" className="hover:text-infinite-blue transition-colors">Swap Crypto</Link></li>
                 <li><Link href="/#countries" className="hover:text-infinite-blue transition-colors">Network Status</Link></li>
               </ul>
             </div>

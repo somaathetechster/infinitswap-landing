@@ -3,46 +3,58 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
+// The four moments now span wallet, savings, bills and swap rather than four
+// flavours of off-ramp — the section carries the repositioning emotionally.
 const USE_CASES = [
   {
     id: 1,
     image:
       'https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1200&auto=format&fit=crop',
     action: 'Paid a designer',
-    recipient: 'for a logo project in naira',
+    recipient: 'for a logo project, in naira',
+    context:
+      'Straight from her wallet — no card, no transfer, no waiting on a bank to open.',
     bankColor: 'bg-[#fe009c]',
     bankInitial: '₦',
     alt: 'Creative freelancer being paid for a design service',
   },
   {
     id: 2,
+    // TODO(design): placeholder. Wants candid African-context photography of
+    // someone saving toward a home, to match the section's people-led style.
     image:
-      'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1200&auto=format&fit=crop',
-    action: 'Received money',
-    recipient: 'from family in another African country',
+      'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1200&auto=format&fit=crop',
+    action: 'Locked ₦50,000',
+    recipient: 'toward rent, six months out',
+    context:
+      'Earning interest while she waits, and out of reach until the day she needs it.',
     bankColor: 'bg-[#0827dc]',
-    bankInitial: 'AF',
-    alt: 'Woman receiving money support from a relative abroad',
+    bankInitial: 'SAVE',
+    alt: 'Keys to a new home, saved for over six months',
   },
   {
     id: 3,
+    // TODO(design): placeholder. Wants a warm living-room scene with people.
     image:
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop',
-    action: 'Bought airtime',
-    recipient: 'and topped up mobile data instantly',
-    bankColor: 'bg-[#4bba2e]',
-    bankInitial: 'AIR',
-    alt: 'Person using a phone to buy airtime and data',
+      'https://images.unsplash.com/photo-1593784991095-a205069470b6?q=80&w=1200&auto=format&fit=crop',
+    action: 'Set DSTV to autopay',
+    recipient: 'and stopped thinking about it',
+    context:
+      'The bill clears itself every month, with a reminder before it does and a retry if it fails.',
+    bankColor: 'bg-[#00b578]',
+    bankInitial: 'AUTO',
+    alt: 'Television at home on a subscription that pays itself',
   },
   {
     id: 4,
     image:
       'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=1200&auto=format&fit=crop',
-    action: 'Sent an invoice',
-    recipient: 'and got paid through chat',
-    bankColor: 'bg-[#00b578]',
-    bankInitial: 'INV',
-    alt: 'Small business owner sending an invoice and getting paid',
+    action: 'Cashed out 200 USDT',
+    recipient: 'to cover a slow month',
+    context: 'No card, no bank queue — local currency landed while the chat was still open.',
+    bankColor: 'bg-[#4bba2e]',
+    bankInitial: 'USDT',
+    alt: 'Small business owner converting crypto to local currency',
   },
 ];
 
@@ -125,14 +137,7 @@ export default function EverydayUseCases() {
               {/* OPTIONAL BOTTOM CONTEXT TEXT */}
               <div className="absolute bottom-24 left-6 right-6">
                 <p className="max-w-[85%] font-body text-sm leading-relaxed text-white/88 md:text-base">
-                  {useCase.id === 1 &&
-                    'Use crypto to settle real creative work quickly, without payment friction.'}
-                  {useCase.id === 2 &&
-                    'Receive support from loved ones across borders and access it locally with ease.'}
-                  {useCase.id === 3 &&
-                    'Turn digital value into something immediately useful for daily communication.'}
-                  {useCase.id === 4 &&
-                    'Help freelancers and small businesses move from invoice to payment faster.'}
+                  {useCase.context}
                 </p>
               </div>
 
@@ -142,7 +147,12 @@ export default function EverydayUseCases() {
                   <div
                     className={`${useCase.bankColor} flex h-full w-full items-center justify-center rounded-xl`}
                   >
-                    <span className="font-display text-lg font-bold text-white">
+                    {/* 4-char labels (SAVE/AUTO/USDT) overflow at text-lg */}
+                    <span
+                      className={`font-display font-bold text-white ${
+                        useCase.bankInitial.length > 3 ? 'text-[11px]' : 'text-lg'
+                      }`}
+                    >
                       {useCase.bankInitial}
                     </span>
                   </div>
