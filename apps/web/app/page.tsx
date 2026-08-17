@@ -110,6 +110,26 @@ export default function Home() {
         />
       </section>
 
+      {/* SCENE 06.45: CAMPUS AMBASSADORS — dark, the recruitment CTA before
+          the FAQ resolves the remaining questions. */}
+      <section id="campus-ambassador">
+        <ModuleTeaser
+          eyebrow="Campus / programme"
+          titleTop="Run Infinitswap"
+          titleBottom="On Your Campus."
+          body="We're recruiting student ambassadors across Africa. Host events, build a community, and put a real financial account in the hands of the students around you — with support, materials, and rewards from the Infinitswap team."
+          ctaLabel="Become a Campus Ambassador"
+          ctaHref="/campusambassador"
+          tone="dark"
+          accent="cyan"
+          stats={[
+            { label: "Who it's for", value: "Students with a campus network" },
+            { label: "What you do", value: "Events · Community · Activations" },
+            { label: "Apply in", value: "One form, ~10 minutes" },
+          ]}
+        />
+      </section>
+
       {/* SCENE 06.5: THE KNOWLEDGE BASE (FAQ)
           Placed here to resolve friction before the final CTA
       */}
