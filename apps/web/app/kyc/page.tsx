@@ -45,20 +45,6 @@ function validateIdClientSide(docType: string, idNumber: string): string | null 
       return null;
     }
 
-    case "VOTER_ID": {
-      const stripped = clean.replace(/[-]/g, "");
-      if (stripped.length !== 19)         return `Voter ID must be 19 characters. You entered ${stripped.length}.`;
-      if (!/^[A-Z0-9]{19}$/.test(stripped)) return "Voter ID must contain only letters and numbers.";
-      return null;
-    }
-
-    case "DRIVERS_LICENSE": {
-      // Nigerian DL: 3-letter state code + 11 alphanumeric = 14 chars
-      if (clean.length !== 14) return `Driver's License must be 14 characters. You entered ${clean.length}.`;
-      if (!/^[A-Z]{3}[A-Z0-9]{11}$/.test(clean)) return "Driver's License must start with a 3-letter state code (e.g. LAG, ABJ).";
-      return null;
-    }
-
     case "Ghana Card":
     case "GHANA_CARD": {
       if (!/^GHA-?\d{9}-?\d$/i.test(clean))
@@ -122,16 +108,6 @@ const COUNTRY_CONFIG: Record<string, {
         value: "NIN",
         label: "NIN (National Identification Number)",
         hint:  "11 digits — found on your NIN slip, NIMC card, or dial *346# to retrieve it",
-      },
-      {
-        value: "VOTER_ID",
-        label: "Voter's Card (PVC)",
-        hint:  "19 alphanumeric characters — found on the face of your PVC",
-      },
-      {
-        value: "DRIVERS_LICENSE",
-        label: "Driver's License",
-        hint:  "14 characters — 3-letter state code followed by 11 characters (e.g. LAG12345678901)",
       },
     ],
     tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
