@@ -7,7 +7,7 @@
  * email are always the exact questions the applicant answered.
  */
 
-export type FieldKind = "text" | "tel" | "textarea" | "radio";
+export type FieldKind = "text" | "email" | "tel" | "textarea" | "radio";
 
 export type Field = {
   /** Key in the submitted payload. */
@@ -45,6 +45,13 @@ export const SECTIONS: Section[] = [
         kind: "text",
         required: true,
         placeholder: "e.g. University of Lagos — Economics, 300 Level",
+      },
+      {
+        name: "email",
+        label: "Email Address",
+        kind: "email",
+        required: true,
+        placeholder: "you@example.com",
       },
       {
         name: "phone",
@@ -198,4 +205,9 @@ export function firstMissingField(values: Application): Field | null {
     if (!(values[field.name] ?? "").trim()) return field;
   }
   return null;
+}
+
+/** Loose shape check — enough to catch typos without rejecting valid addresses. */
+export function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }

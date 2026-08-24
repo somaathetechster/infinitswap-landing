@@ -16,6 +16,7 @@ import { useState } from "react";
 import {
   SECTIONS,
   firstMissingField,
+  isValidEmail,
   isVisible,
   type Application,
   type Field,
@@ -114,13 +115,21 @@ function FieldRow({
         </div>
       )}
 
-      {(field.kind === "text" || field.kind === "tel") && (
+      {(field.kind === "text" || field.kind === "email" || field.kind === "tel") && (
         <input
           type={field.kind}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder}
-          autoComplete={field.name === "fullName" ? "name" : field.kind === "tel" ? "tel" : "off"}
+          autoComplete={
+            field.name === "fullName"
+              ? "name"
+              : field.kind === "email"
+                ? "email"
+                : field.kind === "tel"
+                  ? "tel"
+                  : "off"
+          }
           className={INPUT_CLASS}
         />
       )}
@@ -146,6 +155,7 @@ export default function CampusAmbassadorPage() {
 
     const missing = firstMissingField(values);
     if (missing) return setError(`Please answer: ${missing.label}`);
+    if (!isValidEmail(values.email ?? "")) return setError("Please enter a valid email address.");
 
     setState("submitting");
     setError("");

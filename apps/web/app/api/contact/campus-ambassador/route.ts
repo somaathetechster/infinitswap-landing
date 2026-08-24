@@ -14,6 +14,7 @@ import { Resend } from "resend";
 import {
   SECTIONS,
   firstMissingField,
+  isValidEmail,
   isVisible,
   type Application,
 } from "../../../../lib/campus-ambassador";
@@ -111,6 +112,13 @@ export async function POST(request: Request) {
   if (missing) {
     return Response.json(
       { success: false, message: `Please answer: ${missing.label}` },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidEmail(values.email ?? "")) {
+    return Response.json(
+      { success: false, message: "Please enter a valid email address." },
       { status: 400 }
     );
   }
