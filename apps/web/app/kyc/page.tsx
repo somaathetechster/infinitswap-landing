@@ -141,6 +141,16 @@ const COUNTRY_CONFIG: Record<string, {
     ],
     tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
   },
+  UG: {
+    label: "Uganda",
+    tier1: [],
+    tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
+  },
+  RW: {
+    label: "Rwanda",
+    tier1: [],
+    tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
+  },
 };
 
 const TIER_LIMITS = {
@@ -150,6 +160,7 @@ const TIER_LIMITS = {
 
 async function collectDevicePayload(): Promise<string> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const FP     = await import("https://openfpcdn.io/fingerprintjs/v4" as any);
     const fp     = await FP.load();
     const result = await fp.get();
@@ -212,7 +223,7 @@ function UnderReviewScreen({ waLink }: { waLink: string }) {
       <h3 className="text-[18px] font-semibold text-[#1a1a2e] mb-2">Verification Under Review</h3>
       <p className="text-[14px] text-gray-500 mb-6 leading-relaxed">
         Your submission has been received and is being reviewed by our compliance team.
-        You'll be notified on WhatsApp once complete — usually within a few hours.
+        You&apos;ll be notified on WhatsApp once complete — usually within a few hours.
       </p>
       <a href={waLink} className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
         Return to WhatsApp →
@@ -232,6 +243,12 @@ function ErrorScreen({ message }: { message: string }) {
 }
 
 function Tier1Form({ token, countryCode }: { token: string; countryCode: string }) {
+  return countryCode === "UG" || countryCode === "RW"
+    ? <DocumentTier1Form token={token} countryCode={countryCode} />
+    : <NumericTier1Form token={token} countryCode={countryCode} />;
+}
+
+function NumericTier1Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink  = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
   const config  = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
   const idTypes = config.tier1;
@@ -359,6 +376,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
     ? "numeric"
     : "text"
 }
+
             className="w-full px-3.5 py-3 pr-14 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors tracking-wider"
           />
           <button
@@ -371,7 +389,7 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
           </button>
         </div>
         <p className="text-[11px] text-gray-400 mt-1.5 pl-1">
-          🔒 Masked by default — tap "Show" only if you need to double-check what you typed.
+          🔒 Masked by default — tap &quot;Show&quot; only if you need to double-check what you typed.
         </p>
       </div>
 
@@ -410,6 +428,164 @@ function Tier1Form({ token, countryCode }: { token: string; countryCode: string 
   );
 }
 
+const IMAGE_DOC_TYPES = [
+  { value: "NATIONAL_ID", label: "National ID" },
+  { value: "PASSPORT", label: "Passport" },
+  { value: "DRIVERS_LICENSE", label: "Driver’s License" },
+];
+
+function DocumentTier1Form({ token, countryCode }: { token: string; countryCode: string }) {
+  const waLink = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just completed my identity verification.")}`;
+  const country = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG.UG!;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [docType, setDocType] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [state, setState] = useState<"idle" | "submitting" | "success">("idle");
+  const [error, setError] = useState("");
+  const [underReview, setUnderReview] = useState(false);
+
+  const selectFile = (file: File | null) => {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      setError("Please select a JPG or PNG image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image too large. Maximum size is 5 MB.");
+      return;
+    }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setError("");
+  };
+
+  const removeFile = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedFile(null);
+    setPreviewUrl("");
+    if (fileRef.current) fileRef.current.value = "";
+    setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (state === "submitting") return;
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("Please enter your first and last name.");
+      return;
+    }
+    if (!docType) {
+      setError("Please select a document type.");
+      return;
+    }
+    if (!selectedFile) {
+      setError("Please upload a document image.");
+      return;
+    }
+    if (!['image/jpeg', 'image/png'].includes(selectedFile.type)) {
+      setError("Please select a JPG or PNG image.");
+      return;
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setError("Image too large. Maximum size is 5 MB.");
+      return;
+    }
+
+    setState("submitting");
+    setError("");
+    const formData = new FormData();
+    formData.append("token", token);
+    formData.append("firstName", firstName.trim());
+    formData.append("lastName", lastName.trim());
+    formData.append("docType", docType);
+    formData.append("document", selectedFile);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/kyc/submit-document`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.underReview) setUnderReview(true);
+        else setState("success");
+      } else {
+        setError(data.message || "Submission failed. Please check your details and try again.");
+        setState("idle");
+      }
+    } catch {
+      setError("Unable to submit your document. Your link may have expired or your connection may be unavailable. Please request a new link and try again.");
+      setState("idle");
+    }
+  };
+
+  if (underReview) return <UnderReviewScreen waLink={waLink} />;
+  if (state === "success") return <SuccessScreen message="Your identity has been verified. Your Tier 1 limits are now active." waLink={waLink} />;
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <span className="inline-block bg-blue-50 border border-blue-200 text-blue-700 text-[12px] font-semibold rounded-md px-2.5 py-1 mb-3">
+          Tier 1 Upgrade · {country.label}
+        </span>
+        <h2 className="text-[18px] font-semibold text-[#1a1a2e]">Verify Your Identity 🛡️</h2>
+      </div>
+
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 text-[13px] text-emerald-700 leading-relaxed">
+        📈 After verification: <strong>{TIER_LIMITS[1].daily}</strong> · <strong>{TIER_LIMITS[1].monthly}</strong>
+      </div>
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 text-[13px] text-blue-700 leading-relaxed">
+        🔒 Upload a clear photo of your document. JPG or PNG only, maximum 5 MB.
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="kyc-first-name" className="block text-[13px] font-medium text-gray-600 mb-1.5">First Name</label>
+          <input id="kyc-first-name" type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="As on your ID" autoComplete="given-name" className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
+        </div>
+        <div>
+          <label htmlFor="kyc-last-name" className="block text-[13px] font-medium text-gray-600 mb-1.5">Last Name</label>
+          <input id="kyc-last-name" type="text" required value={lastName} onChange={e => setLastName(e.target.value)} placeholder="As on your ID" autoComplete="family-name" className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors" />
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="kyc-document-type" className="block text-[13px] font-medium text-gray-600 mb-1.5">Document Type</label>
+        <select id="kyc-document-type" required value={docType} onChange={e => { setDocType(e.target.value); setError(""); }} className="w-full px-3.5 py-3 border-[1.5px] border-gray-200 rounded-xl text-[15px] text-gray-900 outline-none focus:border-indigo-500 transition-colors bg-white">
+          <option value="">Select document type</option>
+          {IMAGE_DOC_TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="kyc-document-image" className="block text-[13px] font-medium text-gray-600 mb-1.5">Document Image</label>
+        {previewUrl ? (
+          <div className="space-y-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewUrl} alt="Selected document preview" className="w-full max-h-56 object-contain rounded-xl border border-gray-200 bg-gray-50" />
+            <div className="flex gap-2">
+              <button type="button" onClick={() => fileRef.current?.click()} className="flex-1 border border-indigo-200 text-indigo-600 rounded-xl py-2.5 text-[13px] font-medium hover:bg-indigo-50 transition-colors">Reselect image</button>
+              <button type="button" onClick={removeFile} className="border border-red-200 text-red-600 rounded-xl px-4 py-2.5 text-[13px] font-medium hover:bg-red-50 transition-colors">Remove</button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" onClick={() => fileRef.current?.click()} className="w-full px-3.5 py-4 border-[1.5px] border-dashed border-gray-300 rounded-xl bg-gray-50 text-[14px] text-gray-500 hover:bg-gray-100 transition-colors">Tap to select a JPG or PNG image</button>
+        )}
+        <input id="kyc-document-image" ref={fileRef} type="file" className="hidden" accept="image/jpeg,image/png" onChange={e => selectFile(e.target.files?.[0] ?? null)} />
+        <p className="text-[11px] text-gray-400 mt-1.5 pl-1">JPG or PNG only · maximum 5 MB</p>
+      </div>
+
+      {error && <p className="text-[13px] text-red-600 bg-red-50 border border-red-200 rounded-xl p-3 leading-relaxed">⚠️ {error}</p>}
+      <button type="submit" disabled={state === "submitting"} className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed text-white font-semibold text-[16px] rounded-xl py-3.5 transition-colors mt-1">{state === "submitting" ? "Submitting…" : "Verify My Identity"}</button>
+      {state === "submitting" && <p className="text-[12px] text-gray-400 text-center animate-pulse">Uploading your document securely…</p>}
+      <p className="text-[12px] text-gray-400 text-center">🔐 256-bit encrypted · Documents deleted after verification</p>
+    </form>
+  );
+}
 function Tier2Form({ token, countryCode }: { token: string; countryCode: string }) {
   const waLink   = `https://wa.me/${WA_BUSINESS_NUMBER}?text=${encodeURIComponent("I just submitted my proof of address.")}`;
   const config   = COUNTRY_CONFIG[countryCode] ?? COUNTRY_CONFIG["NG"]!;
@@ -546,7 +722,8 @@ function KycPageInner() {
   const params      = useSearchParams();
   const token       = params.get("token") || "";
   const tier        = parseInt(params.get("tier") || "1", 10);
-  const countryCode = (params.get("country") || "NG").toUpperCase();
+  const countryParam = (params.get("country") || "NG").trim().toUpperCase();
+  const countryCode = countryParam === "UGANDA" ? "UG" : countryParam === "RWANDA" ? "RW" : countryParam;
 
   if (!token) {
     return <KycCard><ErrorScreen message="Missing verification link. Please request a new one from WhatsApp by typing *kyc*." /></KycCard>;
