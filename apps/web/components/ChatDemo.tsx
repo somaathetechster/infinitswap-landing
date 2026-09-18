@@ -1,16 +1,16 @@
-const messages = [
-  { side: "right", text: "I want to cash out 500 USDT to naira", time: "10:41" },
-  { side: "left", text: <>Your live quote is ready.<br /><strong>₦760,000</strong> locked for 2 minutes.</>, time: "10:41" },
-  { side: "right", text: "Proceed", time: "10:42" },
-  { side: "left", text: <>Confirmed. Your payout is on the way. 🎉</>, time: "10:42", check: true },
+"use client";
+import { useState } from "react";
+import WhatsAppMockup from "./WhatsAppMockup";
+
+const demos: [string, string, string][] = [
+  ["Bill payment", "Set my DSTV to autopay in Naira every month", "Done. DSTV autopay activated. ₦22,500 on the 1st of each month. ✓"],
+  ["Cash out", "Cash out 200 USDT to my bank", "₦152,000 sent to your GTBank account. ✓"],
+  ["Send money", "Pay Chidi ₦15,000 for the design work", "Chidi has been paid. Receipt sent. ✓"],
+  ["Airtime & data", "Buy ₦2,000 airtime for 08012345678", "Airtime sent to 08012345678. ✓"],
 ];
-export default function ChatDemo({ compact = false }: { compact?: boolean }) {
-  const mockup = <div className={("mx-auto w-full max-w-[410px] overflow-hidden rounded-[28px] border-[7px] border-[#2a2631] bg-[#111B21] shadow-[0_24px_70px_rgba(15,10,30,.25)] " + (compact ? "max-w-[380px]" : ""))} aria-label="WhatsApp conversation showing a USDT cash out">
-    <div className="flex items-center gap-3 bg-[#202C33] px-4 py-3 text-white"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6C3FE8] text-sm font-bold">i</div><div><div className="flex items-center gap-1 text-sm font-semibold">Infinitswap <span className="text-[#54b9e8]">●</span></div><div className="text-[10px] text-[#b9c5ca]">online</div></div><span className="ml-auto text-[#b9c5ca]">⋮</span></div>
-    <div className="flex min-h-[405px] flex-col gap-3 bg-[#0f1b20] bg-[radial-gradient(#26343a_1px,transparent_1px)] p-4 [background-size:18px_18px]">{messages.map((message, index) => <div key={index} className={(message.side === "right" ? "flex justify-end" : "flex justify-start")}><div className={("max-w-[86%] rounded-xl px-3 py-2 text-[13px] leading-5 text-[#e9edef] shadow-sm " + (message.side === "right" ? "rounded-tr-sm bg-[#005C4B]" : "rounded-tl-sm bg-[#202C33]"))}>{message.text}<div className="mt-1 flex items-center justify-end gap-1 text-[10px] text-[#aebbc0]">{message.time}{message.check && <span className="text-[#53bdeb]">✓✓</span>}</div></div></div>)}</div>
-    <div className="flex items-center gap-2 bg-[#202C33] px-3 py-2 text-[#9ba6aa]"><div className="flex-1 rounded-full bg-[#2a3940] px-3 py-2 text-xs">Message</div><div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00a884] text-white">➤</div></div>
-  </div>;
-  if (compact) return mockup;
-  const demos = [["Bill payment", "Set my DSTV to autopay in Naira every month", "Done. DSTV autopay activated. ✓"], ["Cash out", "Cash out 200 USDT to my bank", "₦152,000 sent to your account. ✓"], ["Send money", "Pay Chidi ₦15,000 for the design work", "Chidi has been paid. ✓"], ["Airtime & data", "Buy ₦2,000 airtime for 08012345678", "Airtime sent. ✓"]];
-  return <section className="bg-[#0F0A1E] py-20 text-white md:py-28"><div className="section-wrap"><div className="grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr]"><div><p className="mb-4 text-sm font-semibold text-[#FF6B6B]">See it in action</p><h2 className="display text-3xl font-bold tracking-[-.04em] sm:text-4xl">Money should fit into your everyday life.</h2><p className="mt-5 text-lg leading-8 text-[#B8AACC]">See what you can do in one chat.</p></div>{mockup}</div><div className="mt-16 grid gap-4 sm:grid-cols-2">{demos.map(([label, request, response]) => <div key={label} className="rounded-2xl border border-white/10 bg-white/[.04] p-5"><p className="text-sm font-semibold text-[#FF6B6B]">{label}</p><div className="mt-4 rounded-xl rounded-tr-sm bg-[#005C4B] p-3 text-sm text-[#e9edef]">{request}</div><div className="mt-2 rounded-xl rounded-tl-sm bg-[#202C33] p-3 text-sm text-[#e9edef]">{response}</div></div>)}</div></div></section>;
+
+export default function ChatDemo() {
+  const [active, setActive] = useState(0);
+  const selected = demos[active] ?? demos[0]!;
+  return <section className="bg-[#1A1033] py-24 text-white md:py-28"><div className="section-wrap"><div className="mx-auto max-w-[700px] text-center"><h2 className="display text-[clamp(32px,5vw,56px)] font-bold leading-tight tracking-[-.05em]">Money should fit into your everyday life.</h2><p className="mt-5 text-lg text-[#B8AACC]">See what you can do in one chat.</p></div><div className="mt-16 grid items-center gap-14 lg:grid-cols-[55%_45%]"><div className="flex justify-center lg:justify-start"><WhatsAppMockup messages={[{ side: "right", text: selected[1], time: "10:41" }, { side: "left", text: selected[2], time: "10:42" }]} /></div><div className="space-y-2">{demos.map(([label, request, response], index) => <button key={label} onClick={() => setActive(index)} className={("block w-full border-l-[3px] p-5 text-left transition " + (index === active ? "rounded-r-lg border-[#6C3FE8] bg-[#6C3FE8]/10" : "border-transparent"))}><span className={("font-display text-lg font-semibold " + (index === active ? "text-white" : "text-[#B8AACC]"))}>{label}</span><span className={("mt-2 block text-sm leading-6 " + (index === active ? "text-[#B8AACC]" : "text-[#B8AACC]/50"))}>{request}</span>{index === active && <span className="mt-2 block text-sm leading-6 text-[#22C55E]">{response}</span>}</button>)}</div></div></div></section>;
 }
