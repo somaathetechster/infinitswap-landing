@@ -1,18 +1,19 @@
-type Message = { side: "left" | "right"; text: string; time?: string; action?: boolean };
+import type { ReactNode } from "react";
 
-const cashOut: Message[] = [
-  { side: "left", text: "Hello. What would you like to convert today?", time: "10:41" },
-  { side: "right", text: "I want to cash out 500 USDT to naira", time: "10:41" },
-  { side: "left", text: "Your live quote is ready. Estimated payout calculated.", time: "10:41" },
-  { side: "right", text: "Proceed with the transaction.", time: "10:42", action: true },
-  { side: "left", text: "Confirmed. Your payout is on the way. 🎉", time: "10:42" },
-];
+export type ChatMessage = { side: "left" | "right"; text: ReactNode; time?: string; action?: boolean };
 
-export default function WhatsAppMockup({ messages = cashOut }: { messages?: Message[] }) {
-  return <div className="phone-frame" aria-label="Authentic WhatsApp conversation with Infinitswap">
+interface WhatsAppMockupProps {
+  tilt?: boolean;
+  glowIntensity?: "high" | "medium";
+  children: ReactNode;
+}
+
+export default function WhatsAppMockup({ tilt = false, glowIntensity = "medium", children }: WhatsAppMockupProps) {
+  return <div className={("phone-frame " + (tilt ? "phone-tilted " : "phone-straight ") + (glowIntensity === "high" ? "phone-glow-high" : "phone-glow-medium"))} aria-label="Authentic WhatsApp conversation with Infinitswap">
     <div className="phone-notch" />
-    <div className="wa-header"><span className="text-xl leading-none">‹</span><div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#6C3FE8] text-sm font-bold">i</div><div className="min-w-0"><div className="flex items-center gap-1 text-[15px] font-semibold">Infinitswap <span className="text-[#53BDEB]">●</span></div><div className="text-xs text-[#53BDEB]">Verified assistant <span className="ml-1 inline-block h-2 w-2 rounded-full bg-[#22C55E]" /></div></div><div className="ml-auto flex gap-3 text-lg">⌕ ⋮</div></div>
-    <div className="wa-chat"><div className="rate-card"><div className="flex items-center justify-between text-[9px] tracking-[.12em] text-[#8696A0]"><span>Live payout estimate</span><b className="rounded bg-[#22C55E] px-2 py-0.5 text-[9px] tracking-normal text-white">Locked</b></div><div className="mt-1 font-display text-[26px] font-bold text-white">₦760,000</div><div className="text-[10px] text-[#8696A0]">Rate locked for 2 minutes</div></div>{messages.map((message, index) => <div key={index} className={(message.side === "right" ? "wa-row justify-end" : "wa-row justify-start")}><div className={("wa-bubble " + (message.side === "right" ? "wa-user" : "wa-bot") + (message.action ? " wa-action" : ""))}>{message.text}<div className="wa-time">{message.time}{message.side === "right" && <span className="ml-1 text-[#53BDEB]">✓✓</span>}</div></div></div>)}<span className="wa-confirm">✓ Transaction confirmed</span></div>
-    <div className="wa-input"><div className="flex-1 rounded-full bg-[#2A3942] px-4 py-2 text-[13px] text-[#8696A0]">Message</div><div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00A884] text-white">➤</div></div>
+    <div className="phone-status"><span>10:41</span><span className="flex items-center gap-2" aria-hidden="true"><span>▮▮▮</span><span>⌁</span><span>▰</span></span></div>
+    <div className="wa-header"><span className="text-2xl leading-none">‹</span><div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#6C3FE8] to-[#4A2DB0] text-[15px] font-bold">i</div><div className="min-w-0"><div className="flex items-center gap-1 text-[15px] font-semibold text-[#E9EDEF]">Infinitswap <span className="text-[#53BDEB]">●</span></div><div className="flex items-center gap-1 text-xs text-[#53BDEB]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22C55E]" />Verified assistant</div></div><div className="ml-auto flex gap-3 text-lg text-white" aria-hidden="true">⌕ ♡ ⋮</div></div>
+    <div className="wa-chat">{children}</div>
+    <div className="wa-input"><span className="text-lg text-[#8696A0]" aria-hidden="true">☺</span><div className="flex-1 rounded-full bg-[#2A3942] px-4 py-2 text-[13px] text-[#8696A0]">Message</div><span className="text-lg text-[#8696A0]" aria-hidden="true">⌁</span></div>
   </div>;
 }
