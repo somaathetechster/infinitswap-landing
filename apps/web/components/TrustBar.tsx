@@ -1,0 +1,2 @@
+const items = ["Up to 7 African countries supported", "No app download needed", "Licensed payment partners", "Transactions in seconds"];
+export default function TrustBar() { return <div className="border-y border-[#e6def2] bg-[#eee6ff]"><div className="section-wrap grid gap-4 py-6 text-sm font-medium text-[#5A4E6E] sm:grid-cols-2 lg:grid-cols-4">{items.map(item => <div key={item} className="flex items-center gap-2"><span className="text-[#22C55E]">✓</span>{item}</div>)}</div></div>; }

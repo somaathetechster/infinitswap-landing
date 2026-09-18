@@ -1,105 +1,18 @@
 @import "tailwindcss";
 
-@theme {
-  /* High-Authority "Deep Parchment" Palette */
-  --color-parchment: #e2dac7; 
-  --color-ink-black: #0a0a0a;
-  --color-infinite-blue: #0827dc;
-  --color-infinite-magenta: #fe009c;
-  --color-infinite-cyan: #00f0ff;
-
-  /* WhatsApp Native Palette */
-  --color-wa-teal: #075e54;
-  --color-wa-light-green: #e7ffdb;
-  --color-wa-bg: #e5ddd5;
-  --color-wa-button-blue: #f0f7ff;
-
-  /* Drafting Line Colors */
-  --line-subtle: rgba(139, 125, 107, 0.15); 
-  --line-strong: rgba(139, 125, 107, 0.4); 
-
-  --font-display: "HK Modular", sans-serif;
-  --font-body: "Helvetica Now Display", sans-serif;
-}
-
+@theme { --font-display: var(--font-jakarta); --font-body: var(--font-inter); }
 @layer base {
-  html {
-    color-scheme: light;
-    scroll-behavior: initial;
-  }
-
-  body {
-    background-color: var(--color-parchment);
-    color: var(--color-ink-black);
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: #f5f0ff; color: #0f0a1e; font-family: var(--font-inter), "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
+  ::selection { background: #6c3fe8; color: white; }
+  * { box-sizing: border-box; }
 }
-
-/* 🟢 THE WHATSAPP NATIVE ENGINE 
-   Recreates the exact doodle background from your reference
-*/
-.wa-bg-container {
-  background-color: var(--color-wa-bg);
-  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-  background-blend-mode: overlay;
-  background-size: 450px;
-  position: relative;
+@layer utilities { .section-wrap { width: min(1200px, calc(100% - 40px)); margin-inline: auto; } .display { font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif; } }
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+  .hero-enter { animation: hero-enter .6s ease-out both; }
+  .hero-enter-delay { animation: hero-enter .6s .12s ease-out both; }
+  @keyframes hero-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 }
-
-/* MASTER TECHNICAL GRID */
-.technical-grid {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: 
-    linear-gradient(to right, var(--line-strong) 1.5px, transparent 1.5px),
-    linear-gradient(to bottom, var(--line-strong) 1.5px, transparent 1.5px),
-    linear-gradient(to right, var(--line-subtle) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--line-subtle) 1px, transparent 1px);
-  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
-}
-
-/* XARA FILM GRAIN OVERLAY 
-   Gives the UI that "Award-Winning" texture
-*/
-.grain-texture::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 50;
-  opacity: 0.04;
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-}
-
-/* HIDE SCROLLBARS BUT KEEP FUNCTIONALITY */
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-::selection {
-  background-color: var(--color-infinite-magenta);
-  color: white;
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.animate-marquee {
-  animation: marquee 30s linear infinite;
-}
-
-/* EASE EXPO for superior transitions */
-.ease-expo {
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

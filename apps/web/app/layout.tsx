@@ -1,47 +1,17 @@
-'use client'; // Required because Lenis is a client-side interaction provider
-
-import { ReactLenis } from '@studio-freight/react-lenis';
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 
-// Note: Metadata and Viewport exports must remain in a separate 
-// 'layout.tsx' if you want them to be server-rendered, OR 
-// you can move them to a 'metadata.ts' file. 
-// For this layout to be 'use client', we focus on the structure.
+const jakarta = localFont({ src: "./fonts/GeistVF.woff", variable: "--font-jakarta", display: "swap" });
+const inter = localFont({ src: "./fonts/GeistVF.woff", variable: "--font-inter", display: "swap" });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" className="selection:bg-infinite-magenta selection:text-white">
-      <body className="antialiased bg-parchment text-ink-black min-h-screen">
-        
-        {/* 1. THE LENIS ROOT: This is the magic "Xara" scroll engine */}
-        <ReactLenis root options={{ 
-          lerp: 0.1,         // Speed of the "inertia" (lower is smoother/heavier)
-          duration: 1.5,     // How long the scroll animation lasts
-          smoothWheel: true, 
-          wheelMultiplier: 1, 
-          infinite: false 
-        }}>
-          
-          {/* THE DRAFTING FOUNDATION */}
-          <div className="technical-grid fixed inset-0 pointer-events-none z-0" />
+export const metadata: Metadata = {
+  title: "Infinitswap | Spend USDT & Stablecoins in Local Currencies Across Africa",
+  description: "Spend USDT and stablecoins in local currencies on WhatsApp with Infinitswap. Convert crypto, make payments and move money across supported African markets without juggling multiple apps.",
+  alternates: { canonical: "https://www.infinitswap.ai" },
+  openGraph: { title: "Infinitswap | Spend USDT & Stablecoins Across Africa", description: "Spend USDT and stablecoins in local currencies on WhatsApp. Make payments and move money across supported African markets.", type: "website", url: "https://www.infinitswap.ai" },
+};
 
-          <div className="relative z-10 flex flex-col min-h-screen">
-            <Navbar />
-            
-            <main className="flex-grow">
-              {children}
-            </main>
-
-            <Footer />
-          </div>
-        </ReactLenis>
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="en" className={jakarta.variable + " " + inter.variable}><body>{children}</body></html>;
 }
