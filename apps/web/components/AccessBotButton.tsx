@@ -1,16 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { waLink, WA_PREFILL } from '../lib/whatsapp';
 
 export default function AccessBotButton() {
-  // 🔒 Your WhatsApp Business number (unchanged)
-  const WHATSAPP_NUMBER = "447860028474";
-
-  // Initial message users send
-  const INITIAL_INTENT = "Hi! I want to swap my crypto for cash.";
-  const encodedMessage = encodeURIComponent(INITIAL_INTENT);
-
-  const botUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+  const botUrl = waLink(WA_PREFILL.start);
 
   return (
     <motion.a

@@ -13,7 +13,7 @@ export function waLink(message: string) {
 
 /** Module-specific prefills, kept together so copy stays consistent site-wide. */
 export const WA_PREFILL = {
-  start: 'Hi, I want to get started',
+  start: 'Hello, I want to get started',
   savings: 'Hi, I want to start a savings goal',
   bills: 'Hi, I want to pay a bill',
   rewards: 'Hi, I want to know about rewards and referrals',
