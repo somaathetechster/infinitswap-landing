@@ -86,6 +86,19 @@ case "VOTER_ID_GH": {
       return null;
     }
 
+    case "KENYA_NATIONAL_ID": {
+      const n = clean.replace(/\s/g, "");
+      if (!/^\d+$/.test(n)) return "Kenya National ID must contain digits only.";
+      if (n.length < 7 || n.length > 9)
+        return `Kenya National ID must be 7–9 digits. You entered ${n.length}.`;
+      return null;
+    }
+
+    case "KENYA_PASSPORT": {
+      if (clean.length < 6) return "Please enter your full passport number.";
+      return null;
+    }
+
     default:
       return null;
   }
@@ -138,6 +151,22 @@ const COUNTRY_CONFIG: Record<string, {
     label: "South Africa",
     tier1: [
       { value: "SA National ID", label: "SA National ID", hint: "13 digits — your green ID book or smart ID card number" },
+    ],
+    tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
+  },
+  KE: {
+    label: "Kenya",
+    tier1: [
+      {
+        value: "KENYA_NATIONAL_ID",
+        label: "National ID ⭐ Recommended",
+        hint: "7–9 digits — found on your national ID card",
+      },
+      {
+        value: "KENYA_PASSPORT",
+        label: "Passport",
+        hint: "Alphanumeric — found on the photo page of your passport",
+      },
     ],
     tier2: ["Utility Bill", "Bank Statement", "Lease Agreement"],
   },
@@ -372,7 +401,7 @@ function NumericTier1Form({ token, countryCode }: { token: string; countryCode: 
             autoComplete="off"
             spellCheck={false}
             inputMode={
-  docType === "BVN" || docType === "NIN" || docType === "SSNIT"
+  docType === "BVN" || docType === "NIN" || docType === "SSNIT" || docType === "KENYA_NATIONAL_ID"
     ? "numeric"
     : "text"
 }
@@ -722,8 +751,11 @@ function KycPageInner() {
   const params      = useSearchParams();
   const token       = params.get("token") || "";
   const tier        = parseInt(params.get("tier") || "1", 10);
-  const countryParam = (params.get("country") || "NG").trim().toUpperCase();
-  const countryCode = countryParam === "UGANDA" ? "UG" : countryParam === "RWANDA" ? "RW" : countryParam;
+  const rawCountry = (params.get("country") || "").trim().toUpperCase();
+  const normalizedCountry = rawCountry === "UGANDA" ? "UG" : rawCountry === "RWANDA" ? "RW" : rawCountry;
+  const countryCode = (normalizedCountry && normalizedCountry !== "UNKNOWN" && COUNTRY_CONFIG[normalizedCountry])
+    ? normalizedCountry
+    : "NG";
 
   if (!token) {
     return <KycCard><ErrorScreen message="Missing verification link. Please request a new one from WhatsApp by typing *kyc*." /></KycCard>;
