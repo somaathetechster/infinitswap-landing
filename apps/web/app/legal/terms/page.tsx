@@ -49,7 +49,7 @@ export default function TermsPage() {
       <section className="mb-8">
         <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">4. Transaction Finality</h3>
         <p>
-          Due to the real-time nature of the settlement rails used by our partners (including RTGS and blockchain), 
+          Due to the real-time nature of the settlement networks used by our partners (including RTGS),
           once an instruction is confirmed, it is generally <strong>irreversible</strong>. Users are responsible 
           for verifying recipient data before submission.
         </p>

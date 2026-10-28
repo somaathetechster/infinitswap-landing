@@ -9,7 +9,7 @@ export type Country = {
   name: string;
   currency: string;
   region: string;
-  /** Indicative payout rate per 1 USDT, shown as a live-ish figure. */
+  /** Indicative local payout figure, shown as a live-ish reference. */
   rate: string;
   status: string;
   /** Airport-style code for the Navbar's system-status clocks, e.g. "LOS". */
@@ -125,7 +125,7 @@ export const COUNTRIES: Country[] = [
   },
 ];
 
-/** Currency codes, for the Navbar chips and any rate rail. */
+/** Currency codes, for any currency reference in the UI. */
 export const CURRENCIES = COUNTRIES.map((c) => c.currency);
 
 /** Prose list, e.g. "Nigeria, Ghana, … and Rwanda". */

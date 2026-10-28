@@ -1,4 +1,25 @@
-"use client";
-import { useState } from "react";
-const features: [string, string][] = [["Hold", "Keep your USDT safe and accessible. Available whenever you need it."], ["Save", "Set money aside in digital dollars and watch your balance grow."], ["Pay", "Cover airtime, data, electricity, cable TV and more — all through chat."], ["Swap", "Convert your USDT to local currency at a live, locked rate."], ["Earn", "Get rewarded with points every time you use Infinitswap."]];
-export default function Features() { const [active, setActive] = useState(0); const selected = features[active] ?? features[0]!; return <section id="features" className="bg-white py-20 md:py-28"><div className="section-wrap"><h2 className="display max-w-[780px] text-[clamp(24px,3vw,40px)] font-bold leading-tight tracking-[-.045em]">One account. Multiple ways to manage your money.</h2><div className="mt-12 flex flex-wrap gap-2 border-b border-[#E8E0F7] pb-5">{features.map(([title], index) => <button key={title} onClick={() => setActive(index)} className={("rounded-full px-5 py-2.5 text-sm font-semibold transition " + (index === active ? "bg-[#6C3FE8] text-white" : "text-[#5A4E6E] hover:bg-[#F5F0FF]"))} aria-pressed={index === active}>{title}</button>)}</div><div className="py-10"><p className="display max-w-[560px] text-xl leading-9 text-[#0F0A1E] md:text-2xl">{selected[1]}</p><p className="mt-8 text-sm text-[#5A4E6E]">7 African currencies + USDT · Nigeria · Ghana · Tanzania · South Africa · Rwanda · Uganda · Kenya</p></div></div></section>; }
+const capabilities: [string, string][] = [
+  ["Send money", "To anyone, instantly. Name a person and an amount — the AI finds the account, confirms it, and moves the money."],
+  ["Pay bills", "Airtime, electricity, subscriptions and more. Tell it what to settle and it takes care of the rest."],
+  ["Receive money", "Get paid straight to your account. Share a simple request and the money lands where it should."],
+];
+
+export default function Features() {
+  return (
+    <section id="features" className="bg-[#0A0A0A] py-24 md:py-32">
+      <div className="section-wrap">
+        <h2 className="display max-w-[720px] text-[clamp(28px,4.5vw,52px)] font-bold leading-[1.05] tracking-[-.05em] text-white">
+          What you can do.
+        </h2>
+        <div className="mt-16 grid gap-5 md:grid-cols-3">
+          {capabilities.map(([title, text]) => (
+            <article key={title} className="rounded-3xl border border-white/[.07] bg-white/[.02] p-8 transition hover:border-white/15">
+              <h3 className="display text-2xl font-semibold text-white">{title}</h3>
+              <p className="mt-4 text-[15.5px] leading-[1.6] text-[#9A9A9A]">{text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

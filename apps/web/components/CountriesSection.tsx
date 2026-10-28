@@ -1,2 +1,23 @@
-const countries = [["🇳🇬", "Nigeria", "Naira"], ["🇬🇭", "Ghana", "Cedi"], ["🇹🇿", "Tanzania", "Tanzanian Shilling"], ["🇿🇦", "South Africa", "Rand"], ["🇷🇼", "Rwanda", "Rwandan Franc"], ["🇺🇬", "Uganda", "Ugandan Shilling"], ["🇰🇪", "Kenya", "Kenyan Shilling"]];
-export default function CountriesSection() { return <section id="countries" className="bg-gradient-to-br from-[#6C3FE8] to-[#4A2DB0] py-24 text-white md:py-28"><div className="section-wrap"><h2 className="display text-center text-[clamp(24px,3vw,40px)] font-bold tracking-[-.045em]">Built for the African money movement.</h2><p className="mx-auto mt-5 max-w-[600px] text-center text-lg text-white/75">Spend USDT across Africa, in the currency you already use.</p><div className="mx-auto mt-14 grid max-w-[900px] grid-cols-2 gap-5 md:grid-cols-4">{countries.map(([flag, name, currency]) => <article key={name} className="flex flex-col items-center gap-2 rounded-2xl border border-white/15 bg-white/[.08] px-3 py-6 text-center"><span className="text-4xl">{flag}</span><h3 className="display text-base font-semibold">{name}</h3><p className="text-[13px] text-white/65">{currency}</p></article>)}</div><blockquote className="display mx-auto mt-14 max-w-[600px] text-center text-xl font-semibold italic leading-8">Your crypto shouldn’t be stuck in a wallet. Spend it where you live, in the currency you use.</blockquote></div></section>; }
+const countries = ["Nigeria", "Ghana", "Tanzania", "South Africa", "Rwanda", "Uganda", "Kenya"];
+
+export default function CountriesSection() {
+  return (
+    <section id="countries" className="bg-[#0A0A0A] py-24 md:py-32">
+      <div className="section-wrap">
+        <h2 className="display max-w-[640px] text-[clamp(28px,4.5vw,52px)] font-bold leading-[1.05] tracking-[-.05em] text-white">
+          Available in seven markets.
+        </h2>
+        <ul className="mt-14 grid grid-cols-1 gap-x-10 gap-y-5 sm:grid-cols-2 md:grid-cols-3">
+          {countries.map((name) => (
+            <li
+              key={name}
+              className="display border-b border-white/[.07] pb-5 text-[clamp(22px,3vw,30px)] font-semibold text-[#EDEDED]"
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}

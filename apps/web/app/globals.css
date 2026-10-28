@@ -3,7 +3,7 @@
 @theme { --font-display: var(--font-jakarta); --font-body: var(--font-inter); }
 @layer base {
   html { scroll-behavior: smooth; }
-  body { margin: 0; background: #f5f0ff; color: #0f0a1e; font-family: var(--font-inter), "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: #0A0A0A; color: #EDEDED; font-family: var(--font-inter), "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
   ::selection { background: #6c3fe8; color: white; }
   * { box-sizing: border-box; }
 }

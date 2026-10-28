@@ -70,11 +70,11 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    title: "Web3 & Industry Knowledge",
+    title: "Industry Knowledge",
     fields: [
       {
         name: "experience",
-        label: "How long have you been involved in Web3/crypto/fintech/blockchain?",
+        label: "How long have you been involved in fintech or financial technology?",
         kind: "radio",
         required: true,
         options: [
@@ -82,19 +82,19 @@ export const SECTIONS: Section[] = [
           "6–12 months",
           "1–2 years",
           "2+ years",
-          "I am completely new to Web3",
+          "I am completely new to fintech",
         ],
       },
       {
         name: "communities",
         label:
-          "Which Web3/crypto/fintech communities or student organizations are you currently in?",
+          "Which fintech communities or student organizations are you currently in?",
         kind: "textarea",
         required: true,
       },
       {
         name: "web3Understanding",
-        label: "In your own words, what is Web3 and what do you understand about the ecosystem?",
+        label: "In your own words, what excites you about AI-powered payments and financial technology?",
         kind: "textarea",
         required: true,
       },

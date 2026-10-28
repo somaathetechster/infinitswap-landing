@@ -12,12 +12,12 @@ export type ModulePageProps = {
   titleBottom: string;
   /** Standfirst in the right-hand column, against the magenta rule. */
   intro: string;
-  /** The numbered cards — same visual contract as the /protocol flow. */
+  /** The numbered cards — same visual contract across modules. */
   items: StepItem[];
-  /** Card footer copy, e.g. "Savings module" / "Plan active". */
+  /** Card footer copy, e.g. "Bills module" / "Live". */
   cardFooterLabel: string;
   cardStatusLabel: string;
-  /** Fact rail below the cards. */
+  /** Fact row below the cards. */
   facts: { label: string; value: string }[];
   /** wa.me deep link with the module's own prefill. */
   ctaHref: string;
@@ -123,7 +123,7 @@ export default function ModulePage({
         </div>
       </section>
 
-      {/* Fact rail */}
+      {/* Fact row */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 py-20 md:px-10 xl:px-12">
         <div className="mb-6 flex items-center gap-4">
           <div className="h-px w-14 bg-[#0827dc]/30" />

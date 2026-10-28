@@ -11,7 +11,7 @@ export default function RefundPage() {
         <p>
           At <strong>Infinitswap</strong>, we provide a technology interface that routes instructions to 
           licensed third-party Payment Service Providers (PSPs). Because our settlement partners utilize 
-          real-time rails—including <strong>NIP (Nigeria), RTC (South Africa), GIP (Ghana), and TIPS (Tanzania)</strong>—most 
+          real-time payment networks—including <strong>NIP (Nigeria), RTC (South Africa), GIP (Ghana), and TIPS (Tanzania)</strong>—most
           transactions are processed instantly and cannot be reversed.
         </p>
       </section>
@@ -37,8 +37,8 @@ export default function RefundPage() {
           reaching the beneficiary.
         </p>
         <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Automated Reversals:</strong> If a transaction fails due to a system error within our technology layer, a reversal to the originating bank account or wallet is typically initiated within <strong>24 to 48 hours</strong>.</li>
-          <li><strong>Network Delays:</strong> Transactions marked as "Pending" due to partner bank maintenance (common in cross-border corridors) are not eligible for refunds until a definitive "Failed" status is returned by the PSP.</li>
+          <li><strong>Automated Reversals:</strong> If a transaction fails due to a system error within our technology layer, a reversal to the originating bank account is typically initiated within <strong>24 to 48 hours</strong>.</li>
+          <li><strong>Network Delays:</strong> Transactions marked as "Pending" due to partner bank maintenance are not eligible for refunds until a definitive "Failed" status is returned by the PSP.</li>
         </ul>
       </section>
 
@@ -46,8 +46,8 @@ export default function RefundPage() {
         <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">4. Non-Refundable Scenarios</h3>
         <p>Refunds will not be issued for:</p>
         <ul className="list-disc ml-6 space-y-2">
-          <li><strong>User Error:</strong> Providing incorrect bank account numbers, SWIFT/IBAN codes, or wallet addresses.</li>
-          <li><strong>Exchange Rate Fluctuations:</strong> Any variation between the quoted rate and the final settlement rate caused by network latency or market volatility.</li>
+          <li><strong>User Error:</strong> Providing incorrect bank account numbers, SWIFT/IBAN codes, or recipient details.</li>
+          <li><strong>Rate Fluctuations:</strong> Any variation between the quoted rate and the final settlement rate caused by network latency or market volatility.</li>
           <li><strong>AML Holds:</strong> Transactions flagged or frozen by regulated partners for compliance investigations under <strong>FICA (South Africa)</strong> or <strong>AML Act (Nigeria)</strong>.</li>
         </ul>
       </section>

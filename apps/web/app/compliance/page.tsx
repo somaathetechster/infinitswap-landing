@@ -74,8 +74,8 @@ export default function CompliancePage() {
             <div className="mt-6 space-y-6">
               <p className="max-w-2xl text-xl leading-snug tracking-[-0.03em] text-black/74 md:text-[1.8rem]">
                 Infinitswap is positioned as a financial technology infrastructure
-                and orchestration layer connecting digital asset flows to local
-                payout rails.
+                and orchestration layer connecting a conversational interface to
+                local payout networks.
               </p>
 
               <p className="max-w-2xl text-base leading-relaxed text-black/60">
@@ -133,7 +133,7 @@ export default function CompliancePage() {
 
             <p className="mt-6 text-sm leading-relaxed text-white/72">
               Regional financial and banking compliance expectations inform how
-              partner rails and transaction pathways are structured across
+              partner networks and transaction pathways are structured across
               supported markets.
             </p>
           </div>

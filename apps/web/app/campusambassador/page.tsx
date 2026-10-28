@@ -196,7 +196,7 @@ export default function CampusAmbassadorPage() {
           <h2 className="text-[18px] font-semibold text-[#1a1a2e]">Become a Campus Ambassador 🎓</h2>
           <p className="text-[13px] text-gray-500 mt-1.5 leading-relaxed">
             Represent Infinitswap on your campus — run events, grow a community, and help students
-            hold, save, spend, and swap money from one WhatsApp chat.
+            send money, pay bills, and get paid from one WhatsApp chat.
           </p>
         </div>
 

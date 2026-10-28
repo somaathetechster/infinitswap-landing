@@ -62,7 +62,7 @@ export default function PaymentCompleteClient() {
   const subtext = isFailed
     ? "Something went wrong. Return to WhatsApp and try again."
     : isSuccess
-    ? "Your wallet will be credited shortly."
+    ? "Your account will be credited shortly."
     : "Your payment is being verified. We'll notify you on WhatsApp.";
 
   return (
@@ -232,7 +232,7 @@ export default function PaymentCompleteClient() {
             )}
 
             <p className="footer-note">
-              {isSuccess ? "Wallet credited within 60 seconds."
+              {isSuccess ? "Account credited within 60 seconds."
                 : isFailed ? "No funds were deducted. Please try again."
                 : "We'll send you a WhatsApp confirmation shortly."}
             </p>

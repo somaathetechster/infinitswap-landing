@@ -183,8 +183,8 @@ const COUNTRY_CONFIG: Record<string, {
 };
 
 const TIER_LIMITS = {
-  1: { daily: "2,000 USDT/day",  monthly: "5,000 USDT/month"  },
-  2: { daily: "10,000 USDT/day", monthly: "50,000 USDT/month" },
+  1: { daily: "$2,000/day",  monthly: "$5,000/month"  },
+  2: { daily: "$10,000/day", monthly: "$50,000/month" },
 };
 
 async function collectDevicePayload(): Promise<string> {

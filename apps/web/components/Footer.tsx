@@ -1,2 +1,27 @@
-const nav = [["How it works", "how-it-works"], ["Features", "features"], ["Supported countries", "countries"], ["Trust & safety", "trust"], ["FAQ", "faq"]];
-export default function Footer() { return <footer className="bg-[#0F0A1E] py-12 text-white"><div className="section-wrap"><div className="flex flex-col gap-8 border-b border-white/10 pb-10 md:flex-row md:items-start md:justify-between"><div><a href="#top" className="display text-[21px] font-bold tracking-[-.04em] text-white">infinitswap<span className="text-[#FF6B6B]">.</span></a><p className="mt-4 max-w-[320px] text-sm leading-6 text-[#B8AACC]">Stop juggling apps for money. Hold it, grow it, spend it, swap it — all from one WhatsApp chat.</p></div><nav className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm text-[#B8AACC] md:grid-cols-3" aria-label="Footer navigation">{nav.map(([label, id]) => <a key={id} href={"#" + id} className="hover:text-white">{label}</a>)}<a href="mailto:support@infinitswap.ai" className="hover:text-white">Email support</a><a href="https://www.instagram.com/chatwithinfinitswapai/" target="_blank" rel="noopener noreferrer" className="hover:text-white">Instagram</a><a href="https://x.com/infinitswap" target="_blank" rel="noopener noreferrer" className="hover:text-white">X (Twitter)</a></nav></div><div className="flex flex-col gap-3 pt-6 text-xs text-[#8d7da3] md:flex-row md:items-center md:justify-between"><span>© 2026 Infinitswap. Powered by Domani.</span><span>Privacy policy · Terms of service</span></div><p className="mt-5 text-xs leading-5 text-[#8d7da3]">Infinitswap is not a bank. Payment services are provided by licensed partners.</p></div></footer>; }
+const links: [string, string][] = [
+  ["How it works", "/#how-it-works"],
+  ["Privacy", "/legal/privacy"],
+  ["Terms", "/legal/terms"],
+  ["Contact", "mailto:support@infinitswap.ai"],
+];
+
+export default function Footer() {
+  return (
+    <footer className="bg-[#0A0A0A] py-14 text-white">
+      <div className="section-wrap">
+        <div className="flex flex-col gap-8 border-t border-white/[.08] pt-10 md:flex-row md:items-center md:justify-between">
+          <a href="#top" className="font-display text-[21px] font-bold tracking-[-.04em]">infinitswap<span className="text-[#6C3FE8]">.</span></a>
+          <nav className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-[#9A9A9A]" aria-label="Footer navigation">
+            {links.map(([label, href]) => (
+              <a key={label} href={href} className="transition hover:text-white">{label}</a>
+            ))}
+          </nav>
+        </div>
+        <div className="mt-8 flex flex-col gap-2 text-xs text-[#6B6B6B] md:flex-row md:items-center md:justify-between">
+          <span>© 2026 Infinitswap. Powered by Domani.</span>
+          <span>Infinitswap is not a bank. Payments are settled by licensed partners.</span>
+        </div>
+      </div>
+    </footer>
+  );
+}

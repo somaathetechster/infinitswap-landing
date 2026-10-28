@@ -17,7 +17,7 @@ const BILLS: StepItem[] = [
     micro: 'StayConnected',
     title: 'Airtime and data',
     detail:
-      'Top up any number on any supported network — yours or someone else’s — straight from your wallet balance. Send the number, pick the bundle, done.',
+      'Top up any number on any supported network — yours or someone else’s — straight from your account balance. Send the number, pick the bundle, done.',
   },
   {
     id: '02',
@@ -57,7 +57,7 @@ const BILLS: StepItem[] = [
     micro: 'SetItAndForgetIt',
     title: 'Bills on autopay',
     detail:
-      'Put any recurring bill on a schedule — weekly, monthly, or on a date you pick. Infinitswap reminds you before it charges, pays on the day, retries if a rail is down or your balance is short, and tells you either way, so a missed payment is never a silent one.',
+      'Put any recurring bill on a schedule — weekly, monthly, or on a date you pick. Infinitswap reminds you before it charges, pays on the day, retries if a payment fails or your balance is short, and tells you either way, so a missed payment is never a silent one.',
   },
 ];
 
@@ -70,16 +70,16 @@ export default function PayPage() {
       intro="Airtime, data, electricity, water, cable, betting — paid in a chat message, or automated so it happens without you. Across Nigeria, Ghana, South Africa, Tanzania, Kenya, Uganda, and Rwanda."
       items={BILLS}
       cardFooterLabel="Bills module"
-      cardStatusLabel="Rail active"
+      cardStatusLabel="Live"
       facts={[
         { label: `Countries (${COUNTRY_COUNT})`, value: COUNTRY_LIST },
-        { label: 'Pay from', value: 'Any local wallet balance' },
+        { label: 'Pay from', value: 'Any local account balance' },
         { label: 'Autopay', value: 'Reminder, charge, retry, receipt' },
       ]}
       ctaHref={waLink(WA_PREFILL.bills)}
       ctaLabel="Pay a bill"
       ctaNote="One message. Receipt back in the same chat."
-      statusLeft="Bills module / 7 country rails"
+      statusLeft="Bills module / 7 countries"
       statusRight="All billers operational"
     />
   );

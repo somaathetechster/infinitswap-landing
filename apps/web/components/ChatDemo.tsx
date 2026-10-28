@@ -1,15 +1,43 @@
-"use client";
-import { useState } from "react";
-import WhatsAppMockup, { type ChatMessage } from "./WhatsAppMockup";
+import WhatsAppMockup from "./WhatsAppMockup";
 
-type Demo = { name: string; preview: string; messages: ChatMessage[]; confirmation: string };
-const demos: Demo[] = [
-  { name: "Bill payment", preview: "Set my DSTV to autopay...", confirmation: "Autopay activated", messages: [{ side: "left", text: "Hi! What can I help you with today?", time: "10:41" }, { side: "right", text: "Set my DSTV to autopay in Naira every month", time: "10:41" }, { side: "left", text: <>I can set that up for you. Which package are you on — Compact, Confam, or Premium?</>, time: "10:42" }, { side: "right", text: "Compact", time: "10:42" }, { side: "left", text: <>DSTV Compact autopay activated. ✓<br /><strong>₦22,500 charged on the 1st of each month.</strong></>, time: "10:42" }] },
-  { name: "Send money", preview: "Pay Chidi ₦15,000...", confirmation: "Transfer sent", messages: [{ side: "left", text: "Hi! What can I help you with today?", time: "10:41" }, { side: "right", text: "Pay Chidi ₦15,000 for the design work", time: "10:41" }, { side: "left", text: <>I found Chidi Okafor in your contacts.<br />Sending ₦15,000. Confirm?</>, time: "10:42" }, { side: "right", text: "Yes, confirm", time: "10:42" }, { side: "left", text: <>Done. ₦15,000 sent to Chidi Okafor. 🎉<br />Receipt saved to your chat.</>, time: "10:42" }] },
-  { name: "Airtime & data", preview: "Buy ₦2,000 airtime...", confirmation: "Airtime delivered", messages: [{ side: "left", text: "Hi! What can I help you with today?", time: "10:41" }, { side: "right", text: "Buy ₦2,000 MTN airtime for 08012345678", time: "10:41" }, { side: "left", text: <>₦2,000 MTN airtime for 080 1234 5678.<br />Confirm purchase?</>, time: "10:42" }, { side: "right", text: "Yes", time: "10:42" }, { side: "left", text: <>Airtime sent. ✓<br />Your new balance: ₦2,000 credit.</>, time: "10:42" }] },
-  { name: "Cash out", preview: "Cash out 200 USDT...", confirmation: "₦304,000 received", messages: [{ side: "left", text: "Hi! What can I help you with today?", time: "10:41" }, { side: "right", text: "Cash out 200 USDT to my GTBank", time: "10:41" }, { side: "left", text: <>Live rate: ₦1,520 per USDT.<br />You&apos;ll receive ₦304,000 after fees.<br />Rate locked for 2 minutes. Proceed?</>, time: "10:42" }, { side: "right", text: "Proceed", time: "10:42" }, { side: "left", text: "₦304,000 sent to your GTBank account. 🎉", time: "10:42" }] },
-];
+function Bubble({ side, time, children }: { side: "left" | "right"; time: string; children: React.ReactNode }) {
+  return (
+    <div className={side === "right" ? "wa-row justify-end" : "wa-row justify-start"}>
+      <div className={"wa-bubble " + (side === "right" ? "wa-user" : "wa-bot")}>
+        {children}
+        <div className="wa-time">{time}{side === "right" && <span className="ml-1 text-[#53BDEB]">✓✓</span>}</div>
+      </div>
+    </div>
+  );
+}
 
-function Conversation({ demo }: { demo: Demo }) { return <div className="capability-chat-fade flex min-h-full flex-col gap-2">{demo.messages.map((message, index) => <div key={index} className={(message.side === "right" ? "wa-row justify-end" : "wa-row justify-start")}><div className={("wa-bubble " + (message.side === "right" ? "wa-user" : "wa-bot"))}>{message.text}<div className="wa-time">{message.time}{message.side === "right" && <span className="ml-1 text-[#53BDEB]">✓✓</span>}</div></div></div>)}<span className="wa-confirm"><span className="h-2 w-2 rounded-full bg-[#22C55E]" />{demo.confirmation}</span></div>; }
-
-export default function ChatDemo() { const [active, setActive] = useState(0); const demo = demos[active]!; return <section className="bg-[#1A1033] py-24 text-white md:py-28"><div className="section-wrap"><h2 className="display text-center text-[clamp(28px,3.5vw,44px)] font-bold leading-tight tracking-[-.05em]">See what you can do in one chat.</h2><div className="mt-14 grid items-center gap-10 lg:grid-cols-[45%_55%]"><div className="order-2 space-y-3 lg:order-1">{demos.map((item, index) => <button key={item.name} onClick={() => setActive(index)} className={("capability-tab relative block w-full rounded-2xl border p-5 text-left transition " + (index === active ? "border-[#6C3FE8]/40 bg-[#6C3FE8]/15" : "border-white/[.08] bg-white/[.04] hover:border-white/15 hover:bg-white/[.07]"))}><span className={("mb-1 block text-[11px] font-extrabold tracking-[.2em] " + (index === active ? "text-[#6C3FE8]/80" : "text-white/20"))}>0{index + 1}</span><span className={("font-display text-lg font-semibold " + (index === active ? "text-white" : "text-white/50"))}>{item.name}</span><span className={("mt-2 block truncate text-[13px] " + (index === active ? "text-white/55" : "text-white/30"))}>{item.preview}</span>{index === active && <span className="mt-3 block text-[11px] text-[#6C3FE8]/80">— tap to start ↗</span>}</button>)}</div><div className="order-1 flex justify-center lg:order-2 lg:justify-end"><WhatsAppMockup tilt={false} glowIntensity="medium"><Conversation demo={demo} /></WhatsAppMockup></div></div></div></section>; }
+export default function ChatDemo() {
+  return (
+    <section id="why" className="bg-[#0A0A0A] py-24 md:py-32">
+      <div className="section-wrap grid items-center gap-14 lg:grid-cols-[1fr_minmax(0,460px)]">
+        <div>
+          <h2 className="display max-w-[560px] text-[clamp(28px,4.5vw,52px)] font-bold leading-[1.05] tracking-[-.05em] text-white">
+            Why a conversation.
+          </h2>
+          <div className="mt-8 max-w-[520px] space-y-5 text-[17px] leading-[1.65] text-[#9A9A9A]">
+            <p>Every app makes you learn its menus, fill its forms, and hunt for the right button. A conversation asks for none of that.</p>
+            <p>You say what you mean. The AI understands it, confirms exactly what it will do, and only then executes — the same way you&apos;d instruct a person you trust.</p>
+            <p className="text-[#EDEDED]">No app. No dashboard. No learning curve.</p>
+          </div>
+        </div>
+        <div className="flex justify-center lg:justify-end">
+          <WhatsAppMockup glowIntensity="medium">
+            <div className="flex min-h-full flex-col gap-2">
+              <Bubble side="left" time="10:41">Hey 👋 what do you need?</Bubble>
+              <Bubble side="right" time="10:41">Send ₵200 to Kwame for the generator fuel</Bubble>
+              <Bubble side="left" time="10:41">Kwame Mensah — MTN MoMo, 024&#8226;&#8226;321.<br /><strong>Sending ₵200. Confirm?</strong></Bubble>
+              <Bubble side="right" time="10:42">Yes</Bubble>
+              <Bubble side="left" time="10:42">Done ✅ Kwame has the ₵200. I&apos;ve saved the receipt here for you.</Bubble>
+              <span className="wa-confirm"><span className="h-2 w-2 rounded-full bg-[#22C55E]" />Payment confirmed</span>
+            </div>
+          </WhatsAppMockup>
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -15,7 +15,7 @@ const systemLogs = [
   'Tracking Vector: LOS_JNB_ACC_NBO_KGL',
   'Protocol: V4.0.2 Secure // TLS 1.3',
   'Engine: WebGL 2.0 // Render_04',
-  'Status: Mainnet Liquidity Synced',
+  'Status: Network Liquidity Synced',
 ];
 
 export default function NetworkPage() {
@@ -59,8 +59,8 @@ export default function NetworkPage() {
           <div className="lg:col-span-5 lg:pb-4">
             <div className="max-w-md border-l-2 border-[#fe009c] pl-6">
               <p className="text-base leading-relaxed text-black/62 md:text-[1.08rem]">
-                A real-time view of the regional rails, system routes, and
-                infrastructure logic that help connect digital assets to local
+                A real-time view of the regional routes, system paths, and
+                infrastructure logic that connect a conversation to local
                 payout pathways.
               </p>
             </div>
@@ -92,7 +92,7 @@ export default function NetworkPage() {
               </div>
             </div>
 
-            {/* Right status rail */}
+            {/* Right status column */}
             <aside className="relative border-t border-black/8 bg-white/58 p-6 lg:border-l lg:border-t-0 lg:p-8">
               <div className="flex items-center gap-3">
                 <span className="relative flex h-2.5 w-2.5">
@@ -145,9 +145,9 @@ export default function NetworkPage() {
 
             <p className="mt-6 max-w-2xl text-base leading-relaxed text-black/62 md:text-lg">
               Infinitswap is designed to route transactions through the most
-              appropriate local rails available, helping bridge the space between
-              digital assets and traditional bank payout infrastructure with more
-              clarity and speed.
+              appropriate local payment networks available, helping bridge the
+              space between a simple instruction and traditional bank payout
+              infrastructure with more clarity and speed.
             </p>
           </div>
 

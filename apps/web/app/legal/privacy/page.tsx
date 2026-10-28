@@ -27,7 +27,7 @@ export default function PrivacyPage() {
         <ul className="list-disc ml-6 space-y-2">
           <li><strong>Identity Data:</strong> Full name, date of birth, gender, and government-issued identification (BVN, NIN, Passport, or National ID) required for regional KYC verification.</li>
           <li><strong>Contact Data:</strong> Email address, physical billing address, and verified telephone number.</li>
-          <li><strong>Financial Instruction Data:</strong> Bank account details, digital wallet addresses, and transaction amounts. 
+          <li><strong>Financial Instruction Data:</strong> Bank account details, recipient details, and transaction amounts.
               <span className="italic font-semibold text-infinite-blue ml-1">
                 Note: We do not store full card primary account numbers (PAN) or CVV codes.
               </span>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">4. Data Sharing and Cross-Border Transfers</h3>
+        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">4. Data Sharing and Overseas Data Transfers</h3>
         <p>
           As a technology layer, we do not settle funds. Consequently, your data must be shared with:
         </p>
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
           <li><strong>Regulatory Authorities:</strong> Law enforcement or government bodies across Nigeria, Ghana, Tanzania, and South Africa when required by law.</li>
         </ul>
         <p className="mt-4 italic">
-          <strong>Cross-Border Transfers:</strong> We ensure that any data moved across national borders is protected by Standard Contractual Clauses (SCCs) and robust encryption, ensuring a level of protection equivalent to the data's country of origin.
+          <strong>Overseas Data Transfers:</strong> We ensure that any data moved across national borders is protected by Standard Contractual Clauses (SCCs) and robust encryption, ensuring a level of protection equivalent to the data's country of origin.
         </p>
       </section>
 

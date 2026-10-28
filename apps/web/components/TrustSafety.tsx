@@ -1,2 +1,26 @@
-const points = [["🏛️", "A financial platform, not a bank", "Infinitswap helps you move and manage money. It is not a bank."], ["🛡️", "Regulated providers", "Payment services are powered by regulated partners licensed by the Central Banks of Nigeria, South Africa, Ghana and Tanzania."], ["↗", "Clear handling", "Your funds move through the payment providers handling your transaction. Infinitswap does not hold them in a proprietary ledger."], ["🔒", "Security and support", "Your private keys are never shared. Conversations are protected end to end. Customer support is available 24/7 at +234 907 960 7916."]];
-export default function TrustSafety() { return <section id="trust" className="bg-white py-24 md:py-28"><div className="section-wrap"><h2 className="display mx-auto max-w-[760px] text-center text-[clamp(24px,3vw,40px)] font-bold leading-tight tracking-[-.045em]">Built for secure, transparent money movement.</h2><div className="mx-auto mt-14 grid max-w-[1000px] gap-5 md:grid-cols-2">{points.map(([icon, title, text]) => <article key={title} className="rounded-xl border-l-4 border-[#E8E0F7] bg-[#F9F7FF] p-8"><div className="text-2xl text-[#6C3FE8]">{icon}</div><h3 className="display mt-5 text-xl font-semibold">{title}</h3><p className="mt-3 max-w-[48ch] leading-7 text-[#5A4E6E]">{text}</p></article>)}</div></div></section>; }
+const points: [string, string][] = [
+  ["Conversations are encrypted end to end", "Your messages with the AI stay between you and Infinitswap. Nothing in the chat is readable in transit."],
+  ["Every transaction is confirmed before it runs", "The AI always restates the recipient, the amount and the details, and waits for your yes. Nothing moves until you approve it."],
+  ["Regulated payment infrastructure underneath", "Money is settled through licensed payment providers in each market. The conversation is the interface; the plumbing is regulated."],
+];
+
+export default function TrustSafety() {
+  return (
+    <section id="trust" className="bg-[#0A0A0A] py-24 md:py-32">
+      <div className="section-wrap">
+        <h2 className="display max-w-[640px] text-[clamp(28px,4.5vw,52px)] font-bold leading-[1.05] tracking-[-.05em] text-white">
+          Built to be trusted.
+        </h2>
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
+          {points.map(([title, text], i) => (
+            <article key={title} className="border-t border-white/[.1] pt-6">
+              <span className="display text-sm font-bold tracking-[.15em] text-[#6C3FE8]">0{i + 1}</span>
+              <h3 className="display mt-4 text-xl font-semibold leading-snug text-white">{title}</h3>
+              <p className="mt-4 text-[15px] leading-[1.6] text-[#9A9A9A]">{text}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

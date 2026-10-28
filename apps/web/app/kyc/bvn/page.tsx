@@ -7,7 +7,7 @@
  * Tier 1 KYC with a Driver's License or Voter's Card. Those documents don't
  * carry enough identity data for our provider to issue a dedicated virtual
  * account, so this page collects a BVN or NIN and, on success, returns the
- * permanent NGN account number the user can fund their wallet from.
+ * permanent NGN account number the user can fund their account from.
  *
  * Visual style, card chrome and the masked ID input all mirror kyc/page.tsx.
  */
@@ -116,7 +116,7 @@ function AccountReadyScreen({ account, waLink }: { account: AccountDetails; waLi
 
       <p className="text-[13px] text-gray-500 mb-6 leading-relaxed">
         Send NGN to this account number from any Nigerian bank to fund your
-        Infinitswap wallet instantly.
+        Infinitswap account instantly.
       </p>
 
       <a href={waLink} className="inline-block w-full bg-[#25D366] text-white text-[15px] font-semibold rounded-xl py-3.5 text-center hover:bg-[#1fba58] transition-colors">
