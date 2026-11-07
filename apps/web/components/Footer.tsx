@@ -1,8 +1,9 @@
 const links: [string, string][] = [
-  ["How it works", "/#how-it-works"],
-  ["Privacy", "/legal/privacy"],
-  ["Terms", "/legal/terms"],
-  ["Contact", "mailto:support@infinitswap.ai"],
+  ["About", "/about"],
+  ["Privacy Policy", "/legal/privacy"],
+  ["Terms of Service", "/legal/terms"],
+  ["Refund Policy", "/legal/refund"],
+  ["Contact", "/about#contact"],
 ];
 
 export default function Footer() {

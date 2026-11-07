@@ -1,103 +1,133 @@
+import { LegalShell, LegalSection, ContactCard, type TocItem } from "../../../components/LegalShell";
+
+export const metadata = {
+  title: "Terms of Service | Infinitswap",
+  description: "The terms governing use of the Infinitswap Technologies AI payments platform.",
+};
+
+const toc: TocItem[] = [
+  { id: "preamble", label: "1. Preamble & Acceptance" },
+  { id: "regulatory", label: "2. Regulatory Disclosure" },
+  { id: "eligibility", label: "3. Eligibility (AML/KYC)" },
+  { id: "finality", label: "4. Transaction Finality" },
+  { id: "privacy", label: "5. Data Protection" },
+  { id: "liability", label: "6. Limitation of Liability" },
+  { id: "governing-law", label: "7. Governing Law" },
+  { id: "contact", label: "8. Contact" },
+];
+
 export default function TermsPage() {
   return (
-    <div className="prose prose-sm md:prose-base max-w-none prose-headings:font-display leading-relaxed text-ink-black/80">
-      <h1 className="text-3xl font-bold border-b pb-4 mb-8 text-ink-black">Terms of Service</h1>
-      <p className="text-xs uppercase tracking-[0.2em] font-bold text-infinite-blue mb-8">
-        Last Updated: February 11, 2026
-      </p>
-
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">1. Preamble and Acceptance</h3>
+    <LegalShell eyebrow="Legal" title="Terms of Service" updated="February 11, 2026" toc={toc}>
+      <LegalSection id="preamble" index="1" title="Preamble and Acceptance">
         <p>
-          These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you") and 
-          <strong> Infinite 69Trading Services Limited</strong> ("Infinitswap", "we", "us"), a company incorporated 
-          under the laws of the Federal Republic of Nigeria. 
+          These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you") and{" "}
+          <strong>
+            Infinitswap Technologies (trading as Infinite 69Trading Services Limited, incorporated under the laws of the
+            Federal Republic of Nigeria)
+          </strong>{" "}
+          ("Infinitswap", "we", "us").
         </p>
         <p>
-          By accessing our platform, website, or APIs (collectively, "the Platform"), 
-          you acknowledge that you have read, understood, and agreed to be bound by these Terms across all 
-          operating jurisdictions, including but not limited to Nigeria, South Africa, Ghana, and Tanzania.
+          By accessing our platform, website, or APIs (collectively, "the Platform"), you acknowledge that you have read,
+          understood, and agreed to be bound by these Terms across all operating jurisdictions, including but not limited
+          to Nigeria, South Africa, Ghana, Tanzania, Kenya, Uganda, and Rwanda.
         </p>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8 p-4 bg-infinite-blue/5 border-l-4 border-infinite-blue">
-        <h3 className="text-lg font-bold text-infinite-blue uppercase tracking-tight">2. Regulatory Disclosure & Technology Status</h3>
-        <p className="font-semibold underline">
-          Infinitswap is a technology platform and DOES NOT operate as a bank or a licensed financial intermediary.
+      <LegalSection id="regulatory" index="2" title="Regulatory Disclosure & Technology Status" tone="highlight">
+        <p>
+          <strong>Infinitswap is a technology platform and does not operate as a bank or a licensed financial intermediary.</strong>
         </p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Non-Custodial:</strong> We do not hold, custody, or manage customer funds.</li>
-          <li><strong>Instruction Routing:</strong> We provide software that routes user instructions to licensed third-party Payment Service Providers (PSPs).</li>
-          <li><strong>Partner Compliance:</strong> All currency conversion and movement of value are performed by entities licensed by the Central Bank of Nigeria (CBN), South African Reserve Bank (SARB), Bank of Ghana (BoG), and Bank of Tanzania (BoT).</li>
+        <ul>
+          <li>
+            <strong>Non-Custodial:</strong> We do not hold, custody, or manage customer funds.
+          </li>
+          <li>
+            <strong>Instruction Routing:</strong> We provide software that routes user instructions to licensed
+            third-party Payment Service Providers (PSPs).
+          </li>
+          <li>
+            <strong>Partner Compliance:</strong> All currency conversion and movement of value are performed by entities
+            licensed by the relevant central banks across our operating markets.
+          </li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">3. User Eligibility (Regional AML/KYC)</h3>
+      <LegalSection id="eligibility" index="3" title="User Eligibility (Regional AML/KYC)">
         <p>
-          You agree to comply with regional Anti-Money Laundering (AML) and "Know Your Customer" (KYC) requirements 
-          as mandated by:
+          You agree to comply with regional Anti-Money Laundering (AML) and "Know Your Customer" (KYC) requirements as
+          mandated by:
         </p>
-        <ul className="list-disc ml-6 space-y-1">
-          <li><strong>Nigeria:</strong> Money Laundering (Prevention and Prohibition) Act, 2022.</li>
-          <li><strong>South Africa:</strong> Financial Intelligence Centre Act (FICA), 2001.</li>
-          <li><strong>Ghana:</strong> Anti-Money Laundering Act, 2020 (Act 1044).</li>
-          <li><strong>Tanzania:</strong> Anti-Money Laundering Act, Cap. 423.</li>
+        <ul>
+          <li>
+            <strong>Nigeria:</strong> Money Laundering (Prevention and Prohibition) Act, 2022.
+          </li>
+          <li>
+            <strong>South Africa:</strong> Financial Intelligence Centre Act (FICA), 2001.
+          </li>
+          <li>
+            <strong>Ghana:</strong> Anti-Money Laundering Act, 2020 (Act 1044).
+          </li>
+          <li>
+            <strong>Tanzania:</strong> Anti-Money Laundering Act, Cap. 423.
+          </li>
+          <li>
+            <strong>Kenya:</strong> Proceeds of Crime and Anti-Money Laundering Act (POCAMLA), 2009.
+          </li>
+          <li>
+            <strong>Uganda:</strong> Anti-Money Laundering Act, 2013.
+          </li>
+          <li>
+            <strong>Rwanda:</strong> Law No. 55/2018 on the Prevention and Punishment of Money Laundering and Terrorism
+            Financing.
+          </li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">4. Transaction Finality</h3>
+      <LegalSection id="finality" index="4" title="Transaction Finality">
         <p>
-          Due to the real-time nature of the settlement networks used by our partners (including RTGS),
-          once an instruction is confirmed, it is generally <strong>irreversible</strong>. Users are responsible 
-          for verifying recipient data before submission.
+          Due to the real-time nature of the settlement networks used by our partners (including RTGS), once an
+          instruction is confirmed, it is generally <strong>irreversible</strong>. Users are responsible for verifying
+          recipient data before submission.
         </p>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">5. Data Protection & Privacy</h3>
+      <LegalSection id="privacy" index="5" title="Data Protection & Privacy">
         <p>
-          We process personal data in accordance with the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>, 
-          South Africa's <strong>POPIA</strong>, Ghana's <strong>Data Protection Act</strong>, and Tanzania's 
-          <strong>Personal Data Protection Act</strong>. Please refer to our Privacy Policy for details.
+          We process personal data in accordance with the <strong>Nigeria Data Protection Act (NDPA) 2023</strong>, South
+          Africa&apos;s <strong>POPIA</strong>, Ghana&apos;s <strong>Data Protection Act</strong>, Tanzania&apos;s{" "}
+          <strong>Personal Data Protection Act</strong>, Kenya&apos;s <strong>Data Protection Act, 2019</strong>,
+          Uganda&apos;s <strong>Data Protection and Privacy Act, 2019</strong>, and Rwanda&apos;s{" "}
+          <strong>Law No. 058/2021</strong>. Please refer to our <a href="/legal/privacy">Privacy Policy</a> for details.
         </p>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8 border-t pt-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">6. Limitation of Liability</h3>
+      <LegalSection id="liability" index="6" title="Limitation of Liability">
         <p>
-          Infinitswap provides technology "AS IS". We shall not be liable for any losses arising from 
-          third-party banking failures, network outages in the countries of operation, or regulatory 
-          actions taken against your account by licensed partners.
+          Infinitswap provides technology "AS IS". We shall not be liable for any losses arising from third-party banking
+          failures, network outages in the countries of operation, or regulatory actions taken against your account by
+          licensed partners.
         </p>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">7. Governing Law and Dispute Resolution</h3>
+      <LegalSection id="governing-law" index="7" title="Governing Law and Dispute Resolution">
         <p>
-          These Terms are governed by the laws of the Federal Republic of Nigeria. However, for users 
-          resident in South Africa, Ghana, or Tanzania, we acknowledge your mandatory consumer protection 
-          rights under local laws.
+          These Terms are governed by the laws of the Federal Republic of Nigeria. However, for users resident in South
+          Africa, Ghana, Tanzania, Kenya, Uganda, or Rwanda, we acknowledge your mandatory consumer protection rights
+          under local laws.
         </p>
         <p>
-          Any dispute shall first be settled via <strong>binding mediation</strong>. If unresolved, the 
-          seat of arbitration or litigation shall be Enugu State, Nigeria, unless prohibited by the 
-          mandatory laws of your resident jurisdiction.
+          Any dispute shall first be settled via <strong>binding mediation</strong>. If unresolved, the seat of
+          arbitration or litigation shall be Enugu State, Nigeria, unless prohibited by the mandatory laws of your
+          resident jurisdiction.
         </p>
-      </section>
+      </LegalSection>
 
-      <div className="mt-12 p-6 bg-black text-white rounded-sm text-center">
-        <p className="text-xs uppercase tracking-widest mb-2 font-bold text-infinite-blue">Compliance Inquiry</p>
-        <p className="font-mono text-sm">legal@infinitswap.ai</p>
-      </div>
-
-      <div className="mt-12 p-6 bg-infinite-blue text-white rounded-sm flex flex-col items-center text-center">
-        <h4 className="text-white uppercase tracking-widest text-sm mb-4">Dispute Resolution Desk</h4>
-        <p className="font-mono text-sm mb-1">infinitswap@gmail.com</p>
-        <p className="font-mono text-sm mb-2">+234 907 960 7916</p>
-        <p className="text-[10px] opacity-70">Mon-Fri: 9am - 5pm WAT</p>
-    </div>
-    </div>
+      <ContactCard
+        heading="8. Compliance & Dispute Resolution"
+        blurb="For compliance inquiries or to raise a dispute, reach the Infinitswap support desk."
+      />
+    </LegalShell>
   );
 }

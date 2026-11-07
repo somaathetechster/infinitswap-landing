@@ -21,6 +21,9 @@ export default function CompliancePage() {
     { name: 'South African Reserve Bank', code: 'SARB' },
     { name: 'Bank of Ghana', code: 'BOG' },
     { name: 'Bank of Tanzania', code: 'BOT' },
+    { name: 'Central Bank of Kenya', code: 'CBK' },
+    { name: 'Bank of Uganda', code: 'BOU' },
+    { name: 'National Bank of Rwanda', code: 'BNR' },
   ];
 
   return (

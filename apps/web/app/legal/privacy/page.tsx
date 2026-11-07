@@ -1,116 +1,153 @@
+import { LegalShell, LegalSection, ContactCard, type TocItem } from "../../../components/LegalShell";
+
+export const metadata = {
+  title: "Privacy Policy | Infinitswap",
+  description:
+    "How Infinitswap Technologies collects, uses, protects and shares personal data across its operating markets.",
+};
+
+const toc: TocItem[] = [
+  { id: "introduction", label: "1. Introduction" },
+  { id: "information", label: "2. Information We Collect" },
+  { id: "legal-basis", label: "3. Legal Basis for Processing" },
+  { id: "sharing", label: "4. Data Sharing & Transfers" },
+  { id: "retention", label: "5. Data Retention" },
+  { id: "security", label: "6. Data Security" },
+  { id: "rights", label: "7. Your Rights" },
+  { id: "contact", label: "8. Contact" },
+];
+
 export default function PrivacyPage() {
   return (
-    <div className="prose prose-sm md:prose-base max-w-none prose-headings:font-display leading-relaxed text-ink-black/80">
-      <h1 className="text-3xl font-bold border-b pb-4 mb-8 text-ink-black">Privacy Policy</h1>
-      <p className="text-xs uppercase tracking-[0.2em] font-bold text-infinite-blue mb-8">
-        Effective Date: February 11, 2026
-      </p>
-
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">1. Introduction</h3>
+    <LegalShell eyebrow="Legal" title="Privacy Policy" updated="February 11, 2026" updatedLabel="Effective date" toc={toc}>
+      <LegalSection id="introduction" index="1" title="Introduction">
         <p>
-          At <strong>Infinite 69Trading Services Limited</strong> ("Infinitswap"), we operate as a global 
-          technology platform with a focus on African financial infrastructure. We are committed to protecting 
-          your privacy and processing your personal data in strict accordance with the following regulatory frameworks:
+          <strong>
+            Infinitswap Technologies (trading as Infinite 69Trading Services Limited, incorporated under the laws of the
+            Federal Republic of Nigeria)
+          </strong>{" "}
+          ("Infinitswap", "we", "us") operates an AI-powered payments platform with a focus on African financial
+          infrastructure. We are committed to protecting your privacy and processing your personal data in strict
+          accordance with the following regulatory frameworks:
         </p>
-        <ul className="list-disc ml-6 mt-4 space-y-1 text-sm font-semibold text-ink-black/70">
+        <ul>
           <li>Nigeria: Nigeria Data Protection Act (NDPA) 2023</li>
           <li>South Africa: Protection of Personal Information Act (POPIA) 2013</li>
           <li>Ghana: Data Protection Act, 2012 (Act 843)</li>
           <li>Tanzania: Personal Data Protection Act, 2022</li>
+          <li>Kenya: Data Protection Act, 2019</li>
+          <li>Uganda: Data Protection and Privacy Act, 2019</li>
+          <li>Rwanda: Law No. 058/2021 on the Protection of Personal Data</li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">2. Information We Collect</h3>
+      <LegalSection id="information" index="2" title="Information We Collect">
         <p>To provide a secure and efficient technology interface, we collect the following categories of information:</p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Identity Data:</strong> Full name, date of birth, gender, and government-issued identification (BVN, NIN, Passport, or National ID) required for regional KYC verification.</li>
-          <li><strong>Contact Data:</strong> Email address, physical billing address, and verified telephone number.</li>
-          <li><strong>Financial Instruction Data:</strong> Bank account details, recipient details, and transaction amounts.
-              <span className="italic font-semibold text-infinite-blue ml-1">
-                Note: We do not store full card primary account numbers (PAN) or CVV codes.
-              </span>
+        <ul>
+          <li>
+            <strong>Identity Data:</strong> Full name, date of birth, gender, and government-issued identification (BVN,
+            NIN, Passport, or National ID) required for regional KYC verification.
           </li>
-          <li><strong>Technical Data:</strong> IP address, device telemetry, browser metadata, and usage patterns collected via secure cookies.</li>
+          <li>
+            <strong>Contact Data:</strong> Email address, physical billing address, and verified telephone number.
+          </li>
+          <li>
+            <strong>Financial Instruction Data:</strong> Bank account details, recipient details, and transaction
+            amounts. We do not store full card primary account numbers (PAN) or CVV codes.
+          </li>
+          <li>
+            <strong>Technical Data:</strong> IP address, device telemetry, browser metadata, and usage patterns
+            collected via secure cookies.
+          </li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8 p-4 bg-infinite-blue/5 border border-infinite-blue/10 rounded-sm">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">3. Legal Basis for Processing</h3>
+      <LegalSection id="legal-basis" index="3" title="Legal Basis for Processing" tone="highlight">
         <p>We process your data based on the following legal grounds recognized across our jurisdictions:</p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Contractual Necessity:</strong> To route instructions to our licensed settlement partners.</li>
-          <li><strong>Legal Obligation:</strong> To comply with regional Anti-Money Laundering (AML) and Counter-Terrorism Financing (CTF) mandates.</li>
-          <li><strong>Legitimate Interest:</strong> For fraud detection, system security, and infrastructure optimization.</li>
-          <li><strong>Consent:</strong> For any processing activities where you have provided explicit opt-in authorization.</li>
+        <ul>
+          <li>
+            <strong>Contractual Necessity:</strong> To route instructions to our licensed settlement partners.
+          </li>
+          <li>
+            <strong>Legal Obligation:</strong> To comply with regional Anti-Money Laundering (AML) and Counter-Terrorism
+            Financing (CTF) mandates.
+          </li>
+          <li>
+            <strong>Legitimate Interest:</strong> For fraud detection, system security, and infrastructure optimization.
+          </li>
+          <li>
+            <strong>Consent:</strong> For any processing activities where you have provided explicit opt-in
+            authorization.
+          </li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">4. Data Sharing and Overseas Data Transfers</h3>
-        <p>
-          As a technology layer, we do not settle funds. Consequently, your data must be shared with:
-        </p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Licensed Financial Partners:</strong> Regulated Payment Service Providers (PSPs) and banks (e.g., partners regulated by CBN, SARB, BoG, or BoT).</li>
-          <li><strong>Regulatory Authorities:</strong> Law enforcement or government bodies across Nigeria, Ghana, Tanzania, and South Africa when required by law.</li>
+      <LegalSection id="sharing" index="4" title="Data Sharing and Overseas Data Transfers">
+        <p>As a technology layer, we do not settle funds. Consequently, your data must be shared with:</p>
+        <ul>
+          <li>
+            <strong>Licensed Financial Partners:</strong> Regulated Payment Service Providers (PSPs) and banks regulated
+            by the relevant central banks in our markets.
+          </li>
+          <li>
+            <strong>Regulatory Authorities:</strong> Law enforcement or government bodies across Nigeria, South Africa,
+            Ghana, Tanzania, Kenya, Uganda, and Rwanda when required by law.
+          </li>
         </ul>
-        <p className="mt-4 italic">
-          <strong>Overseas Data Transfers:</strong> We ensure that any data moved across national borders is protected by Standard Contractual Clauses (SCCs) and robust encryption, ensuring a level of protection equivalent to the data's country of origin.
-        </p>
-      </section>
-
-      <section className="mb-8 border-l-4 border-black/10 pl-4">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">5. Data Retention</h3>
         <p>
-          In accordance with financial industry standards in our operating regions, we are legally obligated to retain KYC 
-          and transaction instruction data for a minimum of <strong>five (5) to seven (7) years</strong> following 
+          <strong>Overseas Data Transfers:</strong> We ensure that any data moved across national borders is protected
+          by Standard Contractual Clauses (SCCs) and robust encryption, ensuring a level of protection equivalent to the
+          data&apos;s country of origin.
+        </p>
+      </LegalSection>
+
+      <LegalSection id="retention" index="5" title="Data Retention">
+        <p>
+          In accordance with financial industry standards in our operating regions, we are legally obligated to retain
+          KYC and transaction instruction data for a minimum of <strong>five (5) to seven (7) years</strong> following
           the termination of a user relationship or the last successful transaction.
         </p>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">6. Data Security</h3>
+      <LegalSection id="security" index="6" title="Data Security">
         <p>We implement industry-leading technical measures, including:</p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Encryption:</strong> TLS 1.3 for data in transit and AES-256 for data at rest.</li>
-          <li><strong>Access Control:</strong> Strict multi-factor authentication (MFA) for all internal infrastructure access.</li>
-          <li><strong>Audits:</strong> Regular third-party penetration testing and vulnerability assessments.</li>
+        <ul>
+          <li>
+            <strong>Encryption:</strong> TLS 1.3 for data in transit and AES-256 for data at rest.
+          </li>
+          <li>
+            <strong>Access Control:</strong> Strict multi-factor authentication (MFA) for all internal infrastructure
+            access.
+          </li>
+          <li>
+            <strong>Audits:</strong> Regular third-party penetration testing and vulnerability assessments.
+          </li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">7. Regional Data Subject Rights</h3>
-        <p>Depending on your jurisdiction, you hold specific rights over your data (e.g., NDPA Section 34, POPIA Section 23):</p>
-        <ul className="list-disc ml-6 space-y-2">
-          <li><strong>Access & Correction:</strong> The right to see and correct your data.</li>
-          <li><strong>Objection:</strong> The right to object to processing for direct marketing.</li>
-          <li><strong>Erasure:</strong> The right to request data deletion, subject to mandatory financial retention laws.</li>
-          <li><strong>Portability:</strong> The right to receive your data in a structured, machine-readable format.</li>
+      <LegalSection id="rights" index="7" title="Regional Data Subject Rights">
+        <p>Depending on your jurisdiction, you hold specific rights over your data:</p>
+        <ul>
+          <li>
+            <strong>Access &amp; Correction:</strong> The right to see and correct your data.
+          </li>
+          <li>
+            <strong>Objection:</strong> The right to object to processing for direct marketing.
+          </li>
+          <li>
+            <strong>Erasure:</strong> The right to request data deletion, subject to mandatory financial retention laws.
+          </li>
+          <li>
+            <strong>Portability:</strong> The right to receive your data in a structured, machine-readable format.
+          </li>
         </ul>
-      </section>
+      </LegalSection>
 
-      <section className="mb-8 border-t pt-8">
-        <h3 className="text-lg font-bold text-ink-black uppercase tracking-tight">8. Contact Our Data Protection Officer</h3>
-        <p>
-          For inquiries or to exercise your rights across any of our jurisdictions, please contact our 
-          Data Protection Officer (DPO):
-        </p>
-        <div className="mt-4 font-mono text-sm bg-black text-white p-6 rounded-sm shadow-xl">
-          <p className="mb-1"><strong>Email:</strong> privacy@infinitswap.ai</p>
-          <p className="mb-1"><strong>Global Headquarters:</strong> 17, Onyeneke Chukwu Street, Achara Layout, Enugu, Nigeria.</p>
-          <p className="text-[10px] uppercase tracking-widest text-white/40 mt-4">
-            Authorized Data Controller: Infinite 69Trading Services Ltd.
-          </p>
-        </div>
-        <div className="mt-12 p-6 bg-infinite-blue text-white rounded-sm flex flex-col items-center text-center">
-        <h4 className="text-white uppercase tracking-widest text-sm mb-4">Dispute Resolution Desk</h4>
-        <p className="font-mono text-sm mb-1">infinitswap@gmail.com</p>
-        <p className="font-mono text-sm mb-2">+234 907 960 7916</p>
-        <p className="text-[10px] opacity-70">Mon-Fri: 9am - 5pm WAT</p>
-    </div>
-      </section>
-    </div>
+      <ContactCard
+        heading="8. Contact Our Data Protection Officer"
+        blurb="For inquiries or to exercise your rights across any of our jurisdictions, contact our Data Protection Officer (DPO)."
+        note="Authorized Data Controller: Infinitswap Technologies (trading as Infinite 69Trading Services Limited)."
+      />
+    </LegalShell>
   );
 }
